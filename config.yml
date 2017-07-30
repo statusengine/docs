@@ -59,4 +59,5 @@ top_menu:
     - { name: Worker, url: "/worker", icon: "fa fa-spinner", anchors: ["Overview", "Scale out to Multiple Nodes", "Requirements", "Installation", "Database", "Configuration", "Start Statusengine Worker", "Cleanup database", "Manage Cluster Nodes", "Get Metrics", "In-memory", "Debugging"] }
     - { name: Statusengine UI, url: "/ui", icon: "fa fa-desktop", anchors: ["Overview", "Features", "Installation", "Configuration", "First user", "HTTPS", "Apache Example Config", "Nginx Example Config", "PHP built-in server", "Manage users"] }
     - { name: Tutorials, url: "/tutorials", icon: "fa fa-graduation-cap", anchors: [] }
+    - { name: Demo, url: "https://demo.statusengine.org", icon: "fa fa-desktop", anchors: [] }
     - { name: Old Stable (2.x), url: "/oldstable", icon: "fa fa-code", anchors: [] }
