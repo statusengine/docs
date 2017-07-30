@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        {% include 'head.html' %}
+        <link href="{{ site.url }}/assets/css/style.css" rel="stylesheet">
+    </head>
+    <body class="skin-blue sidebar-mini">
+        <div class="wrapper">
+
+            {% include 'default_header.html' %}
+            {% include 'menu_left.html' with { menu: site.top_menu } %}
+
+            <div class="content-wrapper">
+                {% if site.global_message | length > 0 %}
+                    <div class="bg-info global-msg">
+                        {{ site.global_message }}
+                    </div>
+                {% endif %}
+                <section class="content-header">
+                    <h1>{{ page.title | default(site.title) }}</h1>
+                </section>
+                    <section class="content doc-text">
+                        <div class="box box-solid">
+                            <div class="box-body">
+                                {% block content %}
+                                    {{ page.content }}
+                                {% endblock %}
+                        </div>
+                    </section>
+                </div>
+                {% include 'footer.html' %}
+            </div>
+
+
+        </div>
+    </body>
+</html>

@@ -1,0 +1,185 @@
+---
+layout: "page"
+title: "Getting Started"
+list_mode: false
+---
+<section id="overview" class="doc-section">
+  <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
+  <p>
+      As already mentioned on the <a href="{{ site.url }}">landing page</a>, Statusengine
+      is a modular piece of software to save Naemon and Nagios event data to a database.
+      <br />
+      The main goal is, to reduce your toolstack and enable your monitoring, to
+      scale horizontally.
+  </p>
+</section>
+
+<section id="components" class="doc-section">
+  <h2 class="page-header"><a href="#components" class="anchor">Components</a></h2>
+  <div class="row">
+      <div class="col-xs-12 col-sm-6 col-md-4">
+          <div class="small-box bg-light-blue">
+              <div class="inner">
+                  <h3>Broker Module</h3>
+                  <p>
+                      This little C program gets loaded to your Monitoring Core.
+                      It will encode every event as JSON object and send it to a queue.
+                  </p>
+                  <br />
+              </div>
+              <div class="icon">
+                  <i class="fa fa-cogs"></i>
+              </div>
+              <a href="{{ site.url }}/broker" class="small-box-footer">
+                  More info <i class="fa fa-arrow-circle-right"></i>
+              </a>
+          </div>
+      </div>
+      <div class="col-xs-12 col-sm-6 col-md-4">
+          <div class="small-box bg-light-blue">
+              <div class="inner">
+                  <h3>Worker</h3>
+                  <p>
+                      A PHP process that fetch all events out of the queue and
+                      save them to a database. In addition this process will
+                      also process performance data to build beautiful dashboards using Grafana for example.
+                  </p>
+              </div>
+              <div class="icon">
+                  <i class="fa fa-spinner"></i>
+              </div>
+              <a href="{{ site.url }}/worker" class="small-box-footer">
+                  More info <i class="fa fa-arrow-circle-right"></i>
+              </a>
+          </div>
+      </div>
+      <div class="col-xs-12 col-sm-12 col-md-4">
+          <div class="small-box bg-light-blue">
+              <div class="inner">
+                  <h3>Statusengine UI</h3>
+                  <p>
+                      A modern, responsive web interface built with AngularJS.
+                      Communicating via a JSON API to be easy extendable, also
+                      has simple support to render performance data.
+                  </p>
+              </div>
+              <div class="icon">
+                  <i class="fa fa-desktop"></i>
+              </div>
+              <a href="{{ site.url }}/ui" class="small-box-footer">
+                  More info <i class="fa fa-arrow-circle-right"></i>
+              </a>
+          </div>
+      </div>
+  </div>
+  <p>
+      All Statusengine components can be used stand alone or split across multiple nodes.
+  </p>
+</section>
+
+<section id="requirements" class="doc-section">
+  <h2 class="page-header"><a href="#requirements" class="anchor">Requirements</a></h2>
+  <p>
+      <div class="callout callout-success">
+          <h4>PHP7 ready!</h4>
+          <p>Statusengine is tested on PHP5 and PHP7</p>
+      </div>
+      <ul>
+          <li>Naemon or Nagios 4</li>
+          <li>Redis Server</li>
+          <li>MySQL/MariaDB or CrateDB</li>
+          <li>Ubuntu 16.06</li>
+          <li>PHP 5.5 or greater</li>
+      </ul>
+      Statusengine can also run on other Systems than Ubuntu 16.04 LTS.
+      <br />
+      All examples in this documentation refer to Ubuntu so maybe things are different on an other distribution.
+  </p>
+</section>
+
+<section id="quick-start" class="doc-section">
+  <h2 class="page-header"><a href="#quick-start" class="anchor">Quick start</a></h2>
+  <p>
+      <ol>
+          <li>
+              If not already done, install
+               <a href="{{ site.url }}/tutorials/install-naemon">Naemon</a>
+              or
+               <a href="{{ site.url }}/tutorials/install-nagios4">Nagios</a>
+          </li>
+          <li>
+              Install the Statusengine Broker Module -
+              <a href="{{ site.url }}/broker#installation">Guide</a>
+          </li>
+          <li>
+              Setup Statusengine Worker -
+              <a href="{{ site.url }}/worker#installation">Guide</a>
+          </li>
+          <li>
+              Finish with the Statusengine UI -
+              <a href="{{ site.url }}/ui#installation">Guide</a>
+          </li>
+      </ol>
+  </p>
+</section>
+
+<section id="performance-data" class="doc-section">
+  <h2 class="page-header"><a href="#performance-data" class="anchor">Performance data</a></h2>
+  <p>
+      Statusengine Worker is able to process performance data, collected by
+      the monitoring core.
+
+      <br >
+      Statusengine Ui provides a basic performance data renderer, to make your data
+      visible.
+  </p>
+  <p>
+      <b>Supported Performance Data Storage Backends:</b>
+      <p>
+          <b>Graphite</b>
+          <br />
+          Graphite is a well known solution to save performance data. It is also
+          very well integrated into Grafana - so I would recommend to start with
+          Graphite.
+          <br />
+          <a href="{{ site.url }}/tutorials/Graphite-Grafana">
+              Read the Guide of how to install Graphite and Grafana for Statusengine.
+          </a>
+      </p>
+      <p>
+          <b>CrateDB</b>
+          <br />
+          For CrateDB is also an Datasource plugin for Grafana available.
+          <br />
+          Advantage: No additional software required, very easy to setup and scalable.
+
+      </p>
+      <p>
+          <b>MySQL</b>
+          <br />
+          Statusengine is also able to save your performance data to a MySQL database.
+          This was implemented for demo and testing purpose.
+          <br />
+          The Grafana MySQL Datasource is in beta at the moment, and I didn't tested it.
+          <br />
+          Advantage: No additional software required and very easy to setup.
+          <br />
+          Disadvantage: For small setups only - may be slow with many data.
+      </p>
+
+      <p>
+        <b>Examples</b>
+      </p>
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/tutorials/statusengine-ui-perfdata-graphite.png" class="img-responsive" alt="Statusengine Ui Performance Data via Graphite Backend"/>
+          </center>
+      </p>
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/tutorials/demo-dashboard-light.png" class="img-responsive" alt="Statusengine with Grafana Example"/>
+          </center>
+      </p>
+
+  </p>
+</section>

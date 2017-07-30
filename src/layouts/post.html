@@ -1,0 +1,8 @@
+---
+layout: default
+---
+{% set isPostLayout = true %}
+
+{% block content %}
+    {% include 'post.html' with { 'post': page } %}
+{% endblock %}

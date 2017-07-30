@@ -1,0 +1,394 @@
+---
+layout: "page"
+title: "Worker"
+list_mode: false
+---
+
+<section id="overview" class="doc-section">
+  <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
+  <p>
+       Statusengine Worker is a PHP application that will consume the events provided by the
+       <a href="{{ link.url }}/broker">Statusengine Broker Module</a>.
+      <br />
+      All status data are save in a database (CrateDB, MySQL or Redis)
+      <br />
+      In addition, the Worker is able to parse and process performance data to
+      store them in a time series databases like Graphite.
+      <br />
+      <b>
+          For External Command Routing, it is required to run Statusengine Worker
+          on the same node as your monitoring core is running.
+      </b>
+  </p>
+</section>
+
+<section id="scale-out-to-multiple-nodes" class="doc-section">
+  <h2 class="page-header"><a href="#scale-out-to-multiple-nodes" class="anchor">Scale out to Multiple Nodes</a></h2>
+  <p>
+     If you work load grows, and you split up your monitoring configuration through
+     multiple monitoring nodes, you shoud deploy a new instance of Statusengine Worker
+     on every monitoring node in your cluster.
+     <br />
+     <b>Make sure to set a unique <code>node_name</code> for each Statusengine Worker in the cluster!</b>
+     <br />
+     The default value of <code>node_name</code> is set to <code>Crowbar</code>.
+  </p>
+</section>
+
+<section id="requirements" class="doc-section">
+  <h2 class="page-header"><a href="#requirements" class="anchor">Requirements</a></h2>
+  <p>
+      <ul>
+          <li>php >= 5.5</li>
+          <li>Redis Server</li>
+          <li>php redis extension</li>
+          <li>php gearman extension</li>
+          <li>php composer</li>
+      </ul>
+  </p>
+</section>
+
+<section id="installation" class="doc-section">
+  <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
+  <p>
+      <div class="callout callout-info">
+          <h4>PHP Composer required</h4>
+          <p>Check out the tutorial, of <a href="{{ site.url }}/tutorials/php-composer">how to install php composer</a>, if you don't have it installed to your system yet.</p>
+      </div>
+      <ol>
+          <li>
+              <b>Install dependencies</b>
+              <pre>apt-get install php-cli php-zip php-redis redis-server php-mysql</pre>
+
+              <p>
+                  <div class="callout callout-danger">
+                      <h4>php-gearman</h4>
+                      <p>Unfortunately the php-gearman extension is missing in Ubuntu 16.04
+                          Follow <a href="{{ site.url }}/tutorials/php-gearman-extension">this guide</a> to install it manually</p>
+                  </div>
+              </p>
+
+          </li>
+          <li>
+              <b>Download and Install</b>
+              <div class="callout callout-info">
+                  <h4>Use stable versions for production</h4>
+                  <p>
+                      Stable versions could be found on the
+                      <a href="https://github.com/statusengine/worker/releases" target="_blank">
+                          release page
+                      </a>.
+                  </p>
+              </div>
+              <pre>cd /tmp
+git clone https://github.com/statusengine/worker.git
+mkdir -p /opt/statusengine
+cp -r worker /opt/statusengine/
+cd /opt/statusengine/worker
+chmod +x bin/*
+composer install
+</pre>
+          </li>
+      </ol>
+  </p>
+</section>
+
+<section id="database" class="doc-section">
+  <h2 class="page-header"><a href="#database" class="anchor">Database</a></h2>
+  <p>
+      At this point you need to decide, which database you prefer to use.
+  </p>
+  <p>
+      For large environments or high availability you should use CrateDB. For smaller systems or to keep things simple, you should go with MySQL.
+  </p>
+  <p>
+      <h5>CrateDB</h5>
+      Did not have a running CrateDB Cluster yet? Check the <a href="{{ site.url }}/tutorials/cratedb-cluster-ubuntu">How To</a>.
+      <br />
+      Import the file <code>/opt/statusengine/worker/lib/crateDB.sql</code> via the Crate Admin UI.
+      <br />
+      <b>Notice: You need to run every sql query separately! Do NOT PASTE the whole file at once into the SQL Console</b>
+      <br />
+      With CrateDB, you don't have to create a separate database or user for Statusengine.
+  </p>
+  <p>
+      <h5>MySQL</h5>
+      Did not have a running MySQL server yet? Check the <a href="{{ site.url }}/tutorials/mysql-ubuntu">How To</a>.
+      <br />
+      Create a MySQL database and user for Statusengine
+<pre ><code class="sql hljs">
+CREATE USER 'statusengine'@'localhost' IDENTIFIED BY 'password';
+CREATE DATABASE IF NOT EXISTS `statusengine` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+GRANT ALL PRIVILEGES ON `statusengine`.* TO 'statusengine'@'localhost';
+</code></pre>
+      Import the Statusengine Schema.
+<pre>
+# -p statusengine does not mean that "statusengine" is the password! This is the name of the database!
+mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
+</pre>
+  </p>
+  <p>
+  <h5>Redis</h5>
+  Statusengine is also able to store live data, like host and service status
+  to an Redis Server (in-memory database).
+  <br />
+  Read more about in the
+  <a href="{{ site.url }}/worker#in-memory">In-memory section</a>.
+  </p>
+</section>
+
+<section id="configuration" class="doc-section">
+  <h2 class="page-header"><a href="#configuration" class="anchor">Configuration</a></h2>
+  <p>
+      Due to the fact that the
+      <a href="https://github.com/statusengine/worker/blob/master/etc/config.yml.example" target="_blank">
+          Statusengine Worker Config file
+      </a>
+      has a lot of options you may be don't need, I striped this down to the basics
+      you need to change.
+  </p>
+  <p>
+      If you are going to use CrateDB you can ignore all MySQL settings and vice vera.
+      <br />
+      <br />
+          <b>Copy example configuration</b>
+          <pre>cp /opt/statusengine/worker/etc/config.yml.example /opt/statusengine/worker/etc/config.yml</pre>
+  </p>
+  <p>
+      <ul>
+        <li>
+            <code>node_name</code>
+            <br />
+            The <i>node_name</i> is used to route external commands to the corresponding
+            monitoring node. It is requred, that the <i>node_name</i> is unique!
+        </li>
+
+        <li>
+            <code>use_mysql</code>
+            <br />
+            Set <i>use_mysql</i> to 1, to enable MySQL Backend.
+        </li>
+
+        <li>
+            <code>mysql <i class="fa fa-arrow-right"></i> username</code>
+            <br />
+            The user Statusengine will use to connect to the MySQL server
+        </li>
+
+        <li>
+            <code>mysql <i class="fa fa-arrow-right"></i> password</code>
+            <br />
+            The password of the given MySQL user
+        </li>
+
+        <li>
+            <code>mysql <i class="fa fa-arrow-right"></i> database</code>
+            <br />
+            Name of the MySQL database
+        </li>
+
+        <li>
+            <code>use_crate</code>
+            <br />
+            Set <i>use_crate</i> to 1, to enable CrateDB Backend.
+        </li>
+
+        <li>
+            <code>crate <i class="fa fa-arrow-right"></i> nodes</code>
+            <br />
+            An array of ip addresses of CrateDB instances.
+            I recommend you to use a load balancer in front of your CrateDB cluster,
+            and only add the address of the load balancer.
+        </li>
+
+        <li>
+            <code>external_command_file</code>
+            <br />
+            Set the right path to your external command file (nagios.cmd/naemon.cmd)
+        </li>
+      </ul>
+  </p>
+
+</section>
+
+<section id="start-statusengine-worker" class="doc-section">
+  <h2 class="page-header"><a href="#start-statusengine-worker" class="anchor">Start Statusengine Worker through Systemd</a></h2>
+  <p>
+<pre>
+cp /opt/statusengine/worker/lib/statusengine.service /lib/systemd/system/statusengine.service
+</pre>
+    <div class="callout callout-danger">
+        <h4>Pitfall!</h4>
+        <p>
+            If you use Statusengine with CrateDB, add
+            <pre>crate.service</pre>
+            to the <code>After=</code> line in the file
+            <code> /lib/systemd/system/statusengine.service</code>
+            <br />
+            For Example:
+            <pre>After=syslog.target network.target gearman-job-server.service crate.service</pre>
+
+            <hr />
+            If you use Statusengine with MySQL, add
+            <pre>mysql.service</pre>
+            to the <code>After=</code> line in the file
+            <code> /lib/systemd/system/statusengine.service</code>
+            <br />
+            For Example:
+            <pre>After=syslog.target network.target gearman-job-server.service mysql.service</pre>
+        </p>
+    </div>
+<pre>
+systemctl daemon-reload
+systemctl enable statusengine
+systemctl start statusengine
+</pre>
+  </p>
+</section>
+
+<section id="cleanup-database" class="doc-section">
+  <h2 class="page-header"><a href="#cleanup-database" class="anchor">Automatically delete old data from database</a></h2>
+  <p>
+      The Statusengine Database cleanup cronjob should only run at one node of your cluster.
+      You can run the cron on as many nodes as you want, but this will increase the load of the system.
+      <br />
+      If you want to run the cronjob on more than one node, you should set different times for scheduling the cron.
+      For example at 01:00AM on node1 and at 01:00PM on node2.
+<pre>
+echo "0 1 * * * /opt/statusengine/worker/bin/Console.php cleanup -q" > /etc/cron.d/statusengine
+</pre>
+    You can define, how long Statusengine will keep your data in <code>/opt/statusengine/worker/etc/config.yml</code>
+  </p>
+  <p>
+      The parameter <code>-q</code> or <code>--quiet</code> is required, if the
+      cron gets executed via crontab! Otherwise <i>crond</i> will send the output
+      of the script to your mail addres - which could be annoying <i class="fa fa-smile-o"></i>
+  </p>
+  <p>
+      For debugging purpose you can also execute the cronjob by your self.
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/statusengine-cleanup-cronjob.png" class="img-responsive" alt="Running Statusengine database cleanup cronjob"/>
+          </center>
+      </p>
+  </p>
+</section>
+
+<section id="manage-cluster-nodes" class="doc-section">
+  <h2 class="page-header"><a href="#manage-cluster-nodes" class="anchor">Manage Cluster Nodes</a></h2>
+  <p>
+      If you start a new Statusengine Worker Node, the Node gets automatically
+      added to the table <code>statusengine_nodes</code>.
+      <br />
+      This is one of the reasons, why the <code>node_name</code> needs to be unique.
+      <br />
+      How ever. If you want to remove a node from your cluster, you need to do this
+      manually.
+      For this task, you can use the command <code>/opt/statusengine/worker/bin/Console.php cluster</code>
+      <br />
+      <br />
+      To keep things automatable (e.g. using Ansible), you can pass all data as parameters, like in the following example.
+      <br />
+      Admins can run the command without the parameter <code>--nodename</code> to get into an interactive shell.
+
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/add-delete-node.png" class="img-responsive" alt="Add or delete a cluster node from Statusengine"/>
+          </center>
+      </p>
+      As alway <code>--help</code> is your friend
+  </p>
+</section>
+
+<section id="get-metrics" class="doc-section">
+  <h2 class="page-header"><a href="#get-metrics" class="anchor">Get Metrics</a></h2>
+  <p>
+      Statusengine Worker provides a simple CLI tool, to get basic metrics about
+      the worker performance.
+      Execute the command <code>/opt/statusengine/worker/bin/Console.php statistics</code>
+      to get a human friendly  output
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/worker-statistics.png" class="img-responsive" alt="Statusenigne Worker statistics"/>
+          </center>
+      </p>
+      Run <code>/opt/statusengine/worker/bin/Console.php statistics --watch 3</code>
+      for automatically  refresh every 3 seconds.
+      <br />
+      Run <code>/opt/statusengine/worker/bin/Console.php statistics --naemon</code>
+      to change to output format to Naemon/Nagios performance data
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/worker-metrics.png" class="img-responsive" alt="Statusenigne Worker statistics as nagios or naemon output"/>
+          </center>
+      </p>
+
+      As alway <code>--help</code> is your friend
+
+  </p>
+</section>
+
+<section id="in-memory" class="doc-section">
+  <h2 class="page-header"><a href="#in-memory" class="anchor">In-memory</a></h2>
+  <p>
+      Statusengine Worker is able to store live data to an Redis in-memory database.
+      <br />
+      Use cases:
+      <ul>
+          <li>Notification scripts - Passing special characters, like ', ", &, etc... as parameter can be a challenging task</li>
+          <li>Build a simple API on top</li>
+          <li>Applications with heavy read operations</li>
+      </ul>
+  </p>
+  <p>
+      Statusengine Worker will save the following data to Redis:
+      <ul>
+          <li>A list of hosts for every host state (hosts_up, hosts_down and hosts_unreachable)</li>
+          <li>A list of services for every service state (services_ok, services_warning, services_critical and services_unknown)</li>
+          <li>Host status object of every host (hoststatus_&lt;hostname&gt;)</li>
+          <li>Service status object of every service (servicestatus_&lt;hostname&gt;_&lt;service_description&gt;)</li>
+          <li>Internal Statusengine statistics (statusengine_statistics, worker_statistics_&lt;pid&gt;)</li>
+      </ul>
+  </p>
+  <p>
+      Statusengine always require an alternative storage backend to Redis (MySQL or CrateDB), for
+      the cluster status and the external command router. To enable the Redis backend,
+      set <code>use_redis=1</code> in the Statusengine Worker <code>config.yml</code>.
+  </p>
+  <p>
+      A list of all Services in state "Ok"
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/redis/statusengine_redis_services_ok.png" class="img-responsive" alt="Statusengine live service data in redis"/>
+          </center>
+      </p>
+  </p>
+  <p>
+      Service status data of a particular service
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/redis/statusengine_redis_servicestatus.png" class="img-responsive" alt="Statusengine service status object in redis"/>
+          </center>
+      </p>
+  </p>
+  <p>
+      Internal Statusengine statistics
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/redis/statusengine_redis_internal_statistics.png" class="img-responsive" alt="Internal Statusengine statistics in redis"/>
+          </center>
+      </p>
+  </p>
+</section>
+
+<section id="debugging" class="doc-section">
+  <h2 class="page-header"><a href="#debuging" class="anchor">Debugging</a></h2>
+  <p>
+      For better debugging, you can run Statusengine in foreground. (Exit with STRG+C)
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/worker/statusengine-foreground.png" class="img-responsive" alt="Statusengine Worker running in foreground mode for debugging"/>
+          </center>
+      </p>
+  </p>
+</section>

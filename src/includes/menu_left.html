@@ -1,0 +1,41 @@
+<aside class="main-sidebar">
+    <section class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="header">MAIN NAVIGATION</li>
+
+            {% for link in menu %}
+                {% set active = '' %}
+                {% set angle = 'left' %}
+                {% set tree = '' %}
+                {% if link.name == page.title %}
+                    {% set active = 'active' %}
+                    {% set angle = 'down' %}
+                {% endif %}
+                {% if link.anchors|length > 0 %}
+                    {% set tree = 'treeview' %}
+                {% endif %}
+                <li class="{{ tree }} {{ active }}">
+                    <a href="{{ link.url }}">
+                        <i class="{{ link.icon }}"></i> <span>{{ link.name }}</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-{{ angle }} pull-right"></i>
+                        </span>
+                    </a>
+
+                    {% if link.anchors|length > 0 %}
+                        <ul class="treeview-menu">
+                            {% for anchor in link.anchors %}
+                                {% set blue = '' %}
+                                {% if anchor == 'Installation' %}
+                                    {% set blue = 'text-aqua' %}
+                                {% endif %}
+                                <li><a href="{{ link.url }}#{{ anchor|replace({' ': '-'})|lower }}" class="{{ blue }}"><i class="fa fa-circle-o"></i> {{ anchor }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% endfor %}
+
+        </ul>
+    </section>
+</aside>

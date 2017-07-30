@@ -1,0 +1,50 @@
+<footer class="main-footer">
+
+        <div class="pull-right">
+            <a href="/impressum.html">Impressum</a> |
+            <a href="/datenschutz.html">Datenschutz</a>
+        </div>
+        <strong>Copyright © 2016-{{ 'now' | date('Y') }} <a href="https://daniel-ziegler.com">Daniel Ziegler</a>.</strong> All rights reserved.
+
+{% if site.piwik_enabled %}
+        <!-- Piwik -->
+        <script type="text/javascript">
+          var _paq = _paq || [];
+          _paq.push(["setDomains", ["*.statusengine.org"]]);
+          _paq.push(['trackPageView']);
+          _paq.push(['enableLinkTracking']);
+          (function() {
+            var u="https://piwik.nook24.eu/";
+            _paq.push(['setTrackerUrl', u+'piwik.php']);
+            _paq.push(['setSiteId', 1]);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+          })();
+        </script>
+        <noscript><p><img src="https://piwik.nook24.eu/piwik.php?idsite=1" style="border:0;" alt="" /></p></noscript>
+        <!-- End Piwik Code -->
+{% endif %}
+</footer>
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- DO NOT REMOVE GERMAN/EU LAW DEMANDS THIS -->
+<link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/cookieconsent.min.css" />
+<script src="{{ site.url }}/assets/js/cookieconsent.min.js"></script>
+<script>
+window.addEventListener("load", function(){
+window.cookieconsent.initialise({
+  "palette": {
+    "popup": {
+      "background": "#222d32"
+    },
+    "button": {
+      "background": "#3c8dbc"
+    }
+  },
+  "position": "bottom-right",
+  "content": {
+    "href": "/datenschutz.html"
+  }
+})});
+</script>

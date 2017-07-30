@@ -1,0 +1,84 @@
+.jumbotron-black{
+    background-color: #292929;
+    color: #d6d6d6;
+    text-align: center;
+}
+
+.jumbotron-black h1{
+    color: #d6d6d6;
+    font-weight: 200;
+}
+
+.jumbotron-black h3{
+    color: #d6d6d6;
+    font-weight: 200;
+    font-style: italic;
+}
+
+.se-description{
+    min-height: 100px;
+}
+
+.se-icon{
+    font-size: 45px;
+    color: #000;
+}
+
+.feature{
+    text-align: center;
+}
+
+.row{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.jumbotron {
+    padding-top: 75px;
+}
+
+.btn-dark {
+  color: #D6D6D6;
+  background-color: #292929;
+  border-color: #191B1D;
+}
+
+.btn-dark:hover,
+.btn-dark:focus,
+.btn-dark:active,
+.btn-dark.active,
+.open .dropdown-toggle.btn-dark {
+  color: #D6D6D6;
+  background-color: #0c0c0c;
+  border-color: #191B1D;
+}
+
+.btn-dark:active,
+.btn-dark.active,
+.open .dropdown-toggle.btn-dark {
+  background-image: none;
+}
+
+.btn-dark.disabled,
+.btn-dark[disabled],
+fieldset[disabled] .btn-dark,
+.btn-dark.disabled:hover,
+.btn-dark[disabled]:hover,
+fieldset[disabled] .btn-dark:hover,
+.btn-dark.disabled:focus,
+.btn-dark[disabled]:focus,
+fieldset[disabled] .btn-dark:focus,
+.btn-dark.disabled:active,
+.btn-dark[disabled]:active,
+fieldset[disabled] .btn-dark:active,
+.btn-dark.disabled.active,
+.btn-dark[disabled].active,
+fieldset[disabled] .btn-dark.active {
+  background-color: #292929;
+  border-color: #191B1D;
+}
+
+.btn-dark .badge {
+  color: #292929;
+  background-color: #D6D6D6;
+}

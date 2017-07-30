@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        {% include 'head.html' %}
+        <link href="{{ site.url }}/assets/css/landing_page.css" rel="stylesheet">
+    </head>
+    <body class="skin-blue layout-top-nav">
+        {% include 'menu_top.html' with { menu: site.top_menu } %}
+
+
+        <div class="content-wrapper">
+            <div class="jumbotron jumbotron-black">
+                <div class="container">
+                    <h1>Statusengine 3</h1>
+                    <h3>There is a new sheriff in town to scale your Nagios or Naemon monitoring horizontally</h3>
+                    <p>
+                        <img src="{{ site.url }}/assets/img/statusengine3/statusengine-3-preview.png" class="img-responsive" alt="Statusengine 3 Web Interface"/>
+                    </p>
+                    <p>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <a href="https://github.com/statusengine" target="_blank" class="btn btn-dark btn-md">Fork on GitHub</a>
+                            <a href="https://demo.statusengine.org" class="btn btn-dark btn-md">Statusengine Ui Demo</a>
+                        </div>
+                    </p>
+                </div>
+            </div>
+
+            <div class="container">
+
+                <section class="content-header">
+                    <h1>
+                        Overview
+                        <small>- What is Statusengine?</small>
+                    </h1>
+                </section>
+
+                <section class="content se-description">
+                    <p>
+                        Statusengine is an extension for Nagios or Naemon and save events such as status results, acknowledgements, notifications and so on to a queueing engine.
+                    </p>
+                    <p>
+                        A simple process, written in PHP will take all the events from the queue and save them to a database. At the moment Statusengine supports <a href="https://crate.io/" target="_blank">CrateDB</a>, <a href="https://www.mysql.com/" target="_blank">MySQL</a> and <a href="https://redis.io/" target="_blank">Redis</a> as storage backends.
+                    </p>
+                    <p>
+                        For large setups, you can scale out the CrateDB backend by adding more nodes to the cluster <b>- how simple is this?</b>
+                    </p>
+                    <p>
+                        <b>But the load average of my monitoring server is way too high! Do you address this issue?</b> Yes. Just install a new monitoring server and split your configuration. Statusengine can handle multiple monitoring nodes and save all results to one database. The only condition is, that the host names are unique across the whole monitoring cluster.
+                    </p>
+                    <p>
+                        <b>That sounds fair enough to give it a try, but how can i access my data?</b> You can use <i>Statusengine UI</i> to make your data visible. The web interface is based on a JSON API and perfectly fits all sizes of screens like TV's or your Smartphone.
+                    </p>
+                </section>
+
+                <section class="content-header">
+                    <h1>
+                        Features
+                    </h1>
+                </section>
+
+                <div class="row">
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-cloud"></i>
+                            </div>
+                            <h4>Multiple Statusengine Nodes</h4>
+                            <p>Spread the load of your monitoring server or database over multiple nodes. Statusengine has an external command router to pass external commands or passive check results to the corresponding cluster node. How cool is this?</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-desktop"></i>
+                            </div>
+                            <h4>Statusengine UI</h4>
+                            <p>Statusengine provide a modern responsive web interface based on AngularJS. An inbuilt refresh method keeps the data up to date, so you can use Statusengine UI on big screens without any Browser Plugins.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-area-chart"></i>
+                            </div>
+                            <h4>Performance Data</h4>
+                            <p>Statusengine supports multiple time series databases such as CrateDB or Graphite. Statusengine UI can display simple Charts using this metrics. For Dashboards or more complex charts you can use Grafana.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-github"></i>
+                            </div>
+                            <h4>Open Source</h4>
+                            <p>Statusengine is 100% open source. Check the <a href="https://github.com/statusengine" target="_blank">GitHub</a> page.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-book"></i>
+                            </div>
+                            <h4>Open documentation</h4>
+                            <p>This documentation is open source as well and release under the terms of <a href="https://creativecommons.org/licenses/by-sa/4.0/">Attribution-ShareAlike 4.0 International</a>
+                                You're welcome to append or fix typos.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-md-4">
+                        <div class="feature">
+                            <div class="se-icon">
+                                <i class="fa fa-chain-broken"></i>
+                            </div>
+                            <h4>No more legacy</h4>
+                            <p>
+                                Statusengine 3 use a complete new written code base and a new database schema. It is <b>not</b> compatible with Statusengine 2 but I am sure you will love the new schema.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+
+        {% include 'footer.html' %}
+
+    </body>
+</html>

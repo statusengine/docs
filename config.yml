@@ -1,0 +1,62 @@
+title: "Statusengine 3"
+description: "The missing broker module for Nagios4 and Naemon"
+
+# Your site's domain. E.g: http://yoursite.com
+#url: "https://statusengine.org/se3/"
+
+# For your lokal development system use this url
+url: "http://127.0.0.1:4000"
+
+
+parsedown_actived: true
+
+text_extensions: [ 'htm', 'html', 'html.twig', 'twig.html', 'less', 'markdown', 'md', 'mkd', 'mkdn', 'coffee', 'erb', 'haml', 'handlebars', 'hb', 'ms', 'mustache', 'php', 'rb', 'sass', 'scss', 'slim', 'txt', 'xhtml', 'xml' ]
+
+# Do not ebable piwik for your local build!
+# This is just for the official statusengine[.org,.io] page
+piwik_enabled: false
+
+#include: ['.htaccess']
+
+global_message: "You are reading the documentation for Statusengine 3.x - Switch to <a href='https://statusengine.org/oldstable'>Version 2.x</a> for old stable"
+
+# Comments in posts
+comments:
+    enabled: false
+    disqus_shortname: ""
+
+# Information about author
+author:
+    name: "Daniel Ziegler"
+
+
+# Collections
+collections:
+
+  tutorials:
+    output: true
+
+# RSS feed
+feed:
+    max_item: 10
+
+# Facebook Open Graph
+open_graph:
+    locale: "en_US"
+
+# Code highlight for <pre> and <code> tags
+# Powered by http://highlightjs.org/
+code_highlight: true
+
+# Site validation
+google_verify:
+bing_verify:
+
+# Page menus
+top_menu:
+    - { name: Getting Started, url: "/getting_started", icon: "fa fa-play", anchors: ["Overview", "Components", "Requirements", "Quick start", "Performance data"] }
+    - { name: Broker Module, url: "/broker", icon: "fa fa-cogs", anchors: ["Overview", "Scale out to Multiple Nodes", "Supported Monitoring Tools", "Installation", "Broker Options", "OCSP and OCHP", "Debug Broker Module"] }
+    - { name: Worker, url: "/worker", icon: "fa fa-spinner", anchors: ["Overview", "Scale out to Multiple Nodes", "Requirements", "Installation", "Database", "Configuration", "Start Statusengine Worker", "Cleanup database", "Manage Cluster Nodes", "Get Metrics", "In-memory", "Debugging"] }
+    - { name: Statusengine UI, url: "/ui", icon: "fa fa-desktop", anchors: ["Overview", "Features", "Installation", "Configuration", "First user", "HTTPS", "Apache Example Config", "Nginx Example Config", "PHP built-in server", "Manage users"] }
+    - { name: Tutorials, url: "/tutorials", icon: "fa fa-graduation-cap", anchors: [] }
+    - { name: Old Stable (2.x), url: "/oldstable", icon: "fa fa-code", anchors: [] }
