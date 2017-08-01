@@ -2,7 +2,7 @@ title: "Statusengine 3"
 description: "The missing broker module for Nagios4 and Naemon"
 
 # Your site's domain. E.g: http://yoursite.com
-#url: "https://statusengine.org/se3/"
+#url: "https://statusengine.org"
 
 # For your lokal development system use this url
 url: "http://127.0.0.1:4000"
