@@ -1,0 +1,56 @@
+---
+layout: "page"
+title: "Statusengine Roadmap"
+list_mode: false
+---
+
+<section id="worker-3.1.0" class="doc-section">
+  <h2 class="page-header"><a href="#worker-3.1.0" class="anchor">Worker 3.1.0</a></h2>
+  <p>
+      The Redis section of the file <code>config.yml</code> got the key
+      <code>db: 0</code> to define
+      which Redis database should be used.
+<pre ><code class="YAML hljs"># Configuration of your redis server
+redis:
+  address: 127.0.0.1
+  port: 6379
+  db: 0
+</code></pre>
+  </p>
+  <p class="text-info">
+      Planed: Implement Elasticsearch as performance data backend
+  </p>
+</section>
+
+<section id="ui-3.0.1" class="doc-section">
+  <h2 class="page-header"><a href="#ui-3.0.1" class="anchor">UI 3.0.1</a></h2>
+  <p>
+      With Statusengine UI 3.0.1, empty state blocks on the dashboard will be hidden.
+      <p>
+          <center>
+              <img src="{{ site.url }}/assets/img/roadmap/hide_empty_state.png" class="img-responsive" alt="Hide empty state blocks on Statusengine Dashboard"/>
+          </center>
+      </p>
+  </p>
+</section>
+
+<section id="ui-3.0.0" class="doc-section">
+  <h2 class="page-header"><a href="#ui-3.0.0" class="anchor">UI 3.0.0</a></h2>
+  <p>
+      Release Statusengine UI 3.0.0
+  </p>
+</section>
+
+<section id="worker-3.0.0" class="doc-section">
+  <h2 class="page-header"><a href="#worker-3.0.0" class="anchor">Worker 3.0.0</a></h2>
+  <p>
+      Release Statusengine Worker 3.0.0
+  </p>
+</section>
+
+<section id="module-3.0.0" class="doc-section">
+  <h2 class="page-header"><a href="#module-3.0.0" class="anchor">Module 3.0.0</a></h2>
+  <p>
+      Release Statusengine Event Broker Module 3.0.0 for Nagios 4 and Naemon
+  </p>
+</section>
