@@ -60,4 +60,5 @@ top_menu:
     - { name: Statusengine UI, url: "/ui", icon: "fa fa-desktop", anchors: ["Overview", "Features", "Installation", "Configuration", "First user", "HTTPS", "Apache Example Config", "Nginx Example Config", "PHP built-in server", "Manage users"] }
     - { name: Tutorials, url: "/tutorials", icon: "fa fa-graduation-cap", anchors: [] }
     - { name: Demo, url: "https://demo.statusengine.org", icon: "fa fa-desktop", anchors: [] }
+    - { name: Roadmap, url: "/roadmap", icon: "fa fa-map-marker", anchors: [] }
     - { name: Old Stable (2.x), url: "/oldstable", icon: "fa fa-code", anchors: [] }
