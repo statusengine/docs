@@ -99,6 +99,14 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
                       </p>
                   </div>
               </p>
+              <p>
+                  <div class="callout callout-warning">
+                      <h4>Attention Nagios users</h4>
+                      <p>
+                          Due to a bug, you should disable processing of log entries via <pre><code class="ini hljs">use_log_data=0</code></pre> to avoid issues on restart or stop of Nagios process.
+                      </p>
+                  </div>
+              </p>
           </li>
           <li>
               <b>Restart your Monitoring Tool</b>
