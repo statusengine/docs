@@ -70,3 +70,13 @@
     background-color: #367fa9!important;
     border-color: #367fa9!important;
 }
+
+.tutorial{
+    box-shadow: 1px 1px 13px rgba(0,0,0,0.3);
+    border-radius: 5px;
+    min-height: 125px
+}
+
+.tutorial-content{
+    margin-left: 4px;
+};
