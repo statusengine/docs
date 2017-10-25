@@ -62,6 +62,7 @@ number_perfdata_worker: 1
 perfdata_backend:
 # - crate
 # - graphite
+# - elasticsearch
 - mysql
 
 ````
