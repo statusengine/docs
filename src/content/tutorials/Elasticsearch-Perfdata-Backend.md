@@ -262,3 +262,26 @@ Make sure, that you set **Display** <i class="fa fa-arrow-right"></i> **Null val
         </p>
     </div>
 </div>
+
+##Deletion of old records
+Depending on your `elasticsearch_pattern`, Statusengine Worker will create multiple indices. In this case, one index per day:
+<div class="jumbotron jumbotron-black">
+    <div class="container">
+        <p>
+            <center>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine_elastic_indices.png" class="img-responsive" alt="Statusengine Elasticsearch indices"/>
+            </center>
+        </p>
+    </div>
+</div>
+
+The [Statusengine Cleanup Cronjob](/worker#cleanup-database) will delete indices, that are older than `age_perfdata`. `age_perfdata` is set in days.
+<div class="jumbotron jumbotron-black">
+    <div class="container">
+        <p>
+            <center>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine_perfdata_cleanup.png" class="img-responsive" alt="Statusengine Perfdata Cleanup Cronjob"/>
+            </center>
+        </p>
+    </div>
+</div>
