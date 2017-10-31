@@ -211,6 +211,19 @@ mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
 
 </section>
 
+<section id="configure-performance-data" class="doc-section">
+  <h2 class="page-header"><a href="#configure-performance-data" class="anchor">Configure Performance Data</a></h2>
+  <p>
+       Statusengine Worker can store Nagios and Naemon Performance data to different storage backends.
+       <ul>
+           <li><a href="/tutorials/CrateDB-Perfdata-Backend">CrateDB</a></li>
+           <li><a href="/tutorials/MySQL-Perfdata-Backend">MySQL</a></li>
+           <li><a href="/tutorials/Elasticsearch-Perfdata-Backend">Elasticsearch</a></li>
+           <li><a href="/tutorials/Graphite-Grafana">Graphite</a></li>
+       </ul>
+  </p>
+</section>
+
 <section id="start-statusengine-worker" class="doc-section">
   <h2 class="page-header"><a href="#start-statusengine-worker" class="anchor">Start Statusengine Worker through Systemd</a></h2>
   <p>

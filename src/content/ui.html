@@ -443,3 +443,34 @@ service nginx restart
       As alway <code>--help</code> is your friend
   </p>
 </section>
+
+<section id="ui-settings" class="doc-section">
+  <h2 class="page-header"><a href="#ui-settings" class="anchor">Ui Settings</a></h2>
+  <p>
+      Statusengine Ui allow to set some user specific settings to the interface. All settings are saved in the local storage of your browser!
+      <br />
+      I also try to add not too much options.
+  </p>
+  <p>
+      <center>
+          <img src="{{ site.url }}/assets/img/ui/statusengine_ui_settings.png" class="img-responsive" alt="Statusengine Ui users settings"/>
+      </center>
+  </p>
+  <p>
+      <ul>
+          <li>
+              <b>Auto refresh</b> - Enable or disable the automatically page refresh interval.
+              <br />
+              If you scroll, auto refresh will be temporarily disabled automatically, to avoid jumping lines while reading a log file or so.
+          </li>
+          <li><b>Auto Refresh frequency</b> - Choose from a predefined list of auto refresh intervals</li>
+          <li>
+              <b>Acknowledge and in Downtime hidden in Menu and Dashboard</b>
+              <br />
+              Hosts and services, where the current state was acknowledged or a period of downtime was scheduled, will not count any more as Down, Unreachable, Warning, Critical or Unknown in the menu state overview and the dashboard.
+              <br />
+              These hosts and services are just hidden, they will not count as Up or Ok! They will also be not hidden from the state lists.
+          </li>
+      </ul>
+  </p>
+</section>

@@ -4,6 +4,45 @@ title: "Statusengine Roadmap"
 list_mode: false
 ---
 
+<section id="ui-3.2.0" class="doc-section">
+  <h2 class="page-header"><a href="#ui-3.2.0" class="anchor">UI 3.2.0</a></h2>
+  <p>
+      <ul>
+          <li>Implement <a href="/tutorials/Elasticsearch-Perfdata-Backend">
+              Elasticsearch as new performance data backend</a></li>
+          <li>Fix a bug, where links to a host or service from "Upcoming downtimes" where undefined</li>
+          <li>Set Version to the same as Worker Version number due to Elasticsearch</li>
+          <li>The <a href="/ui#ui-settings">auto refresh can now bet set by the user</a> in seconds</li>
+          <li>Add state overview to the menu</li>
+          <li>Acknowledged hosts and services or hosts and services that are in a period of downtime, can now be hidden from the dashboard</li>
+          <li>
+              Add a state change notification on the dashboard
+              <br />
+              <img src="{{ site.url }}/assets/img/roadmap/state_change_dashboard.png" class="img-responsive" alt="State changes on Statusengine Dashboard"/>
+          </li>
+          <li>Add new menu point "Current Acknowledgements"
+              <br />
+              <center>
+                  <img src="{{ site.url }}/assets/img/roadmap/current_acknowledgements.png" class="img-responsive" alt="Current Acknowledgements in Statusengine"/>
+              </center>
+          </li>
+      </ul>
+  </p>
+</section>
+
+<section id="worker-3.2.0" class="doc-section">
+  <h2 class="page-header"><a href="#worker-3.2.0" class="anchor">Worker 3.2.0</a></h2>
+  <p>
+      <ul>
+          <li>Implement <a href="/tutorials/Elasticsearch-Perfdata-Backend">
+              Elasticsearch as new performance data backend</a></li>
+          <li>Fix a bug, where it was not possible to enable MySQL and CrateDB as performance data backend at the same time</li>
+          <li>Update MySQL schema <code>TINYINT(1)</code> to <code>TINYINT(2)</code> for non boolean values to increase ORM compatibility</li>
+      </ul>
+  </p>
+</section>
+
+
 <section id="worker-3.1.0" class="doc-section">
   <h2 class="page-header"><a href="#worker-3.1.0" class="anchor">Worker 3.1.0</a></h2>
   <p>
