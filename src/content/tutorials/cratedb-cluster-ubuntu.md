@@ -81,11 +81,12 @@ If not already installed on all CraterDB nodes, here is a guid of
 
 ## Starting setup the first CrateDB node
 
-### Add the CrateDB PPA
+### Add the CrateDB repository
 All commands needs to run as user `root` or via `sudo`.
 ````nohighlight
-apt-get install software-properties-common
-add-apt-repository ppa:crate/stable
+wget -qO - https://cdn.crate.io/downloads/deb/DEB-GPG-KEY-crate | apt-key add -
+echo "deb https://cdn.crate.io/downloads/deb/stable/ xenial main" > /etc/apt/sources.list.d/crate-stable.list
+echo "deb-src https://cdn.crate.io/downloads/deb/stable/ xenial main" >> /etc/apt/sources.list.d/crate-stable.list
 apt-get update
 apt-get install crate python
 ````
