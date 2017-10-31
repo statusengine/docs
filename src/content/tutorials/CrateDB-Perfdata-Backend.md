@@ -232,3 +232,33 @@ Make sure, that you set **Display** <i class="fa fa-arrow-right"></i> **Null val
         </p>
     </div>
 </div>
+
+##Deletion of old records
+By default, CrateDB will create a new Partition in the table `statusengine_perfdata` for every day.
+
+This behavior is set in the default sql schema:
+````SQL
+CREATE TABLE statusengine_perfdata (
+    ...
+) CLUSTERED INTO 4 SHARDS PARTITIONED BY (DAY) WITH (number_of_replicas = '0');
+````
+<div class="jumbotron jumbotron-black">
+    <div class="container">
+        <p>
+            <center>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine_cratedb_partitions.png" class="img-responsive" alt="Statusengine CrateDB Partitions"/>
+            </center>
+        </p>
+    </div>
+</div>
+
+The [Statusengine Cleanup Cronjob](/worker#cleanup-database) will delete partitions, that are older than `age_perfdata`. `age_perfdata` is set in days.
+<div class="jumbotron jumbotron-black">
+    <div class="container">
+        <p>
+            <center>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine_perfdata_cleanup.png" class="img-responsive" alt="Statusengine Perfdata Cleanup Cronjob"/>
+            </center>
+        </p>
+    </div>
+</div>

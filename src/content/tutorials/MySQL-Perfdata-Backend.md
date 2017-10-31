@@ -275,3 +275,38 @@ ORDER BY timestamp_unix ASC
         </p>
     </div>
 </div>
+
+##Deletion of old records
+The MySQL Performance Data implementation is very simple. There are no partitions in use and data will just save as in every other table you know.
+
+````nohighlight
+mysql> SELECT * FROM statusengine_perfdata LIMIT 10;
++-----------+---------------------+--------+---------------+----------------+----------+------+
+| hostname  | service_description | label  | timestamp     | timestamp_unix | value    | unit |
++-----------+---------------------+--------+---------------+----------------+----------+------+
+| localhost | Current Users       | users  | 1508781382000 |     1508781382 |        3 | NULL |
+| localhost | PING                | rta    | 1508781446000 |     1508781446 |    0.044 | ms   |
+| localhost | PING                | pl     | 1508781446000 |     1508781446 |        0 | %    |
+| localhost | Root Partition      | /      | 1508781501000 |     1508781501 |     3561 | MB   |
+| localhost | Current Load        | load1  | 1508781519000 |     1508781519 |     0.16 | NULL |
+| localhost | Current Load        | load5  | 1508781519000 |     1508781519 |     0.24 | NULL |
+| localhost | Current Load        | load15 | 1508781519000 |     1508781519 |     0.17 | NULL |
+| localhost | Swap Usage          | swap   | 1508781549000 |     1508781549 |    24573 | MB   |
+| localhost | SSH                 | time   | 1508781569000 |     1508781569 | 0.009121 | s    |
+| localhost | Total Processes     | procs  | 1508781614000 |     1508781614 |       76 | NULL |
++-----------+---------------------+--------+---------------+----------------+----------+------+
+10 rows in set (0.00 sec)
+
+mysql>
+````
+
+The [Statusengine Cleanup Cronjob](/worker#cleanup-database) will delete every record, where `timestamp_unix` is less than `age_perfdata`. `age_perfdata` is set in days.
+<div class="jumbotron jumbotron-black">
+    <div class="container">
+        <p>
+            <center>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine_perfdata_cleanup.png" class="img-responsive" alt="Statusengine Perfdata Cleanup Cronjob"/>
+            </center>
+        </p>
+    </div>
+</div>
