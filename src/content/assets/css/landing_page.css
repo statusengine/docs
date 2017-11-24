@@ -82,3 +82,15 @@ fieldset[disabled] .btn-dark.active {
   color: #292929;
   background-color: #D6D6D6;
 }
+
+.navbar{
+    font-size: 14px;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 300;
+}
+
+.navbar-brand{
+    font-size: inherit;
+    font-weight: 700;
+    text-transform: uppercase;
+}

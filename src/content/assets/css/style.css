@@ -6,7 +6,7 @@
 
 .navbar{
     font-size: 14px;
-    font-family: "News Cycle","Arial Narrow Bold",sans-serif;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-weight: normal;
 }
 
@@ -79,4 +79,5 @@
 
 .tutorial-content{
     margin-left: 4px;
-};
+}
+
