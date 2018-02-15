@@ -134,141 +134,221 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
   </p>
   <p>
       <div class="container-fluid">
-          <div class="row">
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Option name</span></div>
               <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Affected queue</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-5"><span class="bold">Description</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-4"><span class="bold">Description</span></div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Recommended to disable</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Deprecated</span></div>
+          </div>
 
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_host_status_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hoststatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Hoststatus table</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Hoststatus table</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_service_status_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicestatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Servicestatus table</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Servicestatus table</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+          
 
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Notice! There was a bug in Statusengine < 2.0.4. If disabled no objects will be dumped anymore! In later versions you can disable this option if you like</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_service_check_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicechecks</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Will update the servicechecks table and process performance data information (graphing)</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the servicechecks table</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_host_check_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hostchecks</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Will update the hostchecks table</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the hostchecks table</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_state_change_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_statechanges</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">If disabled, the table 'statehistory' for hosts and services will get no updates anymore</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">If disabled, the table 'statehistory' for hosts and services will not get updated anymore</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_log_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_logentries</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Will update the table logentries</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the table logentries</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_system_command_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_systemcommands</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Will update the table systemcommands</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_comment_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_comments</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">If disabled, no comment records will be saved anymore.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_external_command_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_externalcommands</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">If disabled, no external commands will be saved to the database. Disable this if you receive a lot of passive checks.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not implemented yet</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_acknowledgement_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_acknowledgements</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">The message of acknowledgements will not be saved in the database anymore. Will not affect the 'problem_has_been_acknowledged' field in host-/servicestatus tables.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">The message of acknowledgements will not be saved in the database anymore. Will not affect the 'problem_has_been_acknowledged' field in host-/servicestatus tables.</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_flapping_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_flappings</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">The table flappinghistory will not be saved anymore. Will not affect the 'is_flapping' field in host-/servicestatus tables</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_downtime_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_downtimes</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Downtime information will be saved in the database anymore. Will not affect the 'scheduled_downtime_depth' field in host-/servicestatus tables.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Downtime information will be saved in the database anymore. Will not affect the 'scheduled_downtime_depth' field in host-/servicestatus tables.</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_notification_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_notifications</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Notification information will be saved in the database anymore.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_program_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_programmstatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Information about the current running Naemon process. Will be updated every <i>n</i> seconds</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactstatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Information about the last notifications for an contact</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Notifications a contact received</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_method_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationmethod</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">The method that was used to send the notification (notification command)</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Event that conains all notification data</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_event_handler_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_eventhandler</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Table 'eventhandlers' will not be saved anymore.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
-
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_object_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_objects</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">If disabled, the objects table will not be saved anymore! Only disable this, if you know what you are doing or for headless OCHP/OCSP sytems!</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends!</span></div>
-
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">enable_ochp</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ochp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Basically the same as statusngin_hostchecks. You can use this as alternative for the classic OCHP command</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_hostchecks. You can use this as alternative for the classic OCHP command</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">enable_ocsp</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ocsp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Basically the same as statusngin_servicechecks. You can use this as alternative for the classic OCSP command</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_servicechecks. You can use this as alternative for the classic OCSP command</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_restart_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_core_restart</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Tell Statusengine Worker that a restart of the Monitoring Core occurse</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Tell Statusengine Worker that a restart of the Monitoring Core occurse</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No!</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_service_perfdata</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_service_perfdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Used by Statusengine Worker to process performance data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Used by Statusengine Worker to process performance data</div>
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
-
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+          
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_addr</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Address of the Gearman-Job-Server (default: 127.0.0.1)</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Address of the Gearman-Job-Server (default: 127.0.0.1)</div>
               <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
 
+          <div class="row myOdd">
               <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_port</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-5">Port of the Gearman-Job-Server (default: 4730)</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Port of the Gearman-Job-Server (default: 4730)</div>
               <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+          
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_system_command_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_systemcommands</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_external_command_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_externalcommands</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_flapping_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_flappings</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_program_status_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_programmstatus</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_notification_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_notifications</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_status_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactstatus</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationdata</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+          
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_event_handler_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_eventhandler</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+          </div>
+
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">use_object_data</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_objects</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">Statusengine 3 don't save a dump of the monitoring configuration to the database anymore.</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
           </div>
       </div>
   </p>
@@ -387,7 +467,7 @@ gearman -w -c 1 -f statusngin_ocsp | jq .
         <br />
         More languages are available in
         <a href="http://gearman.org/download/#client--worker-apis" target="_blank">
-            the official documentation
+            the official Gearman documentation
         </a>
         .
     </p>
