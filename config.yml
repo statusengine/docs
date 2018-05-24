@@ -14,6 +14,7 @@ text_extensions: [ 'htm', 'html', 'html.twig', 'twig.html', 'less', 'markdown', 
 
 # Do not ebable piwik for your local build!
 # This is just for the official statusengine[.org,.io] page
+#piwik_enabled: true
 piwik_enabled: false
 
 #include: ['.htaccess']

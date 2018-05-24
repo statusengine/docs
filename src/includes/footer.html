@@ -1,8 +1,8 @@
 <footer class="main-footer">
 
         <div class="pull-right">
-            <a href="/impressum.html">Impressum</a> |
-            <a href="/datenschutz.html">Datenschutz</a>
+            <a href="/impressum.html">Imprint</a> |
+            <a href="/datenschutz.html">Privacy policy</a>
         </div>
         <strong>Copyright © 2016-{{ 'now' | date('Y') }} <a href="https://daniel-ziegler.com">Daniel Ziegler</a>.</strong> All rights reserved.
 
@@ -28,6 +28,7 @@
 
 <script>hljs.initHighlightingOnLoad();</script>
 
+{% if site.piwik_enabled %}
 <!-- DO NOT REMOVE GERMAN/EU LAW DEMANDS THIS -->
 <link rel="stylesheet" type="text/css" href="{{ site.url }}/assets/css/cookieconsent.min.css" />
 <script src="{{ site.url }}/assets/js/cookieconsent.min.js"></script>
@@ -48,3 +49,4 @@ window.cookieconsent.initialise({
   }
 })});
 </script>
+{% endif %}
