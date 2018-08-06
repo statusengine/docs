@@ -17,7 +17,7 @@ angular.module('StatusengineDocs')
                 startStatusengineWorker: 'systemctl start statusengine'
             },
             trusty: {
-                dependencies: 'apt-get install git php5-cli php5-zip php5-redis redis-server php5-mysql php5-gearman',
+                dependencies: 'apt-get install git php5-cli php5-redis redis-server php5-mysql php5-gearman',
                 stopStatusengineWorker: 'service statusengine stop',
                 startStatusengineWorker: 'service statusengine start'
             }

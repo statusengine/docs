@@ -83,7 +83,7 @@ list_mode: false
           <li>
               <b>Download and Install Statusengine Broker Module</b>
               <pre>cd /tmp
-git clone https://github.com/statusengine/module.git
+git clone https://github.com/statusengine/module.git module
 cd module/
 make all
 
@@ -475,8 +475,7 @@ apt-get install jq
 </pre>
 
     This example will print one job to the shell and exit
-<pre ><code class="bash hljs">
-#!/bin/bash
+<pre ><code class="bash hljs">#!/bin/bash
 gearman -w -c 1 -f statusngin_ocsp | jq .
 </code></pre>
     </p>

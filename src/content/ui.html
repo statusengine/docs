@@ -277,6 +277,8 @@ composer install
 &lt;VirtualHost 192.168.56.101:443&gt;
     ServerName statusengine.example.org
 
+    RedirectMatch 404 /\.git
+
     DocumentRoot "/usr/share/statusengine-ui/public/"
 
     SSLEngine On
@@ -312,10 +314,10 @@ a2enmod ssl
       <br/>
       By default php-fpm will use a Unix socket, so you have to change the following
       line in the file
-      <code>/etc/php/7.0/fpm/pool.d/www.conf</code> and restart the php-fpm service.
+      <code>{[{commands[selectedOs].fpmConfigPath}]}</code> and restart the php-fpm service.
 <pre ><code class="ini hljs">
 ;Remove this line - or make it became a comment
-;listen = /run/php/php7.0-fpm.sock
+;listen = /run/php/php7.2-fpm.sock
 
 ; Add this line to use TCP
 listen = 127.0.0.1:9000
