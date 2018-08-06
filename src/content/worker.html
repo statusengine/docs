@@ -4,6 +4,7 @@ title: "Worker"
 list_mode: false
 ---
 
+<div ng-controller="WorkerController">
 <section id="overview" class="doc-section">
   <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
   <p>
@@ -50,6 +51,19 @@ list_mode: false
 
 <section id="installation" class="doc-section">
   <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
+  
+  <p>
+      Please select your operating system first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
+      <div class="form-group">
+          <label>Operating system</label>
+          <select class="form-control" ng-model="selectedOs">
+              <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
+              <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
+              <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+          </select>
+      </div>
+  </p>
+  
   <p>
       <div class="callout callout-info">
           <h4>PHP Composer required</h4>
@@ -58,10 +72,10 @@ list_mode: false
       <ol>
           <li>
               <b>Install dependencies</b>
-              <pre>apt-get install php-cli php-zip php-redis redis-server php-mysql</pre>
+              <pre>{[{commands[selectedOs].dependencies}]}</pre>
 
               <p>
-                  <div class="callout callout-danger">
+                  <div class="callout callout-danger" ng-show="selectedOs == 'xenial'">
                       <h4>php-gearman</h4>
                       <p>Unfortunately the php-gearman extension is missing in Ubuntu 16.04
                           Follow <a href="{{ site.url }}/tutorials/php-gearman-extension">this guide</a> to install it manually</p>
@@ -80,10 +94,9 @@ list_mode: false
                       </a>.
                   </p>
               </div>
-              <pre>cd /tmp
-git clone https://github.com/statusengine/worker.git
-mkdir -p /opt/statusengine
-cp -r worker /opt/statusengine/
+              <pre>mkdir -p /opt/statusengine
+cd /opt/statusengine
+git clone https://github.com/statusengine/worker.git worker
 cd /opt/statusengine/worker
 chmod +x bin/*
 composer install
@@ -224,7 +237,7 @@ mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
   </p>
 </section>
 
-<section id="start-statusengine-worker" class="doc-section">
+<section id="start-statusengine-worker" class="doc-section" ng-if="hasSystemd">
   <h2 class="page-header"><a href="#start-statusengine-worker" class="anchor">Start Statusengine Worker through Systemd</a></h2>
   <p>
 <pre>
@@ -255,6 +268,41 @@ cp /opt/statusengine/worker/lib/statusengine.service /lib/systemd/system/statuse
 systemctl daemon-reload
 systemctl enable statusengine
 systemctl start statusengine
+</pre>
+  </p>
+</section>
+
+<section id="start-statusengine-worker" class="doc-section" ng-if="!hasSystemd">
+  <h2 class="page-header"><a href="#start-statusengine-worker" class="anchor">Start Statusengine Worker through SysVinit</a></h2>
+  <p>
+<pre>
+cp /opt/statusengine/worker/lib/statusengine.init /etc/init.d/statusengine
+chmod +x /etc/init.d/statusengine
+</pre>
+    <div class="callout callout-danger">
+        <h4>Pitfall!</h4>
+        <p>
+            If you use Statusengine with CrateDB, add
+            <pre>crate</pre>
+            to the <code>Required-Start</code> line in the file
+            <code> /etc/init.d/statusengine</code>
+            <br />
+            For Example:
+            <pre>Required-Start: gearman-job-server crate</pre>
+
+            <hr />
+            If you use Statusengine with MySQL, add
+            <pre>mysql</pre>
+            to the <code>equired-Start</code> line in the file
+            <code> /etc/init.d/statusengine</code>
+            <br />
+            For Example:
+            <pre>Required-Start: gearman-job-server mysql</pre>
+        </p>
+    </div>
+<pre>
+update-rc.d statusengine defaults
+service statusengine start
 </pre>
   </p>
 </section>
@@ -403,8 +451,62 @@ echo "0 1 * * * /opt/statusengine/worker/bin/Console.php cleanup -q" > /etc/cron
   </p>
 </section>
 
+<section id="how-to-update" class="doc-section">
+  <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+  <p>
+      If you had installed Statusengine through <code>git</code>, the update will be done quickly.
+      
+      <ol>
+          <li>
+              Stop Statusengine Worker
+              <pre>{[{commands[selectedOs].stopStatusengineWorker}]}</pre>
+          </li>
+          
+          <li>
+              Create backup of your files
+              <pre>cp -r /opt/statusengine/worker /some/backup/path</pre>
+          </li>
+          
+          <li>
+              Update your local files
+              <pre>cd /opt/statusengine/worker
+git pull origin master
+composer update</pre>
+          </li>
+          
+          <li>
+              Update your database (if required)
+              <br />
+              Check the path <code>/opt/statusengine/worker/<a href="https://github.com/statusengine/worker/tree/master/lib" target="_blank">lib</a></code> for any database update files.
+              <br />
+              If an database schema update is available, the file name would be like <code>mysql_3.1.0_TO_3.2.0.sql</code> for example.
+              <br />
+              Execute every sql file in the right order!
+              <br />
+              The current version of the database schema is stored in the table <code>statusengine_dbversion</code>.
+          </li>
+          
+          <li>
+              Check for configuration changes
+              <br />
+              You old configuration is still loaded. Statusengine Worker defines default values for each configuration variable.
+              <br />
+              Nevertheless you should compare your current configuration with the new example configuration file for new interessing configuration options.
+              <pre>vimdiff /opt/statusengine/worker/etc/config.yml /opt/statusengine/worker/etc/config.yml.example</pre>
+          </li>
+          
+          <li>
+              Start Statusengine Worker
+              <pre>{[{commands[selectedOs].startStatusengineWorker}]}</pre>
+          </li>
+          
+      </ol>
+      
+  </p>
+</section>
+
 <section id="debugging" class="doc-section">
-  <h2 class="page-header"><a href="#debuging" class="anchor">Debugging</a></h2>
+  <h2 class="page-header"><a href="#debugging" class="anchor">Debugging</a></h2>
   <p>
       For better debugging, you can run Statusengine in foreground. (Exit with STRG+C)
       <p>
@@ -414,3 +516,4 @@ echo "0 1 * * * /opt/statusengine/worker/bin/Console.php cleanup -q" > /etc/cron
       </p>
   </p>
 </section>
+</div>

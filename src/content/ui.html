@@ -4,6 +4,7 @@ title: "Statusengine UI"
 list_mode: false
 ---
 
+<div ng-controller="UiController">
 <section id="overview" class="doc-section">
   <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
   <p>
@@ -71,7 +72,7 @@ list_mode: false
       <div class="col-xs-12 ">
           <br />
           <a href="https://demo.statusengine.org" class="btn btn-primary" target="_blank">
-              Visit Statusengine Ui Demo
+              Visit Statusengine UI Demo
           </a>
       </div>
   </div>
@@ -100,6 +101,19 @@ list_mode: false
 
 <section id="installation" class="doc-section">
   <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
+  
+  <p>
+      Please select your operating system first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
+      <div class="form-group">
+          <label>Operating system</label>
+          <select class="form-control" ng-model="selectedOs">
+              <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
+              <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
+              <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+          </select>
+      </div>
+  </p>
+  
   <p>
       <div class="callout callout-info">
           <h4>PHP Composer required</h4>
@@ -108,7 +122,7 @@ list_mode: false
       <ol>
           <li>
               <b>Install dependencies</b>
-              <pre>apt-get install php-cli php-zip php-mysql php-ldap</pre>
+              <pre>{[{commands[selectedOs].dependencies}]}</pre>
 
           </li>
           <li>
@@ -122,10 +136,8 @@ list_mode: false
                       </a>.
                   </p>
               </div>
-              <pre>cd /tmp
-git clone https://github.com/statusengine/interface.git
-mkdir -p /usr/share/statusengine-ui
-cp -r interface/* /usr/share/statusengine-ui/
+              <pre>cd /usr/share/
+git clone https://github.com/statusengine/interface.git statusengine-ui
 cd /usr/share/statusengine-ui
 chmod +x bin/*
 composer install
@@ -157,7 +169,7 @@ composer install
         <li>
             <code>auth_type</code>
             <br />
-            Determines if you want to use Statusengine Ui basic authentication
+            Determines if you want to use Statusengine UI basic authentication
             or your LDAP for SSO.
         </li>
 
@@ -170,7 +182,7 @@ composer install
         <li>
             <code>mysql <i class="fa fa-arrow-right"></i> username</code>
             <br />
-            The user Statusengine Ui will use to connect to the MySQL server
+            The user Statusengine UI will use to connect to the MySQL server
         </li>
 
         <li>
@@ -209,7 +221,7 @@ composer install
   <p>
       If you are using Statusengine <i>basic auth</i>, you need to create a user first.
       <br />
-      This can be done, via the Statusengine Ui Console
+      This can be done, via the Statusengine UI Console
 
       <pre>/usr/share/statusengine-ui/bin/Console.php users add --username "admin" --password "admin"</pre>
       Read more about users in the
@@ -243,7 +255,7 @@ composer install
       In this example the web server is listen to the address <code>192.168.56.101</code>
       and we create a virtual host for the subdomain <code>statusengine.example.org</code>
 
-      <pre>apt-get install apache2 libapache2-mod-php</pre>
+      <pre>{[{commands[selectedOs].apache2}]}</pre>
 
       We place the configuration for Statusengine UI to <code>/etc/apache2/sites-available/statusengine-ui.conf</code>
 <pre ><code class="apache hljs">
@@ -255,6 +267,8 @@ composer install
     RewriteRule (.*) https://%{SERVER_NAME}/$1 [R,L]
 
     DocumentRoot "/usr/share/statusengine-ui/public/"
+
+    RedirectMatch 404 /\.git
 
     ErrorLog "/var/log/apache2/statusengine-ui-error.log"
     CustomLog "/var/log/apache2/statusengine-ui-access.log" combined
@@ -279,7 +293,7 @@ a2ensite statusengine-ui
 a2enmod rewrite
 a2enmod ssl
 
-service apache2 restart
+{[{commands[selectedOs].apache2Restart}]}
 </pre>
   </p>
 </section>
@@ -290,7 +304,7 @@ service apache2 restart
       In this example the web server is listen to the address <code>192.168.56.101</code>
       and we create a virtual host for the subdomain <code>statusengine.example.org</code>
 
-      <pre>apt-get install nginx php-fpm</pre>
+      <pre>{[{commands[selectedOs].nginx}]}</pre>
 
   </p>
   <p>
@@ -308,7 +322,7 @@ listen = 127.0.0.1:9000
 </code></pre>
 
 <pre>
-service php7.0-fpm restart
+{[{commands[selectedOs].phpFpmRestart}]}
 </pre>
 
   </p>
@@ -347,6 +361,10 @@ server {
         fastcgi_param    SCRIPT_NAME  /api/index.php;
         fastcgi_param    PHP_SELF     $document_uri;
     }
+    
+    location ~ /\.git {
+        deny all;
+    }
 
     # Remove css, js, and images from access log
     location ~* \.(?:css|js|svg|gif|png|html|ttf|ico|jpg|jpeg)$ {
@@ -360,7 +378,7 @@ Enable the configuration and restart the web server
 rm /etc/nginx/sites-enabled/default
 ln -s /etc/nginx/sites-available/statusengine-ui /etc/nginx/sites-enabled/statusengine-ui
 
-service nginx restart
+{[{commands[selectedOs].nginxRestart}]}
 </pre>
   </p>
 </section>
@@ -381,12 +399,12 @@ service nginx restart
 <section id="manage-users" class="doc-section">
   <h2 class="page-header"><a href="#manage-users" class="anchor">Manage users</a></h2>
   <p>
-      To manage the users of Statusengine Ui Basic Auth, you need to use
+      To manage the users of Statusengine UI Basic Auth, you need to use
       the CLI Tool provided by Statusengine.
 
       Managing Users via the Interface is NOT possible at the moment.
       <br />
-      You can access the Statusengine Ui User Console, with the following command
+      You can access the Statusengine UI User Console, with the following command
       <br />
       <code>/usr/share/statusengine-ui/bin/Console.php users</code>
   </p>
@@ -397,7 +415,7 @@ service nginx restart
       spawn in an interactive mode and ask for username and password.
       <p>
           <center>
-              <img src="{{ site.url }}/assets/img/ui/add-user-interactive.png" class="img-responsive" alt="Crate a new Statusengine Ui user in interactive mode"/>
+              <img src="{{ site.url }}/assets/img/ui/add-user-interactive.png" class="img-responsive" alt="Crate a new Statusengine UI user in interactive mode"/>
           </center>
       </p>
   </p>
@@ -411,7 +429,7 @@ service nginx restart
       This is useful for automatisation (e.g. Ansible)
       <p>
           <center>
-              <img src="{{ site.url }}/assets/img/ui/add-user-parameters.png" class="img-responsive" alt="Crate a new Statusengine Ui user in non interactive mode"/>
+              <img src="{{ site.url }}/assets/img/ui/add-user-parameters.png" class="img-responsive" alt="Crate a new Statusengine UI user in non interactive mode"/>
           </center>
       </p>
   </p>
@@ -420,10 +438,10 @@ service nginx restart
       <br/>
       Call the <code>delete</code> action to remove users.
       <br />
-      In interactive mode, Statusengine Ui will autocomplete usernames.
+      In interactive mode, Statusengine UI will autocomplete usernames.
       <p>
           <center>
-              <img src="{{ site.url }}/assets/img/ui/delete-user-interactive.png" class="img-responsive" alt="Delete a Statusengine Ui user in interactive mode"/>
+              <img src="{{ site.url }}/assets/img/ui/delete-user-interactive.png" class="img-responsive" alt="Delete a Statusengine UI user in interactive mode"/>
           </center>
       </p>
   </p>
@@ -433,7 +451,7 @@ service nginx restart
       Call the <code>list</code> action to get a list of all available users.
       <p>
           <center>
-              <img src="{{ site.url }}/assets/img/ui/list-users.png" class="img-responsive" alt="List all available Statusengine Ui users"/>
+              <img src="{{ site.url }}/assets/img/ui/list-users.png" class="img-responsive" alt="List all available Statusengine UI users"/>
           </center>
       </p>
   </p>
@@ -445,15 +463,15 @@ service nginx restart
 </section>
 
 <section id="ui-settings" class="doc-section">
-  <h2 class="page-header"><a href="#ui-settings" class="anchor">Ui Settings</a></h2>
+  <h2 class="page-header"><a href="#ui-settings" class="anchor">UI Settings</a></h2>
   <p>
-      Statusengine Ui allow to set some user specific settings to the interface. All settings are saved in the local storage of your browser!
+      Statusengine UI allow to set some user specific settings to the interface. All settings are saved in the local storage of your browser!
       <br />
       I also try to add not too much options.
   </p>
   <p>
       <center>
-          <img src="{{ site.url }}/assets/img/ui/statusengine_ui_settings.png" class="img-responsive" alt="Statusengine Ui users settings"/>
+          <img src="{{ site.url }}/assets/img/ui/statusengine_ui_settings.png" class="img-responsive" alt="Statusengine UI users settings"/>
       </center>
   </p>
   <p>
@@ -474,3 +492,36 @@ service nginx restart
       </ul>
   </p>
 </section>
+
+<section id="how-to-update" class="doc-section">
+  <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+  <p>
+      If you had installed Statusengine UI through <code>git</code>, the update will be done quickly.
+      
+      <ol>
+          <li>
+              Create backup of your files
+              <pre>cp -r /usr/share/statusengine-ui /some/backup/path</pre>
+          </li>
+          
+          <li>
+              Update your local files
+              <pre>cd /usr/share/statusengine-ui
+git pull origin master
+composer update</pre>
+          </li>
+          
+          <li>
+              Check for configuration changes
+              <br />
+              You old configuration is still loaded. Statusengine UI defines default values for each configuration variable.
+              <br />
+              Nevertheless you should compare your current configuration with the new example configuration file for new interessing configuration options.
+              <pre>vimdiff /usr/share/statusengine-ui/etc/config.yml /usr/share/statusengine-ui/etc/config.yml.example</pre>
+          </li>
+          
+      </ol>
+      
+  </p>
+</section>
+</div>
