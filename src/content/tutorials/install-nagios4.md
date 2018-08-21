@@ -10,7 +10,7 @@ If you want to delete Nagios Core, just remove this folder and the systemd confi
 
 All commands needs to run as user `root` or via `sudo`.
 
-````
+````nohighlight
 addgroup --system nagios
 adduser --system nagios
 adduser nagios nagios
@@ -46,12 +46,6 @@ make install-config
 ````
 
 ## Start Nagios Core (through systemd - recommended)
-As far as I know, there is no systemd configuration from Nagios itself available.
-
-
-So i use a modified version of the systemd configuration from the
-[Naemon Project](https://github.com/naemon/naemon-core/blob/master/daemon-systemd.in)!
-
 Copy the following to the file `/lib/systemd/system/nagios.service` using your favorite editor.
 
 <div class="callout callout-danger">
@@ -73,23 +67,20 @@ Copy the following to the file `/lib/systemd/system/nagios.service` using your f
 
 ````ini
 [Unit]
-Description=Nagios network monitor
-After=network.target
+Description=Nagios Core
+Documentation=https://www.nagios.org/documentation
+After=network.target local-fs.target
 
 [Service]
 Type=forking
-PIDFile=/opt/nagios/var/nagios.lock
-ExecStartPre=/opt/nagios/bin/nagios --verify-config /opt/nagios/etc/nagios.cfg
-ExecStart=/opt/nagios/bin/nagios --daemon /opt/nagios/etc/nagios.cfg
-ExecReload=/bin/kill -HUP $MAINPID
-User=nagios
-Group=nagios
-StandardOutput=journal
-StandardError=inherit
+ExecStartPre=/opt/nagios/bin/nagios -v /opt/nagios/etc/nagios.cfg
+ExecStart=/opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
+ExecStop=/bin/kill -s TERM ${MAINPID}
+ExecStopPost=/bin/rm -f /opt/nagios/var/rw/nagios.cmd
+ExecReload=/bin/kill -s HUP ${MAINPID}
 
 [Install]
 WantedBy=multi-user.target
-
 ````
 
 

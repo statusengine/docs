@@ -119,7 +119,9 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
                   <div class="callout callout-warning">
                       <h4>Attention Nagios users</h4>
                       <p>
-                          Due to a bug, you should disable processing of log entries via <pre><code class="ini hljs">use_log_data=0</code></pre> to avoid issues on restart or stop of Nagios process.
+                          If you are using a Nagios version &lt; 4.4.0 and systemd, you should disable processing of log entries via
+                          <pre><code class="ini hljs">use_log_data=0</code></pre>
+                          to avoid issues on restart or stop of Nagios process.
                       </p>
                   </div>
               </p>
@@ -290,6 +292,28 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
           </div>
           
           <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_list</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">
+                  A list of Gearman-Job-Servers separated by comma as failover servers.
+                  <code>gearman_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_dup_server_list</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">
+                  A list of Gearman-Job-Servers separated by comma. All records will be pushed to all servers.
+                  <code>gearman_dup_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+          
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
               <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
@@ -368,6 +392,13 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
               <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
           </div>
+      </div>
+      
+      <div class="callout callout-warning">
+          <h4>Only use ip addresses!</h4>
+          <p>
+              Due to a bug in the german library you should only use ip addresses to connect to a Gearman-Job-Server. Do not use host names like <code>localhost</code>!
+          </p>
       </div>
   </p>
 </section>
