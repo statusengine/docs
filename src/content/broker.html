@@ -69,6 +69,7 @@ list_mode: false
               <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="centos7">CentOS 7.5</option>
           </select>
       </div>
   </p>
@@ -76,9 +77,20 @@ list_mode: false
   <div>
   <p>
       <ol>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Load EPEL Repository and install CentOS dependencies</b>
+              <pre>yum install epel-release
+yum check-update
+
+yum group install "Development Tools"</pre>
+          </li>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
+          </li>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Start Gearman-Job-Server on system boot</b>
+              <pre>systemctl enable gearmand</pre>
           </li>
           <li>
               <b>Download and Install Statusengine Broker Module</b>

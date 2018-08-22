@@ -60,6 +60,7 @@ list_mode: false
               <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="centos7">CentOS 7.5</option>
           </select>
       </div>
   </p>
@@ -70,10 +71,18 @@ list_mode: false
           <p>Check out the tutorial, of <a href="{{ site.url }}/tutorials/php-composer">how to install php composer</a>, if you don't have it installed to your system yet.</p>
       </div>
       <ol>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Load EPEL Repository for PHP 7.2</b>
+              <pre>yum install epel-release
+yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum check-update
+yum install yum-utils
+yum-config-manager --enable remi-php72
+</pre>
+          </li>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
-
               <p>
                   <div class="callout callout-danger" ng-show="selectedOs == 'xenial'">
                       <h4>php-gearman</h4>
@@ -81,6 +90,12 @@ list_mode: false
                           Follow <a href="{{ site.url }}/tutorials/php-gearman-extension">this guide</a> to install it manually</p>
                   </div>
               </p>
+              
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Start and enable Redis server</b>
+              <pre>systemctl start redis
+systemctl enable redis</pre>
+          </li>
 
           </li>
           <li>
@@ -256,12 +271,12 @@ cp /opt/statusengine/worker/lib/statusengine.service /lib/systemd/system/statuse
 
             <hr />
             If you use Statusengine with MySQL, add
-            <pre>mysql.service</pre>
+            <pre>{[{mysqlShort}]}</pre>
             to the <code>After=</code> line in the file
             <code> /lib/systemd/system/statusengine.service</code>
             <br />
             For Example:
-            <pre>After=syslog.target network.target gearman-job-server.service mysql.service</pre>
+            <pre>{[{mysqlLong}]}</pre>
         </p>
     </div>
 <pre>

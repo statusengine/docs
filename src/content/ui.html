@@ -110,6 +110,7 @@ list_mode: false
               <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="centos7">CentOS 7.5</option>
           </select>
       </div>
   </p>
@@ -120,6 +121,15 @@ list_mode: false
           <p>Check out the tutorial, of <a href="{{ site.url }}/tutorials/php-composer">how to install php composer</a>, if you don't have it installed to your system yet.</p>
       </div>
       <ol>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Load EPEL Repository for PHP 7.2</b>
+              <pre>yum install epel-release
+yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum check-update
+yum install yum-utils
+yum-config-manager --enable remi-php72
+</pre>
+          </li>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
@@ -231,7 +241,7 @@ composer install
 
 <section id="https" class="doc-section">
   <h2 class="page-header"><a href="#https" class="anchor">HTTPS</a></h2>
-  <p>
+  <div ng-if="selectedOs != 'centos7'">
       All example configurations are using https, with an auto redirect
       from http:// to https://.
       <br />
@@ -246,7 +256,17 @@ composer install
               to get free TLS certificates.
           </p>
       </div>
-  </p>
+  </div>
+  <div ng-if="selectedOs == 'centos7'">
+      All example configurations are using https, with an auto redirect
+      from http:// to https://.
+      <br />
+      Create a new self-signed SSL certificate.
+      <pre>mkdir /etc/ssl/private
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+cat /etc/ssl/certs/dhparam.pem | tee -a /etc/ssl/certs/ssl-cert-snakeoil.pem</pre>
+  </div>
 </section>
 
 <section id="apache-example-config" class="doc-section">
@@ -257,7 +277,7 @@ composer install
 
       <pre>{[{commands[selectedOs].apache2}]}</pre>
 
-      We place the configuration for Statusengine UI to <code>/etc/apache2/sites-available/statusengine-ui.conf</code>
+      We place the configuration for Statusengine UI to <code>{[{apacheConfig}]}</code>
 <pre ><code class="apache hljs">
 &lt;VirtualHost 192.168.56.101:80&gt;
     ServerName statusengine.example.org
@@ -289,7 +309,8 @@ composer install
     CustomLog "/var/log/apache2/statusengine-ui-access.log" combined
 &lt;/VirtualHost&gt;
 </code></pre>
-    Now we need to enable the configuration and restart the web server
+    <div ng-if="selectedOs != 'centos7'">
+        Now we need to enable the configuration and restart the web server
 <pre>
 a2ensite statusengine-ui
 a2enmod rewrite
@@ -297,6 +318,25 @@ a2enmod ssl
 
 {[{commands[selectedOs].apache2Restart}]}
 </pre>
+    </div>
+    
+    <div ng-if="selectedOs == 'centos7'">
+            Remove default configuration and restart the web server
+    <pre>
+rm /etc/httpd/conf.d/welcome.conf
+
+mkdir /var/log/apache2
+
+echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
+
+echo "&lt;Directory /usr/share/statusengine-ui/public&gt;" >> {[{apacheConfig}]}
+echo "  Require all granted" >> {[{apacheConfig}]}
+echo "&lt;/Directory&gt;" >> {[{apacheConfig}]}
+
+{[{commands[selectedOs].apache2Restart}]}
+</pre>
+        </div>
+    
   </p>
 </section>
 
@@ -330,7 +370,7 @@ listen = 127.0.0.1:9000
   </p>
 
       We place the configuration for Statusengine UI to
-      <code>/etc/nginx/sites-available/statusengine-ui</code>
+      <code>{[{nginxConfig}]}</code>
 <pre ><code class="nginx hljs">
 server {
     #Redirect http to https
