@@ -1,12 +1,12 @@
 ---
 layout: "page"
-title: "Install Naemon Core on Ubuntu 16.04"
-description: "In this tutorial I show you, how to install Naemon Core by yourself"
+title: "Install Naemon Core on Ubuntu Bionic 18.04"
+description: "In this tutorial I show you, how to install Naemon Core by yourself on Ubuntu Bionic 18.04"
 ---
 
 Related topics:
 
-- <a href="{{ site.url }}/tutorials/install-naemon-bionic">Install Naemon Core on Ubuntu Bionic 18.04</a>
+- <a href="{{ site.url }}/tutorials/install-naemon">Install Naemon Core on Ubuntu Xenial 16.04</a>
 
 
 ## Prepare your system
@@ -30,18 +30,25 @@ apt-get install build-essential automake gperf help2man libtool libglib2.0-dev
 ````
 
 ## Download and install Naemon Core
+<div class="callout callout-warning">
+    <h4>Naemon &ge; 1.0.7 required</h4>
+    <p>
+        Ubuntu Bionic comes with GCC 7 by default. For this reason only Naemon &ge; 1.0.7 can be build on Ubuntu Bionic.
+    </p>
+</div>
+
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Naemon 1.0.6. Check if there is
+        In this how to I use Naemon 1.0.8. Check if there is
         <a href="https://github.com/naemon/naemon-core/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz
-tar xfv v1.0.6.tar.gz
-cd naemon-core-1.0.6/
+wget https://github.com/naemon/naemon-core/archive/v1.0.8.tar.gz
+tar xfv v1.0.8.tar.gz
+cd naemon-core-1.0.8/
 
 ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins
 make all
@@ -109,28 +116,33 @@ systemctl start naemon
 
 Now you can check if your Naemon Core is running using `systemctl status naemon`:
 ````nohighlight
-root@xenial:/tmp/naemon-core-1.0.6# systemctl status naemon
+root@bionic:/tmp/naemon-core-1.0.8# systemctl status naemon
 ● naemon.service - Naemon Monitoring Daemon
    Loaded: loaded (/lib/systemd/system/naemon.service; disabled; vendor preset: enabled)
-   Active: active (running) since Mi 2017-05-17 20:04:29 CEST; 11s ago
+   Active: active (running) since Wed 2018-08-29 11:06:15 UTC; 4s ago
      Docs: http://naemon.org/documentation
-  Process: 15888 ExecStart=/opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
-  Process: 15885 ExecStartPre=/opt/naemon/bin/naemon --verify-config /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
- Main PID: 15890 (naemon)
-    Tasks: 6
-   Memory: 1.4M
-      CPU: 12ms
+  Process: 17807 ExecStart=/opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
+  Process: 17804 ExecStartPre=/opt/naemon/bin/naemon --verify-config /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
+ Main PID: 17809 (naemon)
+    Tasks: 6 (limit: 1152)
    CGroup: /system.slice/naemon.service
-           ├─15890 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
-           ├─15891 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15892 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15893 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15894 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           └─15895 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+           ├─17809 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+           ├─17810 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─17812 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─17813 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─17814 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           └─17820 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
 
-Mai 17 20:04:29 xenial systemd[1]: Starting Naemon Monitoring Daemon...
-Mai 17 20:04:29 xenial systemd[1]: Started Naemon Monitoring Daemon.
-root@xenial:/tmp/naemon-core-1.0.6#
+Aug 29 11:06:15 bionic naemon[17804]:         Checked 0 service dependencies
+Aug 29 11:06:15 bionic naemon[17804]:         Checked 0 host dependencies
+Aug 29 11:06:15 bionic naemon[17804]:         Checked 5 timeperiods
+Aug 29 11:06:15 bionic naemon[17804]: Checking global event handlers...
+Aug 29 11:06:15 bionic naemon[17804]: Checking obsessive compulsive processor commands...
+Aug 29 11:06:15 bionic naemon[17804]: Checking misc settings...
+Aug 29 11:06:15 bionic naemon[17804]: Total Warnings: 0
+Aug 29 11:06:15 bionic naemon[17804]: Total Errors:   0
+Aug 29 11:06:15 bionic naemon[17804]: Things look okay - No serious problems were detected during the pre-flight check
+Aug 29 11:06:15 bionic systemd[1]: Started Naemon Monitoring Daemon.
 ````
 To make sure that you Naemon will start automatically on boot, you need to
 enable the systemd configuration:
@@ -171,32 +183,26 @@ For some reasons it can be useful  to run Naemon in foreground.
 
 You can do this with this command `/opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg`
 ````nohighlight
-root@xenial:/opt/naemon# sudo -u naemon /bin/bash
-naemon@xenial:~$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
+root@bionic:/opt/naemon# sudo -u naemon /bin/bash
+naemon@bionic:/opt/naemon$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
 
-Naemon Core 1.0.6-source
+Naemon Core 1.0.8.source
 Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
 Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
 License: GPL
 
 Website: http://www.naemon.org
-Naemon 1.0.6-source starting... (PID=1323)
-Local time is Wed May 17 20:34:50 CEST 2017
+Naemon 1.0.8.source starting... (PID=17851)
+Local time is Wed Aug 29 11:07:43 UTC 2018
 qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
 nerd: Channel hostchecks registered successfully
 nerd: Channel servicechecks registered successfully
 nerd: Fully initialized and ready to rock!
-wproc: Successfully registered manager as @wproc with query handler
-wproc: Registry request: name=Core Worker 1325;pid=1325
-wproc: Registry request: name=Core Worker 1327;pid=1327
-wproc: Registry request: name=Core Worker 1326;pid=1326
-wproc: Registry request: name=Core Worker 1324;pid=1324
-Successfully launched command file worker with pid 1328
+Successfully launched command file worker with pid 17856
 ^CCaught 'Interrupt', shutting down...
-Successfully shutdown... (PID=1323)
+Successfully shutdown... (PID=17851)
 Event broker module 'NERD' deinitialized successfully.
-Warning: Cannot open log file '(null)' for writing
-Successfully reaped command worker (PID = 1328)
-naemon@xenial:~$
+Successfully reaped command worker (PID = 17856)
+naemon@bionic:/opt/naemon$
 ````
