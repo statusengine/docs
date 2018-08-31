@@ -7,22 +7,22 @@ angular.module('StatusengineDocs')
         
         $scope.commands = {
             bionic: {
-                dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql php-json php-gearman',
+                dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql php-json php-gearman php-bcmath php-mbstring unzip',
                 stopStatusengineWorker: 'systemctl stop statusengine',
                 startStatusengineWorker: 'systemctl start statusengine'
             },
             xenial: {
-                dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql',
+                dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql php-bcmath php-mbstring unzip',
                 stopStatusengineWorker: 'systemctl stop statusengine',
                 startStatusengineWorker: 'systemctl start statusengine'
             },
             trusty: {
-                dependencies: 'apt-get install git php5-cli php5-redis redis-server php5-mysql php5-gearman',
+                dependencies: 'apt-get install git php5-cli php5-redis redis-server php5-mysql php5-gearman unzip',
                 stopStatusengineWorker: 'service statusengine stop',
                 startStatusengineWorker: 'service statusengine start'
             },
             centos7: {
-                dependencies: 'yum install git php-cli php-pecl-redis redis php-mysql php-pecl-gearman php-json',
+                dependencies: 'yum install git php-cli php-pecl-redis redis php-mysql php-pecl-gearman php-json php-bcmath php-mbstring php-process unzip',
                 stopStatusengineWorker: 'systemctl stop statusengine',
                 startStatusengineWorker: 'systemctl start statusengine'
             }

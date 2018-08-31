@@ -1,13 +1,13 @@
 ---
 layout: "page"
-title: "Install Nagios Core on Ubuntu 16.04"
-description: "In this tutorial I show you, how to install Nagios Core by yourself"
+title: "Install Nagios Core on CentOS 7.5"
+description: "In this tutorial I show you, how to install Nagios Core by yourself on CentOS 7.5"
 ---
 
 Related topics:
 
+- <a href="{{ site.url }}/tutorials/install-nagios4">Install Nagios Core on Ubuntu Xenial 16.04</a>
 - <a href="{{ site.url }}/tutorials/install-nagios4-bionic">Install Nagios Core on Ubuntu Bionic 18.04</a>
-- <a href="{{ site.url }}/tutorials/install-nagios4-centos7">Install Nagios Core on CentOS 7.5</a>
 
 ## Prepare your system
 In this how to, we are going to install all files to `/opt/nagios`.
@@ -17,31 +17,32 @@ If you want to delete Nagios Core, just remove this folder and the systemd confi
 All commands needs to run as user `root` or via `sudo`.
 
 ````nohighlight
-addgroup --system nagios
-adduser --system nagios
-adduser nagios nagios
+useradd -r nagios
 ````
 
 ## Install dependencies
 
 ````bash
-apt-get update
-apt-get install build-essential libgd-dev libpng12-dev unzip
+yum install epel-release
+yum check-update
+
+yum group install "Development Tools"
+yum install wget unzip libpng-devel gd-devel
 ````
 
 ## Download and install Nagios Core
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Nagios 4.3.2. Check if there is
+        In this how to I use Nagios 4.4.2. Check if there is
         <a href="https://github.com/NagiosEnterprises/nagioscore/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.3.2.tar.gz
-tar xfv nagios-4.3.2.tar.gz
-cd nagioscore-nagios-4.3.2/
+wget https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.2.tar.gz
+tar xfv nagios-4.4.2.tar.gz
+cd nagioscore-nagios-4.4.2/
 
 ./configure --prefix=/opt/nagios --with-nagios-user=nagios --with-nagios-group=nagios
 mkdir /opt/nagios
@@ -54,6 +55,7 @@ make install-config
 ## Start Nagios Core (through systemd - recommended)
 Copy the following to the file `/lib/systemd/system/nagios.service` using your favorite editor.
 
+
 <div class="callout callout-danger">
     <h4>Pitfall!</h4>
     <p>
@@ -65,9 +67,11 @@ Copy the following to the file `/lib/systemd/system/nagios.service` using your f
         <br />
         To configure this, replace the <i>AFTER=</i> line in the following systemd configuration
         with this:
-        <pre>After=network.target gearman-job-server.service</pre>
+        <pre>AAfter=network.target gearmand.service</pre>
         If not already done, install the Gearman Job Server now!
-        <pre>apt-get install gearman-job-server</pre>
+        <pre>yum install gearmand
+systemctl enable gearmand
+systemctl start gearmand</pre>
     </p>
 </div>
 
@@ -97,35 +101,33 @@ systemctl start nagios
 
 Now you can check if your Nagios Core is running using `systemctl status nagios`:
 ````nohighlight
-root@xenial:/tmp/nagioscore-nagios-4.3.2# systemctl status nagios
-● nagios.service - Nagios network monitor
-   Loaded: loaded (/lib/systemd/system/nagios.service; disabled; vendor preset: enabled)
-   Active: active (running) since Mi 2017-05-17 21:01:02 CEST; 3s ago
-  Process: 14340 ExecStart=/opt/nagios/bin/nagios --daemon /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
-  Process: 14336 ExecStartPre=/opt/nagios/bin/nagios --verify-config /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
- Main PID: 14341 (nagios)
-    Tasks: 6
-   Memory: 1.7M
-      CPU: 7ms
+[root@centos7 nagioscore-nagios-4.4.2]# systemctl status nagios.service
+● nagios.service - Nagios Core
+   Loaded: loaded (/usr/lib/systemd/system/nagios.service; disabled; vendor preset: disabled)
+   Active: active (running) since Fr 2018-08-31 16:56:28 UTC; 10s ago
+     Docs: https://www.nagios.org/documentation
+  Process: 25804 ExecStart=/opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
+  Process: 25803 ExecStartPre=/opt/nagios/bin/nagios -v /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
+ Main PID: 25807 (nagios)
    CGroup: /system.slice/nagios.service
-           ├─14341 /opt/nagios/bin/nagios --daemon /opt/nagios/etc/nagios.cfg
-           ├─14342 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─14344 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─14345 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─14346 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           └─14347 /opt/nagios/bin/nagios --daemon /opt/nagios/etc/nagios.cfg
+           ├─25807 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
+           ├─25809 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─25810 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─25811 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─25812 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           └─25813 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
 
-Mai 17 21:01:02 xenial nagios[14341]: nerd: Channel servicechecks registered successfully
-Mai 17 21:01:02 xenial nagios[14341]: nerd: Channel opathchecks registered successfully
-Mai 17 21:01:02 xenial nagios[14341]: nerd: Fully initialized and ready to rock!
-Mai 17 21:01:02 xenial nagios[14341]: wproc: Successfully registered manager as @wproc with query handler
-Mai 17 21:01:02 xenial nagios[14341]: wproc: Registry request: name=Core Worker 14342;pid=14342
-Mai 17 21:01:02 xenial nagios[14341]: wproc: Registry request: name=Core Worker 14344;pid=14344
-Mai 17 21:01:02 xenial nagios[14341]: wproc: Registry request: name=Core Worker 14345;pid=14345
-Mai 17 21:01:02 xenial nagios[14341]: wproc: Registry request: name=Core Worker 14346;pid=14346
-Mai 17 21:01:02 xenial nagios[14341]: Successfully launched command file worker with pid 14347
-Mai 17 21:01:02 xenial nagios[14341]: HOST ALERT: localhost;DOWN;SOFT;1;(No output on stdout) stderr: execvp(/opt/nagios/libexec/check_ping, ...) failed. errno is 2: No such file or directory
-root@xenial:/tmp/nagioscore-nagios-4.3.2#
+Aug 31 16:56:28 centos7 nagios[25807]: qh: core query handler registered
+Aug 31 16:56:28 centos7 nagios[25807]: qh: echo service query handler registered
+Aug 31 16:56:28 centos7 nagios[25807]: qh: help for the query handler registered
+Aug 31 16:56:28 centos7 nagios[25807]: wproc: Successfully registered manager as @wproc with query handler
+Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25812;pid=25812
+Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25809;pid=25809
+Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25810;pid=25810
+Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25811;pid=25811
+Aug 31 16:56:28 centos7 nagios[25807]: Successfully launched command file worker with pid 25813
+Aug 31 16:56:28 centos7 nagios[25807]: HOST ALERT: localhost;DOWN;SOFT;1;(No output on stdout) stderr: execvp(/opt/nagios/libexec/check_ping, ...) failed. errno is 2: No such file or directory
+[root@centos7 nagioscore-nagios-4.4.2]#
 ````
 To make sure that you Nagios will start automatically on boot, you need to
 enable the systemd configuration:
@@ -137,8 +139,8 @@ systemctl enable nagios.service
 By default, Nagios will install a sample config with some basic checks.
 So you need to install the `nagios plugins` to get them to work.
 ````nohighlight
-apt-get install nagios-plugins
-echo '$USER1$=/usr/lib/nagios/plugins' > /opt/nagios/etc/resource.cfg
+yum install nagios-plugins-all
+echo '$USER1$=/usr/lib64/nagios/plugins' > /opt/nagios/etc/resource.cfg
 systemctl restart nagios
 ````
 
@@ -160,31 +162,26 @@ For some reasons it can be useful  to run Nagios in foreground.
 
 You can do this with this command `/opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg`
 ````nohighlight
-root@xenial:/tmp/nagioscore-nagios-4.3.2# sudo -u nagios /bin/bash
-bash: /root/.bashrc: Keine Berechtigung
-nagios@xenial:/tmp/nagioscore-nagios-4.3.2$ /opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg
+[root@centos7 nagioscore-nagios-4.4.2]# sudo -u nagios /bin/bash
+bash-4.2$ /opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg
 
-Nagios Core 4.3.2
+Nagios Core 4.4.2
 Copyright (c) 2009-present Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
-Last Modified: 2017-05-09
+Last Modified: 2018-08-16
 License: GPL
 
 Website: https://www.nagios.org
-Nagios 4.3.2 starting... (PID=20972)
-Local time is Wed May 17 21:04:54 CEST 2017
-nerd: Channel hostchecks registered successfully
-nerd: Channel servicechecks registered successfully
-nerd: Channel opathchecks registered successfully
-nerd: Fully initialized and ready to rock!
+Nagios 4.4.2 starting... (PID=26147)
+Local time is Fri Aug 31 16:58:26 UTC 2018
 wproc: Successfully registered manager as @wproc with query handler
-wproc: Registry request: name=Core Worker 20973;pid=20973
-wproc: Registry request: name=Core Worker 20974;pid=20974
-wproc: Registry request: name=Core Worker 20976;pid=20976
-wproc: Registry request: name=Core Worker 20975;pid=20975
-Successfully launched command file worker with pid 20977
+wproc: Registry request: name=Core Worker 26151;pid=26151
+wproc: Registry request: name=Core Worker 26148;pid=26148
+wproc: Registry request: name=Core Worker 26149;pid=26149
+wproc: Registry request: name=Core Worker 26150;pid=26150
+Successfully launched command file worker with pid 26152
 ^C
-nagios@xenial:/tmp/nagioscore-nagios-4.3.2$
+bash-4.2$
 ````
 
 ---

@@ -90,7 +90,8 @@ yum group install "Development Tools"</pre>
           </li>
           <li ng-if="selectedOs == 'centos7'">
               <b>Start Gearman-Job-Server on system boot</b>
-              <pre>systemctl enable gearmand</pre>
+              <pre>systemctl enable gearmand
+systemctl start gearmand</pre>
           </li>
           <li>
               <b>Download and Install Statusengine Broker Module</b>

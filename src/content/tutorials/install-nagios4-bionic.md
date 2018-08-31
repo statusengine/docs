@@ -7,6 +7,7 @@ description: "In this tutorial I show you, how to install Nagios Core by yoursel
 Related topics:
 
 - <a href="{{ site.url }}/tutorials/install-nagios4">Install Nagios Core on Ubuntu Xenial 16.04</a>
+- <a href="{{ site.url }}/tutorials/install-nagios4-centos7">Install Nagios Core on CentOS 7.5</a>
 
 
 ## Prepare your system

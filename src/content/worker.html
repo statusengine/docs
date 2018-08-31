@@ -469,6 +469,7 @@ echo "0 1 * * * /opt/statusengine/worker/bin/Console.php cleanup -q" > /etc/cron
 
 <section id="how-to-update" class="doc-section">
   <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+  <p>Make sure you have installed the php extension <code>bcmath</code>. You can check if the extension is loaded using this command: <code>php -m |grep bcmath</code>.</p>
   <p>
       If you had installed Statusengine through <code>git</code>, the update will be done quickly.
       

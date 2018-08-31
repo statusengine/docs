@@ -1,13 +1,14 @@
 ---
 layout: "page"
-title: "Install Naemon Core on Ubuntu 16.04"
-description: "In this tutorial I show you, how to install Naemon Core by yourself"
+title: "Install Naemon Core on CentOS 7.5"
+description: "In this tutorial I show you, how to install Naemon Core by yourself on CentOS 7.5"
 ---
 
 Related topics:
 
+
+- <a href="{{ site.url }}/tutorials/install-naemon">Install Naemon Core on Ubuntu Xenial 16.04</a>
 - <a href="{{ site.url }}/tutorials/install-naemon-bionic">Install Naemon Core on Ubuntu Bionic 18.04</a>
-- <a href="{{ site.url }}/tutorials/install-naemon-centos7">Install Naemon Core on CentOS 7.5</a>
 
 ## Prepare your system
 In this how to, we are going to install all files to `/opt/naemon`.
@@ -17,33 +18,34 @@ If you want to delete Naemon Core, just remove this folder and the systemd confi
 All commands needs to run as user `root` or via `sudo`.
 
 ````bash
-addgroup --system naemon
-adduser --system naemon
-adduser naemon naemon
+useradd -r naemon
 ````
 
 ## Install dependencies
 
 ````nohighlight
-apt-get update
-apt-get install build-essential automake gperf help2man libtool libglib2.0-dev
+yum install epel-release
+yum check-update
+
+yum group install "Development Tools"
+yum install glib2-devel help2man gperf wget
 ````
 
 ## Download and install Naemon Core
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Naemon 1.0.6. Check if there is
+        In this how to I use Naemon 1.0.8. Check if there is
         <a href="https://github.com/naemon/naemon-core/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/naemon/naemon-core/archive/v1.0.6.tar.gz
-tar xfv v1.0.6.tar.gz
-cd naemon-core-1.0.6/
+wget https://github.com/naemon/naemon-core/archive/v1.0.8.tar.gz
+tar xfv v1.0.8.tar.gz
+cd naemon-core-1.0.8/
 
-./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins
+./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib64/nagios/plugins
 make all
 make install
 
@@ -73,9 +75,11 @@ Copy the following to the file `/lib/systemd/system/naemon.service` using your f
         <br />
         To configure this, replace the <i>AFTER=</i> line in the following systemd configuration
         with this:
-        <pre>After=network.target gearman-job-server.service</pre>
+        <pre>After=network.target gearmand.service</pre>
         If not already done, install the Gearman Job Server now!
-        <pre>apt-get install gearman-job-server</pre>
+        <pre>yum install gearmand
+systemctl enable gearmand
+systemctl start gearmand</pre>
     </p>
 </div>
 
@@ -109,28 +113,23 @@ systemctl start naemon
 
 Now you can check if your Naemon Core is running using `systemctl status naemon`:
 ````nohighlight
-root@xenial:/tmp/naemon-core-1.0.6# systemctl status naemon
+[root@centos7 naemon-core-1.0.8]# systemctl status naemon
 ● naemon.service - Naemon Monitoring Daemon
-   Loaded: loaded (/lib/systemd/system/naemon.service; disabled; vendor preset: enabled)
-   Active: active (running) since Mi 2017-05-17 20:04:29 CEST; 11s ago
+   Loaded: loaded (/usr/lib/systemd/system/naemon.service; disabled; vendor preset: disabled)
+   Active: active (running) since Fr 2018-08-31 16:19:30 UTC; 1min 48s ago
      Docs: http://naemon.org/documentation
-  Process: 15888 ExecStart=/opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
-  Process: 15885 ExecStartPre=/opt/naemon/bin/naemon --verify-config /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
- Main PID: 15890 (naemon)
-    Tasks: 6
-   Memory: 1.4M
-      CPU: 12ms
+ Main PID: 23768 (naemon)
    CGroup: /system.slice/naemon.service
-           ├─15890 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
-           ├─15891 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15892 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15893 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─15894 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           └─15895 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+           ├─23768 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+           ├─23769 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─23770 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─23771 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           ├─23772 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+           └─23773 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
 
-Mai 17 20:04:29 xenial systemd[1]: Starting Naemon Monitoring Daemon...
-Mai 17 20:04:29 xenial systemd[1]: Started Naemon Monitoring Daemon.
-root@xenial:/tmp/naemon-core-1.0.6#
+Aug 31 16:19:30 centos7 systemd[1]: Starting Naemon Monitoring Daemon...
+Aug 31 16:19:30 centos7 systemd[1]: Started Naemon Monitoring Daemon.
+[root@centos7 naemon-core-1.0.8]#
 ````
 To make sure that you Naemon will start automatically on boot, you need to
 enable the systemd configuration:
@@ -138,11 +137,11 @@ enable the systemd configuration:
 systemctl enable naemon.service
 ````
 
-## Install Monitoring Plugins
+## Install Nagios Plugins
 By default, Naemon will install a sample config with some basic checks.
-So you need to install the `monitoring plugins` to get them to work.
+So you need to install the `nagios plugins` to get them to work.
 ````nohighlight
-apt-get install monitoring-plugins
+yum install nagios-plugins-all
 ````
 
 ## Setup Logrotate
@@ -171,32 +170,26 @@ For some reasons it can be useful  to run Naemon in foreground.
 
 You can do this with this command `/opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg`
 ````nohighlight
-root@xenial:/opt/naemon# sudo -u naemon /bin/bash
-naemon@xenial:~$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
+[root@centos7 naemon-core-1.0.8]# sudo -u naemon /bin/bash
+bash-4.2$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
 
-Naemon Core 1.0.6-source
+Naemon Core 1.0.8.source
 Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
 Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
 License: GPL
 
 Website: http://www.naemon.org
-Naemon 1.0.6-source starting... (PID=1323)
-Local time is Wed May 17 20:34:50 CEST 2017
+Naemon 1.0.8.source starting... (PID=24215)
+Local time is Fri Aug 31 16:22:56 UTC 2018
 qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
 nerd: Channel hostchecks registered successfully
 nerd: Channel servicechecks registered successfully
 nerd: Fully initialized and ready to rock!
-wproc: Successfully registered manager as @wproc with query handler
-wproc: Registry request: name=Core Worker 1325;pid=1325
-wproc: Registry request: name=Core Worker 1327;pid=1327
-wproc: Registry request: name=Core Worker 1326;pid=1326
-wproc: Registry request: name=Core Worker 1324;pid=1324
-Successfully launched command file worker with pid 1328
+Successfully launched command file worker with pid 24220
 ^CCaught 'Interrupt', shutting down...
-Successfully shutdown... (PID=1323)
+Successfully shutdown... (PID=24215)
 Event broker module 'NERD' deinitialized successfully.
-Warning: Cannot open log file '(null)' for writing
-Successfully reaped command worker (PID = 1328)
-naemon@xenial:~$
+Successfully reaped command worker (PID = 24220)
+bash-4.2$
 ````
