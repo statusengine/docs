@@ -10,6 +10,9 @@
                 {% if link.name == page.title %}
                     {% set active = 'active' %}
                     {% set angle = 'down' %}
+                {% elseif link.name == 'Misc' and page.title == 'Statusengine miscellaneous information' %}
+                    {% set active = 'active' %}
+                    {% set angle = 'down' %}
                 {% endif %}
                 {% if link.anchors|length > 0 %}
                     {% set tree = 'treeview' %}
