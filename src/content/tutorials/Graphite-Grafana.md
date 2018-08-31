@@ -3,6 +3,16 @@ layout: "page"
 title: "Install Graphite and Grafana Ubuntu 16.04"
 description: "How to install Graphite and Grafana Ubuntu Xenial"
 ---
+Related topics:
+
+- <a href="{{ site.url }}/tutorials/Grafana-Bionic">Install Grafana on Ubuntu 18.04</a>
+
+**Why is this guide not ported to Ubuntu 18.04?**
+
+At my latest tests the package `graphite-web` was broken and Apache run into Python errors. I will update the tutorial as soon as I know a (non docker based!) workaround for this issues.
+
+---
+
 In this tutorial I'm going to use MySQL as database for Graphite
 and Whisper files as database for the performance data.
 
@@ -16,7 +26,7 @@ All commands needs to run as user `root` or via `sudo`.
 
 First of all, we need to install some dependencies
 ````nohighlight
-apt-get install graphite-web graphite-carbon mysql-server python-mysqldb  python-pymysql apache2 libapache2-mod-wsgi apt-transport-https ssl-cert
+apt-get install graphite-web graphite-carbon mysql-server python-mysqldb python-pymysql apache2 libapache2-mod-wsgi apt-transport-https ssl-cert
 ````
 
 #### Create a MySQL User and Database for Graphite

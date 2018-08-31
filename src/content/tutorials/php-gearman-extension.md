@@ -10,6 +10,11 @@ description: "In this tutorial I show you, how to install the php gearman extens
 apt-get install php5-gearman
 ````
 
+#### Ubuntu 18.04 (Bionic)
+````nohighlight
+apt-get install php-gearman
+````
+
 #### Ubuntu 16.04 (Xenial)
 Unfortunately the php-gearman extension is missing in Ubuntu 16.04.
 

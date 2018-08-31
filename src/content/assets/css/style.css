@@ -85,3 +85,16 @@
     background-color: #f9f9f9;
 }
 
+.lineh {
+    color: #777777;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #777777;
+    line-height: 0.1em;
+    margin: 10px 0 20px;
+}
+
+.lineh span {
+    background:#fff;
+    padding:0 10px;
+}

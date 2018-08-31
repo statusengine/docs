@@ -3,6 +3,11 @@ layout: "page"
 title: "Store Nagios or Naemon Performance Data to Elasticsearch 5.x"
 description: "How To store Nagios or Naemon Performance Data to Elasticsearch 5.x using Statusengine"
 ---
+
+Related topics:
+
+- <a href="{{ site.url }}/tutorials/Elasticsearch6-Perfdata-Backend">Store Nagios or Naemon Performance Data to Elasticsearch 6.x</a>
+
 In this tutorial, we are going to configure your system, to store Nagios and Naemon Performance Data into an Elasticsearch Cluster.
 
 In addition, I will show you, how to use this data via Statusengine UI and Grafana.

@@ -4,6 +4,7 @@ title: "Broker Module"
 list_mode: false
 ---
 
+<div ng-controller="BrokerController">
 <section id="overview" class="doc-section">
   <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
   <p>
@@ -21,7 +22,7 @@ list_mode: false
 </section>
 
 <section id="scale-out-to-multiple-nodes" class="doc-section">
-  <h2 class="page-header"><a href="#scale-out-to-multiple-nodes" class="anchor">Scale out to Multiple Nodes</a></h2>
+  <h2 class="page-header"><a href="#scale-out-to-multiple-nodes" class="anchor">Scale out to Multiple Nodes (if required)</a></h2>
   <p>
       I would recommend you, to split your monitoring node if you reach 50.000 services.
       This highly depends on your hardware and check interval but just as a rough idea.
@@ -51,7 +52,7 @@ list_mode: false
       </ul>
       Did not have a running installation yet?
       Check the tutorials for
-      <a href="{{ site.url }}/tutorials/install-naemon">Naemon</a>
+      <a href="{{ site.url }}/tutorials/install-naemon-bionic">Naemon</a>
       or
       <a href="{{ site.url }}/tutorials/install-nagios4">Nagios</a>
   </p>
@@ -59,15 +60,43 @@ list_mode: false
 
 <section id="installation" class="doc-section">
   <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
+  
+  <p>
+      Please select your operating system first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
+      <div class="form-group">
+          <label>Operating system</label>
+          <select class="form-control" ng-model="selectedOs">
+              <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
+              <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
+              <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="centos7">CentOS 7.5</option>
+          </select>
+      </div>
+  </p>
+  
+  <div>
   <p>
       <ol>
-          <li>
-              <b>Install dependencies</b>
-              <pre>apt-get install gearman-job-server libgearman-dev gearman-tools uuid-dev libjson-c-dev manpages-dev build-essential libglib2.0-dev</pre>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Load EPEL Repository and install CentOS dependencies</b>
+              <pre>yum install epel-release
+yum check-update
+
+yum group install "Development Tools"</pre>
           </li>
           <li>
-              <b>Download and Install</b>
-              <pre>git clone https://github.com/statusengine/module.git
+              <b>Install dependencies</b>
+              <pre>{[{commands[selectedOs].dependencies}]}</pre>
+          </li>
+          <li ng-if="selectedOs == 'centos7'">
+              <b>Start Gearman-Job-Server on system boot</b>
+              <pre>systemctl enable gearmand
+systemctl start gearmand</pre>
+          </li>
+          <li>
+              <b>Download and Install Statusengine Broker Module</b>
+              <pre>cd /tmp
+git clone https://github.com/statusengine/module.git module
 cd module/
 make all
 
@@ -103,17 +132,21 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
                   <div class="callout callout-warning">
                       <h4>Attention Nagios users</h4>
                       <p>
-                          Due to a bug, you should disable processing of log entries via <pre><code class="ini hljs">use_log_data=0</code></pre> to avoid issues on restart or stop of Nagios process.
+                          If you are using a Nagios version &lt; 4.4.0 and systemd, you should disable processing of log entries via
+                          <pre><code class="ini hljs">use_log_data=0</code></pre>
+                          to avoid issues on restart or stop of Nagios process.
                       </p>
                   </div>
               </p>
           </li>
           <li>
               <b>Restart your Monitoring Tool</b>
-              <pre>systemctl restart naemon</pre>
+              <pre>{[{commands[selectedOs].restartMonitoring}]}</pre>
           </li>
       </ol>
   </p>
+  </div>
+  
 </section>
 
 
@@ -272,6 +305,28 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
           </div>
           
           <div class="row">
+              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_list</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">
+                  A list of Gearman-Job-Servers separated by comma as failover servers.
+                  <code>gearman_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+
+          <div class="row myOdd">
+              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_dup_server_list</div>
+              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+              <div class="col-xs-12 col-sm-12 col-lg-4">
+                  A list of Gearman-Job-Servers separated by comma. All records will be pushed to all servers.
+                  <code>gearman_dup_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+          </div>
+          
+          <div class="row">
               <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
               <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
               <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
@@ -350,6 +405,13 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
               <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
               <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
           </div>
+      </div>
+      
+      <div class="callout callout-warning">
+          <h4>Only use ip addresses!</h4>
+          <p>
+              Due to a bug in the german library you should only use ip addresses to connect to a Gearman-Job-Server. Do not use host names like <code>localhost</code>!
+          </p>
       </div>
   </p>
 </section>
@@ -457,8 +519,7 @@ apt-get install jq
 </pre>
 
     This example will print one job to the shell and exit
-<pre ><code class="bash hljs">
-#!/bin/bash
+<pre ><code class="bash hljs">#!/bin/bash
 gearman -w -c 1 -f statusngin_ocsp | jq .
 </code></pre>
     </p>
@@ -472,6 +533,18 @@ gearman -w -c 1 -f statusngin_ocsp | jq .
         .
     </p>
 
+</section>
+
+<section id="how-to-update" class="doc-section">
+  <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+  <p>
+      If you want to update to a new version of the Statusengine event broker, create a backup of your currently
+      installed version first.
+      <br /><br />
+      Stop your monitoring engine like: <code>systemctl stop naemon</code>.
+      <br /><br />
+      Than repeat the <a href="#installation">installation steps</a>.
+  </p>
 </section>
 
 <section id="debug-broker-module" class="doc-section">
@@ -494,7 +567,7 @@ statusngin_statechanges          0       0       0
 statusngin_hostchecks            1       0       0
 statusngin_logentries            4       0       0
 </pre>
-    In this example just to broker module put data into the queue but no process is consuming
+    In this example broker module put data into the queue but no process is consuming
     the provided data (0 connected workers).
     <br />
     So the broker modules works fine.
@@ -534,3 +607,5 @@ Successfully launched command file worker with pid 22705
       </pre>
   </p>
 </section>
+
+</div>

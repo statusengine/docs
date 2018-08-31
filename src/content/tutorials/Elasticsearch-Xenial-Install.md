@@ -3,6 +3,12 @@ layout: "page"
 title: "Install Elasticsearch 5.x on Ubuntu 16.04"
 description: "How to install Elasticsearch 5.x on Ubuntu Xenial"
 ---
+
+Related topics:
+
+- <a href="{{ site.url }}/tutorials/Elasticsearch-Bionic-Install">Install Elasticsearch 6.x on Ubuntu 18.04</a>
+
+
 In this tutorial I'm going to show you, how to install Elasticsearch 5.x on your Ubuntu Xenial (16.04) Linux box.
 
 **Before you start! Please take a look at the official documentation!
@@ -11,8 +17,8 @@ In this tutorial I'm going to show you, how to install Elasticsearch 5.x on your
 All commands needs to run as user `root` or via `sudo`.
 
 ## Requirements
-Elasticsearch 5.x requires Java 8 or later. If you don't have Java installed yet -
-[follow this guide](/tutorials/oracle-java).
+**Elasticsearch 5.x requires Java 8 or later. If you don't have Java installed yet -
+[follow this guide](/tutorials/oracle-java).**
 
 The Elasticsearch APT repository is using HTTPS. For this reason, you need to install the following package.
 ````nohighlight
