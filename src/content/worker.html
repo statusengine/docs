@@ -144,8 +144,7 @@ composer install
       Did not have a running MySQL server yet? Check the <a href="{{ site.url }}/tutorials/mysql-ubuntu">How To</a>.
       <br />
       Create a MySQL database and user for Statusengine
-<pre ><code class="sql hljs">
-CREATE USER 'statusengine'@'localhost' IDENTIFIED BY 'password';
+<pre ><code class="sql hljs">CREATE USER 'statusengine'@'localhost' IDENTIFIED BY 'password';
 CREATE DATABASE IF NOT EXISTS `statusengine` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 GRANT ALL PRIVILEGES ON `statusengine`.* TO 'statusengine'@'localhost';
 </code></pre>
@@ -246,7 +245,9 @@ mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
        <ul>
            <li><a href="/tutorials/CrateDB-Perfdata-Backend">CrateDB</a></li>
            <li><a href="/tutorials/MySQL-Perfdata-Backend">MySQL</a></li>
-           <li><a href="/tutorials/Elasticsearch-Perfdata-Backend">Elasticsearch</a></li>
+           <li><a href="/tutorials/Elasticsearch-Perfdata-Backend">Elasticsearch 5.x</a>
+               /
+           <a href="/tutorials/Elasticsearch6-Perfdata-Backend">Elasticsearch 6.x</a></li>
            <li><a href="/tutorials/Graphite-Grafana">Graphite</a></li>
        </ul>
   </p>

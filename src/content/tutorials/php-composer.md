@@ -6,7 +6,7 @@ description: "How to install PHP Composer on Ubuntu Linux."
 
 ## Installation
 ````nohighlight
-apt-get install php7.0-cli
+apt-get install php-cli
 curl -o composer-setup.php  https://getcomposer.org/installer
 ````
 <div class="callout callout-danger">

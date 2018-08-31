@@ -19,7 +19,7 @@ All commands needs to run as user `root` or via `sudo`.
 
 ## Recommended
 - [Statusengine UI](/ui)
-- [Grafana](/tutorials/Graphite-Grafana) (You can skip the Graphite part.)
+- [Grafana](/tutorials/Grafana-Bionic)
 
 
 #### Configure Statusengine Broker Module to export performance data
