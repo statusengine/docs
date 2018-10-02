@@ -8,18 +8,16 @@ list_mode: false
 <section id="overview" class="doc-section">
   <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
   <p>
-      The Statusengine Broker Module is a small C++ dynamic library (so) that gets loaded into
+      The Statusengine Broker Module is a small C binary that gets loaded into
       your Naemon or Nagios Core.
       <br /><br />
-      It will grab all status information, encode them as JSON,
-      and put them into RabbitMQ Queues or the Gearman Job Server. Furthermore it can read commands
-      and check results from the Queues, so you can easily exchange status information between nodes,
-      for example if you want to create a satellite setup or as an alternative to run external commands.
+      It will grab all status and configuration information, encode them as JSON,
+      and put them into the Gearman Job Server.
       <br />
-      Due to the queuing engine (RabbitMQ/Gearman) your Monitoring Core will not get blocked by an slow
+      Due to the queuing engine (Gearman) your Monitoring Core will not get blocked by an slow
       database or disk io issues.
       <br />
-      <b>It is highly recommended to run the Gearman Job Server on the same node as the monitoring core</b>
+      <b>It is highly recommended to run the Gearman Job Server on the same node as the monitoring core.</b>
   </p>
 </section>
 
@@ -29,12 +27,12 @@ list_mode: false
       I would recommend you, to split your monitoring node if you reach 50.000 services.
       This highly depends on your hardware and check interval but just as a rough idea.
       <br />
-      Depending of your monitoring configuration this can be a challenging task.
+      Depanding of your monitoring configuration this can be a challenging task.
       <br />
       For large environments I would recommand to use a config generator or something similar.
       <br />
       Once you have done splitting your configuration, you can deploy a new node with Naemon or Nagios
-      , RabbitMQ (or Gearman) as Queue and load the Statusengine Broker Module.
+      , Gearman as Queue and load the Statusengine Broker Module.
       <br />
       The Statusengine UI comes with support for multiple nodes, so you will see all monitored devices in one interface.
   </p>
@@ -45,14 +43,13 @@ list_mode: false
   <p>
       <b>Naemon:</b>
       <ul>
-          <li>Naemon > 1.0.8</li>
+          <li>Naemon > 1.0.1</li>
       </ul>
 
       <b>Nagios:</b>
       <ul>
-          <li>Nagios > 4.3.2</li>
+          <li>Nagios > 4.0.1</li>
       </ul>
-      <b>Usually the latest broker version only supports the latest Naemon/Nagios version.</b>
       Did not have a running installation yet?
       Check the tutorials for
       <a href="{{ site.url }}/tutorials/install-naemon-bionic">Naemon</a>
@@ -65,7 +62,7 @@ list_mode: false
   <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
   
   <p>
-      Please select your operating system and monitoring core first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
+      Please select your operating system first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
       <div class="form-group">
           <label>Operating system</label>
           <select class="form-control" ng-model="selectedOs">
@@ -74,21 +71,6 @@ list_mode: false
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
               <option value="centos7">CentOS 7.5</option>
           </select>
-      </div>
-      <div class="form-group">
-        <label>Monitoring Core</label>
-        <select class="form-control" ng-model="selectedCore">
-            <option value="naemon">Naemon</option>
-            <option value="nagios">Nagios</option>
-        </select>
-      </div>
-      <div class="form-group">
-            <label>Queue Backend</label>
-            <select class="form-control" ng-model="selectedQueue">
-                <option value="rabbitmq">RabbitMQ</option>
-                <option value="gearman">Gearman</option>
-                <option value="both">Both</option>
-            </select>
       </div>
   </p>
   
@@ -104,37 +86,57 @@ yum group install "Development Tools"</pre>
           </li>
           <li>
               <b>Install dependencies</b>
-              <pre>{[{commands[selectedOs].dependencies}]} {[{commands[selectedOs].queueDep[selectedQueue]}]}</pre>
+              <pre>{[{commands[selectedOs].dependencies}]}</pre>
           </li>
           <li ng-if="selectedOs == 'centos7'">
               <b>Start Gearman-Job-Server on system boot</b>
               <pre>systemctl enable gearmand
 systemctl start gearmand</pre>
           </li>
-          <li ng-if="selectedCore == 'naemon'">
-              <b>Let pkgconfig find the naemon library</b>
-              <p>If you followed the installation for naemon tutorial on this site you probably didn't install naemon to /usr or /usr/local. If you you must copy or symlink the pkgconfig configuration file to a path where pkg-config can find it.</p>
-              <pre>ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
-# Replace /opt/naemon to the prefix specified in the configure command of your naemon installation if necessary
-</pre>
-          </li>
           <li>
               <b>Download and Install Statusengine Broker Module</b>
               <pre>cd /tmp
-git clone https://github.com/statusengine/broker.git broker
-mkdir -p broker/build
-cd broker/build
-cmake {[{seConfiguration[selectedCore].cmake}]} {[{seConfiguration[selectedCore].cmakeQueue[selectedQueue]}]} ..
-# Replace {[{seConfiguration[selectedCore].prefix}]} to the prefix specified in the configure command of your {[{selectedCore}]} installation if necessary
-make
-make install # this copies the libstatusengine.so to {[{seConfiguration[selectedCore].lib}]}
+git clone https://github.com/statusengine/module.git module
+cd module/
+make all
+
+mkdir -p /opt/statusengine/module
+cp src/bin/naemon/statusengine-1-0-5.o /opt/statusengine/module/statusengine-naemon-1-0-5.o
+cp src/bin/naemon/statusengine.o /opt/statusengine/module/statusengine-naemon.o
+cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
 </pre>
           </li>
           <li>
               <b>Load the Broker Module</b>
               <p>
-                  Add the following line to your {[{selectedCore}]}.cfg (Usually {[{seConfiguration[selectedCore].coreConf}]})
-                  <pre><code ng-if="selectedCore == 'naemon'" class="ini hljs">broker_module={[{seConfiguration['naemon'].lib}]} {[{seConfiguration['naemon'].path}]}</code><code ng-if="selectedCore == 'nagios'" class="ini hljs">broker_module={[{seConfiguration['nagios'].lib}]} {[{seConfiguration['nagios'].path}]}</code></pre>
+                  For <b>Naemon > 1.0.1</b> add the following to your <code>naemon.cfg</code>
+                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon.o</code></pre>
+              </p>
+              <p>
+                  For <b>Naemon >= 1.0.5</b> add the following to your <code>naemon.cfg</code>
+                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o</code></pre>
+              </p>
+              <p>
+                  For <b>Nagios > 4.0.1</b> add the following to your <code>nagios.cfg</code>
+                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-nagios.o</code></pre>
+              </p>
+              <p>
+                  <div class="callout callout-info">
+                      <h4>Recommended Broker Options to use with Statusengine UI</h4>
+                      <p>
+                          <pre><code class="ini hljs">use_process_data=0 use_system_command_data=0 use_comment_data=0 use_external_command_data=0 use_flapping_data=0 use_notification_data=0 use_program_status_data=0 use_contact_status_data=0 use_contact_notification_data=0 use_event_handler_data=0 use_object_data=0 use_restart_data=1 use_service_perfdata=1</code></pre>
+                      </p>
+                  </div>
+              </p>
+              <p>
+                  <div class="callout callout-warning">
+                      <h4>Attention Nagios users</h4>
+                      <p>
+                          If you are using a Nagios version &lt; 4.4.0 and systemd, you should disable processing of log entries via
+                          <pre><code class="ini hljs">use_log_data=0</code></pre>
+                          to avoid issues on restart or stop of Nagios process.
+                      </p>
+                  </div>
               </p>
           </li>
           <li>
@@ -148,8 +150,8 @@ make install # this copies the libstatusengine.so to {[{seConfiguration[selected
 </section>
 
 
-<section id="broker-configuration" class="doc-section">
-  <h2 class="page-header"><a href="#broker-configuration" class="anchor">Broker Configuration</a></h2>
+<section id="broker-options" class="doc-section">
+  <h2 class="page-header"><a href="#broker-options" class="anchor">Broker Options</a></h2>
   <p>
       By default the Statusengine Event Broker Module will write every event data to the Gearman Job Server.
       <br />

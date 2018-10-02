@@ -56,7 +56,8 @@ bing_verify:
 # Page menus
 top_menu:
     - { name: Getting Started, url: "/getting_started", icon: "fa fa-play", anchors: ["Overview", "Components", "Requirements", "Quick start", "Performance data"] }
-    - { name: Broker Module, url: "/broker", icon: "fa fa-cogs", anchors: ["Overview", "Scale out to Multiple Nodes", "Supported Monitoring Tools", "Installation", "Broker Options", "OCSP and OCHP", "How to update", "Debug Broker Module"] }
+    - { name: Broker Module, url: "/broker", icon: "fa fa-cogs", anchors: ["Overview", "Scale out to Multiple Nodes", "Supported Monitoring Tools", "Installation", "Broker Configuration", "OCSP and OCHP", "How to update", "Debug Broker Module"] }
+    - { name: Broker Module (old), url: "/broker_old", icon: "fa fa-cogs", anchors: ["Overview", "Scale out to Multiple Nodes", "Supported Monitoring Tools", "Installation", "Broker Options", "OCSP and OCHP", "How to update", "Debug Broker Module"] }
     - { name: Worker, url: "/worker", icon: "fa fa-spinner", anchors: ["Overview", "Scale out to Multiple Nodes", "Requirements", "Installation", "Database", "Configuration", "Configure Performance Data", "Start Statusengine Worker", "Cleanup database", "Manage Cluster Nodes", "Get Metrics", "In-memory", "How to update", "Debugging"] }
     - { name: Statusengine UI, url: "/ui", icon: "fa fa-desktop", anchors: ["Overview", "Features", "Installation", "Configuration", "First user", "HTTPS", "Apache Example Config", "Nginx Example Config", "PHP built-in server", "Manage users", "Ui Settings", "How to update"] }
     - { name: Tutorials, url: "/tutorials", icon: "fa fa-graduation-cap", anchors: [] }
