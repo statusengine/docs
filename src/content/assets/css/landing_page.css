@@ -94,3 +94,14 @@ fieldset[disabled] .btn-dark.active {
     font-weight: 700;
     text-transform: uppercase;
 }
+
+.jetbrains-support {
+    color: #828282;
+    background-color: #000;
+    padding: 15px;
+}
+
+.jetbrains-logo{
+    padding-top: 15px;
+    width: 120px;
+}
