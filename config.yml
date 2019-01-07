@@ -64,4 +64,4 @@ top_menu:
     - { name: Demo, url: "https://demo.statusengine.org", icon: "fa fa-desktop", anchors: [] }
     - { name: Roadmap, url: "/roadmap", icon: "fa fa-map-marker", anchors: [] }
     - { name: Old Stable (2.x), url: "/oldstable", icon: "fa fa-code", anchors: [] }
-    - { name: Misc, url: "/misc", icon: "fa fa-folder-open-o", anchors: ["Logos"] }
+    - { name: Misc, url: "/misc", icon: "fa fa-folder-open-o", anchors: ["3rd party extensions", "Logos"] }
