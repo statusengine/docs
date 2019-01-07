@@ -45,12 +45,12 @@ list_mode: false
   <p>
       <b>Naemon:</b>
       <ul>
-          <li>Naemon > 1.0.8</li>
+          <li>Naemon >= 1.0.8</li>
       </ul>
 
       <b>Nagios:</b>
       <ul>
-          <li>Nagios > 4.3.2</li>
+          <li>Nagios >= 4.3.2</li>
       </ul>
       <b>Usually the latest broker version only supports the latest Naemon/Nagios version.</b>
       Did not have a running installation yet?
@@ -107,7 +107,7 @@ systemctl start gearmand</pre>
               </p>
               <p>
                   Please download the release from github for your distribution or build it with the instructions in the README.
-                  Extract the file libstatusengine.so to /opt/statusengine/lib/libstatusengine.so or somewhere else where naemon/nagios can find it.
+                  Extract the file libstatusengine.so to /opt/statusengine/lib/libstatusengine.so or somewhere else where naemon/nagios can read it.
               </p>
           </li>
       </ol>
@@ -120,13 +120,17 @@ systemctl start gearmand</pre>
   <h2 class="page-header"><a href="#broker-configuration" class="anchor">Broker Configuration</a></h2>
   <p>
       <p><b>Create statusengine.toml configuration file</b></p>
-      You can find an example configuration with comments working with the statusengine worker here: <a href="https://github.com/statusengine/broker/blob/master/statusengine.toml">https://github.com/statusengine/broker/blob/master/statusengine.toml</a>
-      You should copy the file to /opt/statusengine/etc/statusengine.toml or somewhere else where naemon/nagios can find it.
+      <p>You can find an example configuration with comments working with the statusengine worker here: <a href="https://github.com/statusengine/broker/blob/master/statusengine.toml">https://github.com/statusengine/broker/blob/master/statusengine.toml</a></p>
+      <p>You should copy the file to /opt/statusengine/etc/statusengine.toml or somewhere else where naemon/nagios can read it.</p>
   </p>
   <p>
       <p><b>Configure nagios/naemon to load the broker</b></p>
       To activate the broker you have to add a configuration line to your naemon.cfg/nagios.cfg:
       <pre><code class="ini">broker_module=/opt/statusengine/lib/libstatusengine.so /opt/statusengine/etc/statusengine.toml</code></pre>
+  </p>
+  <p>
+      <p><b>Restart nagios/naemon</b></p>
+      <pre><code>systemctl restart naemon</code></pre>
   </p>
 </section>
 
