@@ -65,3 +65,6 @@ top_menu:
     - { name: Roadmap, url: "/roadmap", icon: "fa fa-map-marker", anchors: [] }
     - { name: Old Stable (2.x), url: "/oldstable", icon: "fa fa-code", anchors: [] }
     - { name: Misc, url: "/misc", icon: "fa fa-folder-open-o", anchors: ["3rd party extensions", "Logos"] }
+
+show_in_more_top_menu: ["Roadmap", "Old Stable (2.x)", "Misc"]
+
