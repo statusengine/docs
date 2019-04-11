@@ -45,12 +45,12 @@ list_mode: false
   <p>
       <b>Naemon:</b>
       <ul>
-          <li>Naemon > 1.0.8</li>
+          <li>Naemon >= 1.0.8</li>
       </ul>
 
       <b>Nagios:</b>
       <ul>
-          <li>Nagios > 4.3.2</li>
+          <li>Nagios >= 4.3.2</li>
       </ul>
       <b>Usually the latest broker version only supports the latest Naemon/Nagios version.</b>
       Did not have a running installation yet?
@@ -76,31 +76,20 @@ list_mode: false
           </select>
       </div>
       <div class="form-group">
-        <label>Monitoring Core</label>
-        <select class="form-control" ng-model="selectedCore">
-            <option value="naemon">Naemon</option>
-            <option value="nagios">Nagios</option>
-        </select>
-      </div>
-      <div class="form-group">
             <label>Queue Backend</label>
             <select class="form-control" ng-model="selectedQueue">
                 <option value="rabbitmq">RabbitMQ</option>
                 <option value="gearman">Gearman</option>
-                <option value="both">Both</option>
             </select>
       </div>
   </p>
   
-  <div>
   <p>
       <ol>
           <li ng-if="selectedOs == 'centos7'">
               <b>Load EPEL Repository and install CentOS dependencies</b>
               <pre>yum install epel-release
-yum check-update
-
-yum group install "Development Tools"</pre>
+yum check-update</pre>
           </li>
           <li>
               <b>Install dependencies</b>
@@ -111,39 +100,18 @@ yum group install "Development Tools"</pre>
               <pre>systemctl enable gearmand
 systemctl start gearmand</pre>
           </li>
-          <li ng-if="selectedCore == 'naemon'">
-              <b>Let pkgconfig find the naemon library</b>
-              <p>If you followed the installation for naemon tutorial on this site you probably didn't install naemon to /usr or /usr/local. If you you must copy or symlink the pkgconfig configuration file to a path where pkg-config can find it.</p>
-              <pre>ln -s /opt/naemon/lib/pkgconfig/naemon.pc /usr/local/lib/pkgconfig/naemon.pc
-# Replace /opt/naemon to the prefix specified in the configure command of your naemon installation if necessary
-</pre>
-          </li>
           <li>
               <b>Download and Install Statusengine Broker Module</b>
-              <pre>cd /tmp
-git clone https://github.com/statusengine/broker.git broker
-mkdir -p broker/build
-cd broker/build
-cmake {[{seConfiguration[selectedCore].cmake}]} {[{seConfiguration[selectedCore].cmakeQueue[selectedQueue]}]} ..
-# Replace {[{seConfiguration[selectedCore].prefix}]} to the prefix specified in the configure command of your {[{selectedCore}]} installation if necessary
-make
-make install # this copies the libstatusengine.so to {[{seConfiguration[selectedCore].lib}]}
-</pre>
-          </li>
-          <li>
-              <b>Load the Broker Module</b>
               <p>
-                  Add the following line to your {[{selectedCore}]}.cfg (Usually {[{seConfiguration[selectedCore].coreConf}]})
-                  <pre><code ng-if="selectedCore == 'naemon'" class="ini hljs">broker_module={[{seConfiguration['naemon'].lib}]} {[{seConfiguration['naemon'].path}]}</code><code ng-if="selectedCore == 'nagios'" class="ini hljs">broker_module={[{seConfiguration['nagios'].lib}]} {[{seConfiguration['nagios'].path}]}</code></pre>
+                  You can find the latest release on github: https://github.com/statusengine/broker/releases
               </p>
-          </li>
-          <li>
-              <b>Restart your Monitoring Tool</b>
-              <pre>{[{commands[selectedOs].restartMonitoring}]}</pre>
+              <p>
+                  Please download the release from github for your distribution or build it with the instructions in the README.
+                  Extract the file libstatusengine.so to /opt/statusengine/lib/libstatusengine.so or somewhere else where naemon/nagios can read it.
+              </p>
           </li>
       </ol>
   </p>
-  </div>
   
 </section>
 
@@ -151,271 +119,23 @@ make install # this copies the libstatusengine.so to {[{seConfiguration[selected
 <section id="broker-configuration" class="doc-section">
   <h2 class="page-header"><a href="#broker-configuration" class="anchor">Broker Configuration</a></h2>
   <p>
-      By default the Statusengine Event Broker Module will write every event data to the Gearman Job Server.
-      <br />
-      Normally there is always data you will not need for example 'statusngin_externalcommands' or 'statusngin_systemcommands'
-      <br />
-      For large environments this unnecessary data will slow down your database and increase your disk I/O, so you can disable data using the broker options.
-      <br /><br />
-      To use one or more broker options, just add them in your monitoring config like in this example:
-      <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o use_external_command_data=0 use_system_command_data=1</code></pre>
+      <p><b>Create statusengine.toml configuration file</b></p>
+      <p>You can find an example configuration with comments working with the statusengine worker here: <a href="https://github.com/statusengine/broker/blob/master/statusengine.toml">https://github.com/statusengine/broker/blob/master/statusengine.toml</a></p>
+      <p>You should copy the file to /opt/statusengine/etc/statusengine.toml or somewhere else where naemon/nagios can read it.</p>
   </p>
   <p>
-      <b>List of available broker options:</b>
+      <p><b>Configure nagios/naemon to load the broker</b></p>
+      To activate the broker you have to add a configuration line to your naemon.cfg/nagios.cfg:
+      <pre><code class="ini">broker_module=/opt/statusengine/lib/libstatusengine.so /opt/statusengine/etc/statusengine.toml</code></pre>
   </p>
   <p>
-      <div class="container-fluid">
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Option name</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Affected queue</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-4"><span class="bold">Description</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Recommended to disable</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Deprecated</span></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_host_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hoststatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Hoststatus table</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_service_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicestatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Servicestatus table</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-          
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_service_check_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicechecks</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the servicechecks table</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_host_check_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hostchecks</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the hostchecks table</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_state_change_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_statechanges</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">If disabled, the table 'statehistory' for hosts and services will not get updated anymore</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_log_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_logentries</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Will update the table logentries</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_comment_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_comments</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not implemented yet</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_acknowledgement_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_acknowledgements</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">The message of acknowledgements will not be saved in the database anymore. Will not affect the 'problem_has_been_acknowledged' field in host-/servicestatus tables.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_downtime_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_downtimes</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Downtime information will be saved in the database anymore. Will not affect the 'scheduled_downtime_depth' field in host-/servicestatus tables.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_method_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationmethod</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Event that conains all notification data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">enable_ochp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ochp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_hostchecks. You can use this as alternative for the classic OCHP command</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">enable_ocsp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ocsp</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_servicechecks. You can use this as alternative for the classic OCSP command</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_restart_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_core_restart</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Tell Statusengine Worker that a restart of the Monitoring Core occurse</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No!</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_service_perfdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_service_perfdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Used by Statusengine Worker to process performance data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_addr</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Address of the Gearman-Job-Server (default: 127.0.0.1)</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_port</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Port of the Gearman-Job-Server (default: 4730)</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_list</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">
-                  A list of Gearman-Job-Servers separated by comma as failover servers.
-                  <code>gearman_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
-              </div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">gearman_dup_server_list</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">
-                  A list of Gearman-Job-Servers separated by comma. All records will be pushed to all servers.
-                  <code>gearman_dup_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
-              </div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"></div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_system_command_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_systemcommands</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_external_command_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_externalcommands</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_flapping_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_flappings</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_program_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_programmstatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_notification_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_notifications</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_status_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactstatus</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationdata</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-          
-          <div class="row">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_event_handler_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_eventhandler</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-
-          <div class="row myOdd">
-              <div class="col-xs-12 col-sm-12 col-lg-3">use_object_data</div>
-              <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_objects</div>
-              <div class="col-xs-12 col-sm-12 col-lg-4">Statusengine 3 don't save a dump of the monitoring configuration to the database anymore.</div>
-              <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
-              <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
-          </div>
-      </div>
-      
-      <div class="callout callout-warning">
-          <h4>Only use ip addresses!</h4>
-          <p>
-              Due to a bug in the german library you should only use ip addresses to connect to a Gearman-Job-Server. Do not use host names like <code>localhost</code>!
-          </p>
-      </div>
+      <p><b>Restart nagios/naemon</b></p>
+      <pre><code>systemctl restart naemon</code></pre>
   </p>
 </section>
 
-<section id="ocsp-and-ochp" class="doc-section">
-  <h2 class="page-header"><a href="#ocsp-and-ochp" class="anchor">OCSP and OCHP</a></h2>
+<section id="command-ocsp-and-ochp" class="doc-section">
+  <h2 class="page-header"><a href="#command-ocsp-and-ochp" class="anchor">Command, OCSP and OCHP</a></h2>
   <p>
       The default OCSP and OCHP allows you to run a command or script after a service or host check was executed.
       <br />

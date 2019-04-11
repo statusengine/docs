@@ -7,30 +7,27 @@ angular.module('StatusengineDocs')
 
         $scope.commands = {
             bionic: {
-                dependencies: 'apt-get install git libglib2.0-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev',
+                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu60 libjson-c3 libssl1.1 librabbitmq4 libgearman8',
                 restartMonitoring: 'systemctl restart naemon',
                 queueDep: {
-                    rabbitmq: 'rabbitmq-server librabbitmq-dev',
-                    gearman: 'gearman-job-server libgearman-dev',
-                    both: 'rabbitmq-server gearman-job-server libgearman-dev librabbitmq-dev'
+                    rabbitmq: 'rabbitmq-server',
+                    gearman: 'gearman-job-server'
                 }
             },
             xenial: {
-                dependencies: 'apt-get install git libglib2.0-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev',
+                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu55 libjson-c2 libssl1.0.0 librabbitmq4 libgearman7',
                 restartMonitoring: 'systemctl restart naemon',
                 queueDep: {
-                    rabbitmq: 'rabbitmq-server librabbitmq-dev',
-                    gearman: 'gearman-job-server libgearman-dev',
-                    both: 'rabbitmq-server gearman-job-server libgearman-dev librabbitmq-dev'
+                    rabbitmq: 'rabbitmq-server',
+                    gearman: 'gearman-job-server'
                 }
             },
             trusty: {
-                dependencies: 'apt-get install git libglib2.0-dev uuid-dev libicu-dev libjson-c-dev pkg-config libssl-dev',
+                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu52 libjson-c2 libssl1.0.0 librabbitmq1 libgearman7',
                 restartMonitoring: 'service naemon restart',
                 queueDep: {
-                    rabbitmq: 'rabbitmq-server librabbitmq-dev',
-                    gearman: 'gearman-job-server libgearman-dev',
-                    both: 'rabbitmq-server gearman-job-server libgearman-dev librabbitmq-dev'
+                    rabbitmq: 'rabbitmq-server',
+                    gearman: 'gearman-job-server'
                 }
             },
             centos7: {
@@ -39,35 +36,7 @@ angular.module('StatusengineDocs')
                 queueDep: {
                     rabbitmq: '#TODO',
                     gearman: '#TODO',
-                    both: '#TODO'
                 }
-            }
-        };
-
-        $scope.seConfiguration = {
-            naemon: {
-                cmake: '-DCMAKE_INSTALL_PREFIX:PATH=/opt/naemon',
-                cmakeQueue: {
-                    rabbitmq: '-DWITH_GEARMAN=OFF -DWITH_RABBITMQ=ON',
-                    gearman: '-DWITH_GEARMAN=ON -DWITH_RABBITMQ=OFF',
-                    both: ''
-                },
-                prefix: '/opt/naemon',
-                lib: '/opt/naemon/lib/libstatusengine.so',
-                path: '/opt/naemon/etc/statusengine.toml',
-                coreConf: '/opt/naemon/etc/naemon/naemon.cfg',
-            },
-            nagios: {
-                cmake: '-DCMAKE_INSTALL_PREFIX:PATH=/opt/nagios -DBUILD_NAGIOS=ON -DNAGIOS_INCLUDE_DIR=/opt/nagios/include',
-                prefix: '/opt/nagios',
-                lib: '/opt/nagios/lib/libstatusengine.so ',
-                path: '/opt/nagios/etc/statusengine.toml',
-                coreConf: '/opt/nagios/etc/nagios.cfg',
-                cmakeQueue: {
-                    rabbitmq: '-DWITH_GEARMAN=OFF -DWITH_RABBITMQ=ON',
-                    gearman: '-DWITH_GEARMAN=ON -DWITH_RABBITMQ=OFF',
-                    both: ''
-                },
             }
         };
 
