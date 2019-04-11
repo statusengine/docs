@@ -53,6 +53,7 @@ list_mode: false
           <li>Nagios >= 4.3.2</li>
       </ul>
       <b>Usually the latest broker version only supports the latest Naemon/Nagios version.</b>
+      <br/>
       Did not have a running installation yet?
       Check the tutorials for
       <a href="{{ site.url }}/tutorials/install-naemon-bionic">Naemon</a>
@@ -103,11 +104,14 @@ systemctl start gearmand</pre>
           <li>
               <b>Download and Install Statusengine Broker Module</b>
               <p>
-                  You can find the latest release on github: https://github.com/statusengine/broker/releases
+                  You can find the latest release on GitHub:
+                  <a href="https://github.com/statusengine/broker/releases" target="_blank">
+                      https://github.com/statusengine/broker/releases
+                  </a>
               </p>
               <p>
-                  Please download the release from github for your distribution or build it with the instructions in the README.
-                  Extract the file libstatusengine.so to /opt/statusengine/lib/libstatusengine.so or somewhere else where naemon/nagios can read it.
+                  Please download the release from GitHub for your distribution or build it with the instructions in the README.
+                  Extract the file libstatusengine.so to <code>/opt/statusengine/lib/libstatusengine.so</code> or somewhere else where Naemon/Nagios can read it.
               </p>
           </li>
       </ol>
@@ -120,16 +124,22 @@ systemctl start gearmand</pre>
   <h2 class="page-header"><a href="#broker-configuration" class="anchor">Broker Configuration</a></h2>
   <p>
       <p><b>Create statusengine.toml configuration file</b></p>
-      <p>You can find an example configuration with comments working with the statusengine worker here: <a href="https://github.com/statusengine/broker/blob/master/statusengine.toml">https://github.com/statusengine/broker/blob/master/statusengine.toml</a></p>
-      <p>You should copy the file to /opt/statusengine/etc/statusengine.toml or somewhere else where naemon/nagios can read it.</p>
+      <p>You can find an example configuration with comments working with the Statusengine worker here: <a href="https://github.com/statusengine/broker/blob/master/statusengine.toml">https://github.com/statusengine/broker/blob/master/statusengine.toml</a></p>
+      <p>You should copy the file to <code>/opt/statusengine/etc/statusengine.toml</code> or somewhere else where Naemon/Nagios can read it.</p>
   </p>
   <p>
-      <p><b>Configure nagios/naemon to load the broker</b></p>
-      To activate the broker you have to add a configuration line to your naemon.cfg/nagios.cfg:
+      <p><b>Download example statusengine.toml</b></p>
+<pre ><code class="bash hljs">mkdir -p /opt/statusengine/etc
+curl https://raw.githubusercontent.com/statusengine/broker/master/statusengine.toml > /opt/statusengine/etc/statusengine.toml
+</code></pre>
+  </p>
+  <p>
+      <p><b>Configure Naemon/Nagios to load the broker</b></p>
+      To activate the broker you have to add a configuration line to your <code>naemon.cfg</code> or <code>nagios.cfg</code>:
       <pre><code class="ini">broker_module=/opt/statusengine/lib/libstatusengine.so /opt/statusengine/etc/statusengine.toml</code></pre>
   </p>
   <p>
-      <p><b>Restart nagios/naemon</b></p>
+      <p><b>Restart Naemon/Nagios</b></p>
       <pre><code>systemctl restart naemon</code></pre>
   </p>
 </section>
