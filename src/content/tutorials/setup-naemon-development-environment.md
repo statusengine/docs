@@ -63,7 +63,7 @@ If you see the welcome message just minimize Eclipse for now.
 
 ````nohighlight
 sudo apt-get update
-sudo apt-get install build-essential automake gperf help2man libtool libglib2.0-dev gdb monitoring-plugins git
+sudo apt-get install build-essential automake gperf help2man libtool libglib2.0-dev gdb monitoring-plugins git valgrind
 ````
 
 ## Build a Basic Naemon configuration
@@ -338,6 +338,87 @@ As soon as the code reaches your Breakpoint you can debug as you are used to.
     <p>
         <center>
             <img src="{{ site.url }}/assets/img/tutorials/eclipse/23_breakpoint.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+### Setup Valgrind
+Valgrind is a powerful profiling tool which can also be integrated to Eclipse. It can be used to find memory leaks.
+
+Navigate to **Project** <i class="fa fa-arrow-right"></i> **Properties**  <i class="fa fa-arrow-right"></i> **Run/Debug Settings**
+ <i class="fa fa-arrow-right"></i> **New** <i class="fa fa-arrow-right"></i> **Profile With Valgrind**
+and click on **Search Project** and select the naemon binary.
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/24_create_valgrind_profile.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+Switch to the **Arguments** Tab and set `/home/$USERNAME$/naemon-dev/etc/naemon/naemon.cfg` as argument.
+
+**Replace $USERNAME$ with your user name.**
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/25_valgrid_profile_args.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+Switch to the **Valgrind Options** Tab. [Valgrind provides different profiling tools](https://www.eclipse.org/linuxtools/projectPages/valgrind/). I chosed `Massif` in my case.
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/26_valgrid_options_profile.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+Switch to the **Environment** Tab and create a new environment variable:
+
+Name: `LD_LIBRARY_PATH`
+
+Value: `/home/$USERNAME$/git/naemon-core/.libs:$LD_LIBRARY_PATH`
+
+**Replace $USERNAME$ with your user name.**
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/27_valgrid_env_var.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+#### Run Naemon-Core through Valgrind
+Switch you Launch Configuration to `Naemon Valgrind` and click on `Launch in Profile mode`
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/28_launch_config.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/29_launch_in_profile_mode.png" class="img-responsive" alt="Import code to Eclipse"/>
+        </center>
+    </p>
+</div>
+
+Let Naemon run in profiling mode for a few minutes. As soon as you stop Naemon you will get a heap allocation chart.
+
+<div class="container">
+    <p>
+        <center>
+            <img src="{{ site.url }}/assets/img/tutorials/eclipse/30_heap_allocation.png" class="img-responsive" alt="Import code to Eclipse"/>
         </center>
     </p>
 </div>
