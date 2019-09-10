@@ -101,6 +101,7 @@ cd module/
 make all
 
 mkdir -p /opt/statusengine/module
+cp src/bin/naemon/statusengine-1-1-0.o /opt/statusengine/module/statusengine-naemon-1-1-0.o
 cp src/bin/naemon/statusengine-1-0-5.o /opt/statusengine/module/statusengine-naemon-1-0-5.o
 cp src/bin/naemon/statusengine.o /opt/statusengine/module/statusengine-naemon.o
 cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
@@ -108,14 +109,18 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
           </li>
           <li>
               <b>Load the Broker Module</b>
-              <p>
+              <p class="text-muted">
                   For <b>Naemon > 1.0.1</b> add the following to your <code>naemon.cfg</code>
                   <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon.o</code></pre>
               </p>
-              <p>
-                  For <b>Naemon >= 1.0.5</b> add the following to your <code>naemon.cfg</code>
+              <p class="text-muted">
+                For <b>Naemon >= 1.0.5</b> add the following to your <code>naemon.cfg</code>
                   <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o</code></pre>
               </p>
+              <p>
+                For <b>Naemon >= 1.1.0</b> add the following to your <code>naemon.cfg</code>
+                <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-1-0.o</code></pre>
+            </p>
               <p>
                   For <b>Nagios > 4.0.1</b> add the following to your <code>nagios.cfg</code>
                   <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-nagios.o</code></pre>
@@ -138,6 +143,17 @@ cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
                       </p>
                   </div>
               </p>
+
+              <p>
+                <div class="callout callout-warning">
+                    <h4>Attention Naemon 1.1.0 users</h4>
+                    <p>
+                        The Naemon developeres increased the <i></i>CURRENT_NEB_API_VERSION</i>.
+                        Please make sure to install the latest version of Statusengine Broker.
+                    </p>
+                </div>
+            </p>
+
           </li>
           <li>
               <b>Restart your Monitoring Tool</b>

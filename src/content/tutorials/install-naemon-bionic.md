@@ -40,15 +40,15 @@ apt-get install build-essential automake gperf help2man libtool libglib2.0-dev
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Naemon 1.0.8. Check if there is
+        In this how to I use Naemon 1.1.0. Check if there is
         <a href="https://github.com/naemon/naemon-core/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/naemon/naemon-core/archive/v1.0.8.tar.gz
-tar xfv v1.0.8.tar.gz
-cd naemon-core-1.0.8/
+wget https://github.com/naemon/naemon-core/archive/v1.1.0.tar.gz
+tar xfv v1.1.0.tar.gz
+cd naemon-core-1.1.0/
 
 ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins
 make all
@@ -116,7 +116,7 @@ systemctl start naemon
 
 Now you can check if your Naemon Core is running using `systemctl status naemon`:
 ````nohighlight
-root@bionic:/tmp/naemon-core-1.0.8# systemctl status naemon
+root@bionic:/tmp/naemon-core-1.1.8# systemctl status naemon
 ● naemon.service - Naemon Monitoring Daemon
    Loaded: loaded (/lib/systemd/system/naemon.service; disabled; vendor preset: enabled)
    Active: active (running) since Wed 2018-08-29 11:06:15 UTC; 4s ago
@@ -186,14 +186,14 @@ You can do this with this command `/opt/naemon/bin/naemon /opt/naemon/etc/naemon
 root@bionic:/opt/naemon# sudo -u naemon /bin/bash
 naemon@bionic:/opt/naemon$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
 
-Naemon Core 1.0.8.source
+Naemon Core 1.1.0.source
 Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
 Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
 License: GPL
 
 Website: http://www.naemon.org
-Naemon 1.0.8.source starting... (PID=17851)
+Naemon 1.1.0.source starting... (PID=17851)
 Local time is Wed Aug 29 11:07:43 UTC 2018
 qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
 nerd: Channel hostchecks registered successfully
