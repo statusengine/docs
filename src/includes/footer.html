@@ -13,6 +13,9 @@
           _paq.push(["setDomains", ["*.statusengine.org"]]);
           _paq.push(['trackPageView']);
           _paq.push(['enableLinkTracking']);
+          // require user consent before processing data
+          _paq.push(['requireConsent']);
+          _paq.push(['trackPageview']);
           (function() {
             var u="https://piwik.nook24.eu/";
             _paq.push(['setTrackerUrl', u+'piwik.php']);
@@ -34,19 +37,32 @@
 <script src="{{ site.url }}/assets/js/cookieconsent.min.js"></script>
 <script>
 window.addEventListener("load", function(){
-window.cookieconsent.initialise({
-  "palette": {
-    "popup": {
-      "background": "#222d32"
-    },
-    "button": {
-      "background": "#3c8dbc"
-    }
-  },
-  "position": "bottom-right",
-  "content": {
-    "href": "/datenschutz.html"
-  }
-})});
+    window.cookieconsent.initialise({
+        "palette": {
+            "popup": {
+                "background": "#222d32"
+            },
+            "button": {
+                "background": "#3c8dbc"
+            }
+        },
+        "position": "bottom-right",
+        "type": "opt-in",
+        "content": {
+            "message": "This website uses Matomo to analyzing user behavior in order to optimize the website. No 3rd-party cookies will be used! Never.",
+            "dismiss": "Only necessary cookies",
+            "allow": "Allow all cookies",
+            "link": "Privacy Policy",
+            "href": "/datenschutz.html"
+        },
+        onStatusChange: function(status, chosenBefore) {
+            if(status === "allow"){
+                //Allow cookies
+                _paq.push(['rememberConsentGiven']);
+            }
+            return false;
+        }
+    });
+});
 </script>
 {% endif %}
