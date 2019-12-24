@@ -1,14 +1,15 @@
 ---
 layout: "page"
-title: "Install Nagios Core on CentOS 7.5"
-description: "In this tutorial I show you, how to install Nagios Core by yourself on CentOS 7.5"
+title: "Install Nagios Core on CentOS 8"
+description: "In this tutorial I show you, how to install Nagios Core by yourself on CentOS 8"
 ---
 
 Related topics:
 
 - <a href="{{ site.url }}/tutorials/install-nagios4">Install Nagios Core on Ubuntu Xenial 16.04</a>
 - <a href="{{ site.url }}/tutorials/install-nagios4-bionic">Install Nagios Core on Ubuntu Bionic 18.04</a>
-- <a href="{{ site.url }}/tutorials/install-nagios4-centos8">Install Nagios Core on CentOS 8</a>
+- <a href="{{ site.url }}/tutorials/install-nagios4-centos7">Install Nagios Core on CentOS 7.5</a>
+
 
 ## Prepare your system
 In this how to, we are going to install all files to `/opt/nagios`.
@@ -35,15 +36,15 @@ yum install wget unzip libpng-devel gd-devel
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Nagios 4.4.2. Check if there is
+        In this how to I use Nagios 4.4.5. Check if there is
         <a href="https://github.com/NagiosEnterprises/nagioscore/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.2.tar.gz
-tar xfv nagios-4.4.2.tar.gz
-cd nagioscore-nagios-4.4.2/
+wget https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.5.tar.gz
+tar xfv nagios-4.4.5.tar.gz
+cd nagioscore-nagios-4.4.5/
 
 ./configure --prefix=/opt/nagios --with-nagios-user=nagios --with-nagios-group=nagios
 mkdir /opt/nagios
@@ -102,33 +103,43 @@ systemctl start nagios
 
 Now you can check if your Nagios Core is running using `systemctl status nagios`:
 ````nohighlight
-[root@centos7 nagioscore-nagios-4.4.2]# systemctl status nagios.service
+[root@centos8 nagioscore-nagios-4.4.5]# systemctl status nagios
 ● nagios.service - Nagios Core
    Loaded: loaded (/usr/lib/systemd/system/nagios.service; disabled; vendor preset: disabled)
-   Active: active (running) since Fr 2018-08-31 16:56:28 UTC; 10s ago
+   Active: active (running) since Tue 2019-12-24 12:17:19 UTC; 12s ago
      Docs: https://www.nagios.org/documentation
-  Process: 25804 ExecStart=/opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
-  Process: 25803 ExecStartPre=/opt/nagios/bin/nagios -v /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
- Main PID: 25807 (nagios)
+  Process: 32003 ExecStart=/opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
+  Process: 32002 ExecStartPre=/opt/nagios/bin/nagios -v /opt/nagios/etc/nagios.cfg (code=exited, status=0/SUCCESS)
+ Main PID: 32004 (nagios)
+    Tasks: 14 (limit: 26213)
+   Memory: 6.0M
    CGroup: /system.slice/nagios.service
-           ├─25807 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
-           ├─25809 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─25810 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─25811 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           ├─25812 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
-           └─25813 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
+           ├─32004 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
+           ├─32005 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32006 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32007 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32008 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32009 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32010 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32011 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32012 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32013 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32014 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32015 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           ├─32016 /opt/nagios/bin/nagios --worker /opt/nagios/var/rw/nagios.qh
+           └─32017 /opt/nagios/bin/nagios -d /opt/nagios/etc/nagios.cfg
 
-Aug 31 16:56:28 centos7 nagios[25807]: qh: core query handler registered
-Aug 31 16:56:28 centos7 nagios[25807]: qh: echo service query handler registered
-Aug 31 16:56:28 centos7 nagios[25807]: qh: help for the query handler registered
-Aug 31 16:56:28 centos7 nagios[25807]: wproc: Successfully registered manager as @wproc with query handler
-Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25812;pid=25812
-Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25809;pid=25809
-Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25810;pid=25810
-Aug 31 16:56:28 centos7 nagios[25807]: wproc: Registry request: name=Core Worker 25811;pid=25811
-Aug 31 16:56:28 centos7 nagios[25807]: Successfully launched command file worker with pid 25813
-Aug 31 16:56:28 centos7 nagios[25807]: HOST ALERT: localhost;DOWN;SOFT;1;(No output on stdout) stderr: execvp(/opt/nagios/libexec/check_ping, ...) failed. errno is 2: No such file or directory
-[root@centos7 nagioscore-nagios-4.4.2]#
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32009;pid=32009
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32011;pid=32011
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32012;pid=32012
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32013;pid=32013
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32010;pid=32010
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32014;pid=32014
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32015;pid=32015
+Dec 24 12:17:19 centos8 nagios[32004]: wproc: Registry request: name=Core Worker 32016;pid=32016
+Dec 24 12:17:20 centos8 nagios[32004]: Successfully launched command file worker with pid 32017
+Dec 24 12:17:20 centos8 nagios[32004]: HOST ALERT: localhost;DOWN;SOFT;1;(No output on stdout) stderr: execvp(/opt/nagios/libexec/check_ping, ...) failed. errno is 2: No such file or directory
+[root@centos8 nagioscore-nagios-4.4.5]#
 ````
 To make sure that you Nagios will start automatically on boot, you need to
 enable the systemd configuration:
@@ -139,8 +150,12 @@ systemctl enable nagios.service
 ## Install Nagios Plugins
 By default, Nagios will install a sample config with some basic checks.
 So you need to install the `nagios plugins` to get them to work.
+
+At the time writing this article the package `nagios-plugins-all` has unmet dependencies to the package `nagios-plugins-disk_smb`.
+For this reason we pick the plugins we need manually.
+
 ````nohighlight
-yum install nagios-plugins-all
+yum install nagios-plugins-{load,http,users,procs,disk,swap,nrpe,uptime,dns,ssh,dhcp,icmp,ping,snmp,dummy,by_ssh,tcp}
 echo '$USER1$=/usr/lib64/nagios/plugins' > /opt/nagios/etc/resource.cfg
 systemctl restart nagios
 ````
@@ -163,26 +178,33 @@ For some reasons it can be useful  to run Nagios in foreground.
 
 You can do this with this command `/opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg`
 ````nohighlight
-[root@centos7 nagioscore-nagios-4.4.2]# sudo -u nagios /bin/bash
-bash-4.2$ /opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg
+[root@centos8 nagioscore-nagios-4.4.5]# /opt/nagios/bin/nagios /opt/nagios/etc/nagios.cfg
 
-Nagios Core 4.4.2
+Nagios Core 4.4.5
 Copyright (c) 2009-present Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
-Last Modified: 2018-08-16
+Last Modified: 2019-08-20
 License: GPL
 
 Website: https://www.nagios.org
-Nagios 4.4.2 starting... (PID=26147)
-Local time is Fri Aug 31 16:58:26 UTC 2018
+Nagios 4.4.5 starting... (PID=32104)
+Local time is Tue Dec 24 12:25:38 UTC 2019
 wproc: Successfully registered manager as @wproc with query handler
-wproc: Registry request: name=Core Worker 26151;pid=26151
-wproc: Registry request: name=Core Worker 26148;pid=26148
-wproc: Registry request: name=Core Worker 26149;pid=26149
-wproc: Registry request: name=Core Worker 26150;pid=26150
-Successfully launched command file worker with pid 26152
+wproc: Registry request: name=Core Worker 32105;pid=32105
+wproc: Registry request: name=Core Worker 32107;pid=32107
+wproc: Registry request: name=Core Worker 32112;pid=32112
+wproc: Registry request: name=Core Worker 32113;pid=32113
+wproc: Registry request: name=Core Worker 32111;pid=32111
+wproc: Registry request: name=Core Worker 32114;pid=32114
+wproc: Registry request: name=Core Worker 32110;pid=32110
+wproc: Registry request: name=Core Worker 32116;pid=32116
+wproc: Registry request: name=Core Worker 32115;pid=32115
+wproc: Registry request: name=Core Worker 32109;pid=32109
+wproc: Registry request: name=Core Worker 32106;pid=32106
+wproc: Registry request: name=Core Worker 32108;pid=32108
+Successfully launched command file worker with pid 32117
 ^C
-bash-4.2$
+[root@centos8 nagioscore-nagios-4.4.5]#
 ````
 
 ---

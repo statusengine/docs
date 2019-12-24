@@ -8,6 +8,7 @@ Related topics:
 
 - <a href="{{ site.url }}/tutorials/install-nagios4-bionic">Install Nagios Core on Ubuntu Bionic 18.04</a>
 - <a href="{{ site.url }}/tutorials/install-nagios4-centos7">Install Nagios Core on CentOS 7.5</a>
+- <a href="{{ site.url }}/tutorials/install-nagios4-centos8">Install Nagios Core on CentOS 8</a>
 
 ## Prepare your system
 In this how to, we are going to install all files to `/opt/nagios`.
