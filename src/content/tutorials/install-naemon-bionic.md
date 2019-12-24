@@ -8,6 +8,7 @@ Related topics:
 
 - <a href="{{ site.url }}/tutorials/install-naemon">Install Naemon Core on Ubuntu Xenial 16.04</a>
 - <a href="{{ site.url }}/tutorials/install-naemon-centos7">Install Naemon Core on CentOS 7.5</a>
+- <a href="{{ site.url }}/tutorials/install-naemon-centos8">Install Naemon Core on CentOS 8</a>
 
 ## Prepare your system
 In this how to, we are going to install all files to `/opt/naemon`.

@@ -70,6 +70,7 @@ list_mode: false
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
               <option value="centos7">CentOS 7.5</option>
+              <option value="centos8">CentOS 8</option>
           </select>
       </div>
   </p>
@@ -77,18 +78,27 @@ list_mode: false
   <div>
   <p>
       <ol>
-          <li ng-if="selectedOs == 'centos7'">
+        <li ng-if="selectedOs == 'centos7'">
+            <b>Load EPEL Repository and install CentOS dependencies</b>
+            <pre>yum install epel-release
+yum check-update
+
+yum group install "Development Tools"</pre>
+          </li>
+          <li ng-if="selectedOs == 'centos8'">
               <b>Load EPEL Repository and install CentOS dependencies</b>
               <pre>yum install epel-release
 yum check-update
 
-yum group install "Development Tools"</pre>
+yum group install "Development Tools"
+
+dnf --enablerepo=PowerTools install json-c-devel</pre>
           </li>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
           </li>
-          <li ng-if="selectedOs == 'centos7'">
+          <li ng-if="selectedOs == 'centos7' || selectedOs == 'centos8'">
               <b>Start Gearman-Job-Server on system boot</b>
               <pre>systemctl enable gearmand
 systemctl start gearmand</pre>

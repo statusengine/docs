@@ -19,6 +19,10 @@ angular.module('StatusengineDocs')
             centos7: {
                 dependencies: 'yum install git gearmand libgearman-devel libuuid-devel json-c-devel glib2-devel',
                 restartMonitoring: 'systemctl restart naemon'
+            },
+            centos8: {
+                dependencies: 'yum install git gearmand libgearman-devel libuuid-devel json-c-devel glib2-devel',
+                restartMonitoring: 'systemctl restart naemon'
             }
         };
     });
