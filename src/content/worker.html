@@ -61,6 +61,7 @@ list_mode: false
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
               <option value="centos7">CentOS 7.5</option>
+              <option value="centos8">CentOS 8</option>
           </select>
       </div>
   </p>
@@ -80,6 +81,16 @@ yum install yum-utils
 yum-config-manager --enable remi-php72
 </pre>
           </li>
+          <li ng-if="selectedOs == 'centos8'">
+              <b>Load EPEL Repository for PHP 7.3</b>
+              <pre>yum install epel-release
+yum install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum check-update
+
+dnf module reset php
+dnf module install php:remi-7.3
+</pre>
+          </li>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
@@ -91,7 +102,7 @@ yum-config-manager --enable remi-php72
                   </div>
               </p>
               
-          <li ng-if="selectedOs == 'centos7'">
+          <li ng-if="selectedOs == 'centos7' || selectedOs == 'centos8'">
               <b>Start and enable Redis server</b>
               <pre>systemctl start redis
 systemctl enable redis</pre>

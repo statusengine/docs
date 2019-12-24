@@ -25,6 +25,11 @@ angular.module('StatusengineDocs')
                 dependencies: 'yum install git php-cli php-pecl-redis redis php-mysql php-pecl-gearman php-json php-bcmath php-mbstring php-process unzip',
                 stopStatusengineWorker: 'systemctl stop statusengine',
                 startStatusengineWorker: 'systemctl start statusengine'
+            },
+            centos8: {
+                dependencies: 'yum install git php-cli php-pecl-redis redis php-mysql php-pecl-gearman php-json php-bcmath php-mbstring php-process unzip',
+                stopStatusengineWorker: 'systemctl stop statusengine',
+                startStatusengineWorker: 'systemctl start statusengine'
             }
         };
         
@@ -34,6 +39,10 @@ angular.module('StatusengineDocs')
                 long: 'After=syslog.target network.target gearman-job-server.service mysql.service'
             },
             centos7: {
+                short: 'mysql.service',
+                long: 'After=syslog.target network.target gearmand.service mariadb.service'
+            },
+            centos8: {
                 short: 'mysql.service',
                 long: 'After=syslog.target network.target gearmand.service mariadb.service'
             }
@@ -47,6 +56,10 @@ angular.module('StatusengineDocs')
             if($scope.selectedOs === 'centos7'){
                 $scope.mysqlShort = $scope.mysql.centos7.short;
                 $scope.mysqlLong = $scope.mysql.centos7.long;
+            }
+            if($scope.selectedOs === 'centos8'){
+                $scope.mysqlShort = $scope.mysql.centos8.short;
+                $scope.mysqlLong = $scope.mysql.centos8.long;
             }
             
         });

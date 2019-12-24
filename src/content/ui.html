@@ -111,6 +111,7 @@ list_mode: false
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
               <option value="centos7">CentOS 7.5</option>
+              <option value="centos8">CentOS 8</option>
           </select>
       </div>
   </p>
@@ -130,6 +131,15 @@ yum install yum-utils
 yum-config-manager --enable remi-php72
 </pre>
           </li>
+          <li ng-if="selectedOs == 'centos8'">
+              <b>Load EPEL Repository for PHP 7.3</b>
+              <pre>yum install epel-release
+yum install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+yum check-update
+
+dnf module reset php
+dnf module install php:remi-7.3
+</pre>
           <li>
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
@@ -252,7 +262,7 @@ composer install
 
 <section id="https" class="doc-section">
   <h2 class="page-header"><a href="#https" class="anchor">HTTPS</a></h2>
-  <div ng-if="selectedOs != 'centos7'">
+  <div ng-if="selectedOs != 'centos7' && selectedOs != 'centos8'">
       All example configurations are using https, with an auto redirect
       from http:// to https://.
       <br />
@@ -268,7 +278,7 @@ composer install
           </p>
       </div>
   </div>
-  <div ng-if="selectedOs == 'centos7'">
+  <div ng-if="selectedOs == 'centos7' || selectedOs == 'centos8'">
       All example configurations are using https, with an auto redirect
       from http:// to https://.
       <br />
@@ -321,7 +331,7 @@ cat /etc/ssl/certs/dhparam.pem | tee -a /etc/ssl/certs/ssl-cert-snakeoil.pem</pr
     CustomLog "/var/log/apache2/statusengine-ui-access.log" combined
 &lt;/VirtualHost&gt;
 </code></pre>
-    <div ng-if="selectedOs != 'centos7'">
+    <div ng-if="selectedOs != 'centos7' && selectedOs != 'centos8'">
         Now we need to enable the configuration and restart the web server
 <pre>
 a2ensite statusengine-ui
@@ -332,7 +342,7 @@ a2enmod ssl
 </pre>
     </div>
     
-    <div ng-if="selectedOs == 'centos7'">
+    <div ng-if="selectedOs == 'centos7' || electedOs == 'centos8'">
             Remove default configuration and restart the web server
     <pre>
 rm /etc/httpd/conf.d/welcome.conf
@@ -428,10 +438,17 @@ server {
 </code></pre>
 
 Enable the configuration and restart the web server
-<pre>
+<pre ng-if="selectedOs != 'centos8'">
 rm /etc/nginx/sites-enabled/default
 ln -s /etc/nginx/sites-available/statusengine-ui /etc/nginx/sites-enabled/statusengine-ui
 
+{[{commands[selectedOs].nginxRestart}]}
+</pre>
+
+<span ng-if="selectedOs == 'centos8'">
+    Remove the server defenition from <code>/etc/nginx/nginx.conf</code>
+<span>
+<pre ng-if="selectedOs == 'centos8'">
 {[{commands[selectedOs].nginxRestart}]}
 </pre>
   </p>
