@@ -492,6 +492,17 @@ echo "0 1 * * * /opt/statusengine/worker/bin/Console.php cleanup -q" > /etc/cron
 
 <section id="how-to-update" class="doc-section">
   <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+
+    <div class="callout callout-warning">
+        <h4>Updating from a version < 3.7 ?</h4>
+        <p>
+            Statusengine 3.7 contains major changes to the MySQL database schema.
+            Please follow the
+            <a href="#update-to-3.7">Update to 3.7 instructions</a>
+            first.
+        </p>
+    </div>
+
   <p>Make sure you have installed the php extension <code>bcmath</code>. You can check if the extension is loaded using this command: <code>php -m |grep bcmath</code>.</p>
   <p>
       If you had installed Statusengine through <code>git</code>, the update will be done quickly.
@@ -517,9 +528,16 @@ composer update</pre>
           <li>
               Update your database (if required)
               <br />
+              <b>MySQL Users:</b>
+              <br />
+              Statusengine will handle any schema updates automatically. When executed with <code>--dry-run</code> the update statements will only be print to the CLI but not executed.
+              <pre>/opt/statusengine/worker/bin/Console.php database --update</pre>
+              <br />
+              <b>CrateDB Users:</b>
+              <br />
               Check the path <code>/opt/statusengine/worker/<a href="https://github.com/statusengine/worker/tree/master/lib" target="_blank">lib</a></code> for any database update files.
               <br />
-              If an database schema update is available, the file name would be like <code>mysql_3.1.0_TO_3.2.0.sql</code> for example.
+              If an database schema update is available, the file name would be like <code>crateDB_3.1.0_TO_3.2.0.sql</code> for example.
               <br />
               Execute every sql file in the right order!
               <br />
@@ -543,6 +561,75 @@ composer update</pre>
       </ol>
       
   </p>
+</section>
+
+<section id="update-to-3.7" class="doc-section">
+    <h2 class="page-header"><a href="#update-to-3.7" class="anchor">Update to 3.7</a></h2>
+
+    This update instructions only affects MySQL users. If you are using CrateDB as storage backend, please continue with the
+    <a href="#how-to-update">How to update</a> guide.
+
+    With Statusengine 3.7 new Primary Keys got added to the MySQL database schema. This speeds up select performance by a lot.
+    <br />
+    Unfortunately it could take a while to add the new columns and primary keys depending on the size of the database.
+
+    <ol>
+        <li>
+            Stop Statusengine Worker
+            <pre>{[{commands[selectedOs].stopStatusengineWorker}]}</pre>
+        </li>
+
+        <li>
+            Create backup of your files
+            <pre>cp -r /opt/statusengine/worker /some/backup/path</pre>
+        </li>
+
+        <li>
+            Create backup of your database (Make sure you have enough disk space available)
+            <pre>mysqldump -u statusengine -p --databases statusengine --flush-privileges --single-transaction --triggers --routines --no-tablespaces --events --hex-blob --ignore-table=statusengine.statusengine_perfdata > /opt/statusengine/statusengine_dump.sql</pre>
+        </li>
+
+        <li>
+            Update your local files
+            <pre>cd /opt/statusengine/worker
+git pull origin master
+composer update</pre>
+        </li>
+
+        <li>
+            Check for configuration changes
+            <br />
+            You old configuration is still loaded. Statusengine Worker defines default values for each configuration variable.
+            <br />
+            Nevertheless you should compare your current configuration with the new example configuration file for new interessing configuration options.
+            <pre>vimdiff /opt/statusengine/worker/etc/config.yml /opt/statusengine/worker/etc/config.yml.example</pre>
+        </li>
+
+        <li>
+            Add new primary keys to database
+            <br />
+            This will take a while. running the command via <i>tmux</i> or <i>screen</i> is recommended
+            <br />
+
+            <pre>mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql_update.sql</pre>
+        </li>
+
+        <li>
+            Update database schema
+            <br />
+            This will take a while. running the command via <i>tmux</i> or <i>screen</i> is recommended
+            <br />
+
+            <pre>/opt/statusengine/worker/bin/Console.php database --update</pre>
+        </li>
+
+        <li>
+            Start Statusengine Worker
+            <pre>{[{commands[selectedOs].startStatusengineWorker}]}</pre>
+        </li>
+
+    </ol>
+
 </section>
 
 <section id="debugging" class="doc-section">

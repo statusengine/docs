@@ -6,23 +6,127 @@ list_mode: false
 
 
 <h5 class="lineh"><span>Planed / In development</span></h2>
-<section id="module-4.0.0" class="doc-section">
-  <h2 class="page-header"><a href="#module-4.0.0" class="anchor">Module 4.0.0</a></h2>
+<section id="whats-next" class="doc-section">
+  <h2 class="page-header"><a href="#whats-next" class="anchor">Whats next</a></h2>
   <p>
       <ul>
-      <li>Rewrite Statusengine Broker Module with C++</li>
-      <li><i class="fa fa-check text-success"></i> Create new Repository <a href="https://github.com/statusengine/broker">https://github.com/statusengine/broker</a></li>
-      <li><i class="fa fa-check text-success"></i> Add Gearman support</li>
-      <li><i class="fa fa-check text-success"></i> Add RabbitMQ support</li>
-      <li><i class="fa fa-check text-success"></i> Add config file support</li>
-      <li><i class="fa fa-check text-success"></i> Create CI build process</li>
-      <li>Process of check results</li>
-      <li>Documentation</li>
+      <li>For now Statusengine is feature complete. If you found an issue or have an feature request please create an issue at the corresponding GitHub repository
+          <a href="https://github.com/statusengine/" target="_blank">https://github.com/statusengine/</a></li>
       </ul>
+    <br />
   </p>
 </section>
 
 <h5 class="lineh"><span>Changelog</span></h2>
+
+<section id="worker-3.7.0" class="doc-section">
+    <h2 class="page-header"><a href="#worker-3.7.0" class="anchor">Worker 3.7.0</a></h2>
+    <p>
+
+    <div class="callout callout-warning">
+        <h4>MySQL schema changes</h4>
+    <p>
+        Statusengine 3.7 contains major changes to the MySQL database schema.
+        Please follow the
+        <a href="/worker#update-to-3.7">Update to 3.7 instructions</a>
+        first.
+    </p>
+    </div>
+
+    <ul>
+        <li>
+            Add update statements for MySQL
+            <a href="https://github.com/statusengine/worker/issues/24" target="_blank">
+                #24
+            </a>
+            <a href="https://github.com/statusengine/worker/issues/28" target="_blank">
+                #28
+            </a> - thanks to <a href="https://github.com/ibering" target="_blank">@ibering</a>
+        </li>
+        <li>
+            Implement passing of external commands through Statusengine C++ Broker
+        </li>
+        <li>
+            Added support for Elasticsearch 7.x
+        </li>
+        <li>
+            Add option to set mysql encoding
+            - thanks to <a href="https://github.com/ibering" target="_blank">@ibering</a>
+        </li>
+        <li>
+            Fix for composer 2.0
+        </li>
+    </ul>
+    </p>
+</section>
+
+<section id="module-4.0.2" class="doc-section">
+    <h2 class="page-header"><a href="#module-4.0.2" class="anchor">Module 4.0.2</a></h2>
+    <p>
+    <ul>
+        <li>
+            Gearman support
+        </li>
+        <li>
+            RabbitMQ support
+        </li>
+        <li>
+            Bulk messages in queue
+        </li>
+        <li>
+            Configuration via config file
+        </li>
+        <li>
+            Modern C++ code
+        </li>
+        <li>
+            Resolve UTF8 issues
+        </li>
+        <li>
+            Processing external commands (no more nagios.cmd / naemon.qh needed)
+        </li>
+    </ul>
+    </p>
+</section>
+
+<section id="ui-3.7.0" class="doc-section">
+    <h2 class="page-header"><a href="#ui-3.7.0" class="anchor">UI 3.7.0</a></h2>
+    <p>
+    <ul>
+        <li>
+            Switch package manager from bower to npm
+        </li>
+        <li>
+            Updated all JavaScript dependencies
+        </li>
+        <li>
+            Added support for Elasticsearch 7.x
+        </li>
+        <li>
+            Display username if the user is logged in <a href="https://github.com/statusengine/interface/issues/38" target="_blank">
+                #38
+            </a>
+        </li>
+        <li>
+            Add support for /sub-subdirectories/ in the URL <a href="https://github.com/statusengine/interface/issues/36" target="_blank">
+            #36
+        </a>
+        </li>
+        <li>
+            Add option to set mysql encoding
+            - thanks to <a href="https://github.com/ibering" target="_blank">@ibering</a>
+        </li>
+        <li>
+            Add support for external links <a href="https://github.com/statusengine/interface/issues/44" target="_blank">
+            #44
+        </a>
+            <center>
+                <img src="{{ site.url }}/assets/img/roadmap/external_links.png" class="img-responsive" alt="Statusengine UI Night Mode"/>
+            </center>
+        </li>
+    </ul>
+    </p>
+</section>
 
 <section id="ui-3.4.0" class="doc-section">
     <h2 class="page-header"><a href="#ui-3.4.0" class="anchor">UI 3.4.0</a></h2>
@@ -57,7 +161,7 @@ list_mode: false
         </p>
 
     </p>
-    </section>
+</section>
 
 <section id="module-3.0.2" class="doc-section">
     <h2 class="page-header"><a href="#module-3.0.2" class="anchor">Module 3.0.2</a></h2>
