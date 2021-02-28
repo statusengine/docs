@@ -8,16 +8,7 @@ description: "How to install PHP Composer on Ubuntu Linux."
 ````nohighlight
 apt-get install php-cli
 curl -o composer-setup.php  https://getcomposer.org/installer
-````
-<div class="callout callout-danger">
-    <h4>Security first!</h4>
-    <p>
-        Go to <a href="https://getcomposer.org/download/" target="_blank">https://getcomposer.org/download/</a>
-        and verify your installer. <b>Now!</b>
-    </p>
-</div>
 
-````nohighlight
 php composer-setup.php
 cp composer.phar /usr/local/bin/composer
 ````
@@ -25,15 +16,16 @@ cp composer.phar /usr/local/bin/composer
 ## Usage
 No you should be able to run the command `composer` and get the following output
 ````nohighlight
-root@xenial:~# composer
+root@focal:~# composer
 Do not run Composer as root/super user! See https://getcomposer.org/root for details
+Continue as root/super user [yes]? yes
    ______
   / ____/___  ____ ___  ____  ____  ________  _____
  / /   / __ \/ __ `__ \/ __ \/ __ \/ ___/ _ \/ ___/
 / /___/ /_/ / / / / / / /_/ / /_/ (__  )  __/ /
 \____/\____/_/ /_/ /_/ .___/\____/____/\___/_/
                     /_/
-Composer version 1.4.2 2017-05-17 08:17:52
+Composer version 2.0.11 2021-02-24 14:57:23
 
 Usage:
   command [options] [arguments]
@@ -48,42 +40,50 @@ Options:
       --profile                  Display timing and memory usage information
       --no-plugins               Whether to disable plugins.
   -d, --working-dir=WORKING-DIR  If specified, use the given directory as working directory.
+      --no-cache                 Prevent use of the cache
   -v|vv|vvv, --verbose           Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
 
 Available commands:
-  about           Short information about Composer.
-  archive         Create an archive of this composer package.
-  browse          Opens the package's repository URL or homepage in your browser.
-  clear-cache     Clears composer's internal package cache.
-  clearcache      Clears composer's internal package cache.
-  config          Set config options.
-  create-project  Create new project from a package into given directory.
-  depends         Shows which packages cause the given package to be installed.
-  diagnose        Diagnoses the system to identify common errors.
-  dump-autoload   Dumps the autoloader.
-  dumpautoload    Dumps the autoloader.
-  exec            Execute a vendored binary/script.
-  global          Allows running commands in the global composer dir ($COMPOSER_HOME).
-  help            Displays help for a command
-  home            Opens the package's repository URL or homepage in your browser.
-  info            Show information about packages.
-  init            Creates a basic composer.json file in current directory.
-  install         Installs the project dependencies from the composer.lock file if present, or falls back on the composer.json.
-  licenses        Show information about licenses of dependencies.
-  list            Lists commands
-  outdated        Shows a list of installed packages that have updates available, including their latest version.
-  prohibits       Shows which packages prevent the given package from being installed.
-  remove          Removes a package from the require or require-dev.
-  require         Adds required packages to your composer.json and installs them.
-  run-script      Run the scripts defined in composer.json.
-  search          Search for packages.
-  self-update     Updates composer.phar to the latest version.
-  selfupdate      Updates composer.phar to the latest version.
-  show            Show information about packages.
-  status          Show a list of locally modified packages.
-  suggests        Show package suggestions.
-  update          Updates your dependencies to the latest version according to composer.json, and updates the composer.lock file.
-  validate        Validates a composer.json and composer.lock.
-  why             Shows which packages cause the given package to be installed.
-  why-not         Shows which packages prevent the given package from being installed.
+  about                Shows the short information about Composer.
+  archive              Creates an archive of this composer package.
+  browse               Opens the package's repository URL or homepage in your browser.
+  cc                   Clears composer's internal package cache.
+  check-platform-reqs  Check that platform requirements are satisfied.
+  clear-cache          Clears composer's internal package cache.
+  clearcache           Clears composer's internal package cache.
+  config               Sets config options.
+  create-project       Creates new project from a package into given directory.
+  depends              Shows which packages cause the given package to be installed.
+  diagnose             Diagnoses the system to identify common errors.
+  dump-autoload        Dumps the autoloader.
+  dumpautoload         Dumps the autoloader.
+  exec                 Executes a vendored binary/script.
+  fund                 Discover how to help fund the maintenance of your dependencies.
+  global               Allows running commands in the global composer dir ($COMPOSER_HOME).
+  help                 Displays help for a command
+  home                 Opens the package's repository URL or homepage in your browser.
+  i                    Installs the project dependencies from the composer.lock file if present, or falls back on the composer.json.
+  info                 Shows information about packages.
+  init                 Creates a basic composer.json file in current directory.
+  install              Installs the project dependencies from the composer.lock file if present, or falls back on the composer.json.
+  licenses             Shows information about licenses of dependencies.
+  list                 Lists commands
+  outdated             Shows a list of installed packages that have updates available, including their latest version.
+  prohibits            Shows which packages prevent the given package from being installed.
+  remove               Removes a package from the require or require-dev.
+  require              Adds required packages to your composer.json and installs them.
+  run                  Runs the scripts defined in composer.json.
+  run-script           Runs the scripts defined in composer.json.
+  search               Searches for packages.
+  self-update          Updates composer.phar to the latest version.
+  selfupdate           Updates composer.phar to the latest version.
+  show                 Shows information about packages.
+  status               Shows a list of locally modified packages.
+  suggests             Shows package suggestions.
+  u                    Upgrades your dependencies to the latest version according to composer.json, and updates the composer.lock file.
+  update               Upgrades your dependencies to the latest version according to composer.json, and updates the composer.lock file.
+  upgrade              Upgrades your dependencies to the latest version according to composer.json, and updates the composer.lock file.
+  validate             Validates a composer.json and composer.lock.
+  why                  Shows which packages cause the given package to be installed.
+  why-not              Shows which packages prevent the given package from being installed.
 ````

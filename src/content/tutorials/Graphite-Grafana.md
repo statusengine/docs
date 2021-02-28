@@ -5,7 +5,9 @@ description: "How to install Graphite and Grafana Ubuntu Xenial"
 ---
 Related topics:
 
+- <a href="{{ site.url }}/tutorials/Graphite-Grafana">Install Graphite and Grafana on Ubuntu 16.04</a>
 - <a href="{{ site.url }}/tutorials/Grafana-Bionic">Install Grafana on Ubuntu 18.04</a>
+- <a href="{{ site.url }}/tutorials/Grafana-Focal">Install Grafana on Ubuntu 20.04</a>
 
 **Why is this guide not ported to Ubuntu 18.04?**
 

@@ -1,7 +1,7 @@
 ---
 layout: "page"
-title: "Install Naemon Core on Ubuntu Bionic 18.04"
-description: "In this tutorial I show you, how to install Naemon Core by yourself on Ubuntu Bionic 18.04"
+title: "Install Naemon Core on Ubuntu Focal 20.04"
+description: "In this tutorial I show you, how to install Naemon Core by yourself on Ubuntu Focal 20.04"
 ---
 
 Related topics:
@@ -33,25 +33,19 @@ apt-get install build-essential automake gperf help2man libtool libglib2.0-dev
 ````
 
 ## Download and install Naemon Core
-<div class="callout callout-warning">
-    <h4>Naemon &ge; 1.0.7 required</h4>
-    <p>
-        Ubuntu Bionic comes with GCC 7 by default. For this reason only Naemon &ge; 1.0.7 can be build on Ubuntu Bionic.
-    </p>
-</div>
 
 <div class="callout callout-info">
     <h4>Check for new versions</h4>
     <p>
-        In this how to I use Naemon 1.1.0. Check if there is
+        In this how to I use Naemon 1.2.3. Check if there is
         <a href="https://github.com/naemon/naemon-core/releases" target="_blank">a new version available</a>!
     </p>
 </div>
 ````nohighlight
 cd /tmp/
-wget https://github.com/naemon/naemon-core/archive/v1.1.0.tar.gz
-tar xfv v1.1.0.tar.gz
-cd naemon-core-1.1.0/
+wget https://github.com/naemon/naemon-core/archive/v1.2.3.tar.gz
+tar xfv v1.2.3.tar.gz
+cd naemon-core-1.2.3/
 
 ./autogen.sh --prefix=/opt/naemon --with-naemon-user=naemon --with-naemon-group=naemon --with-pluginsdir=/usr/lib/nagios/plugins
 make all
@@ -119,33 +113,34 @@ systemctl start naemon
 
 Now you can check if your Naemon Core is running using `systemctl status naemon`:
 ````nohighlight
-root@bionic:/tmp/naemon-core-1.1.8# systemctl status naemon
+root@focal:/tmp/naemon-core-1.2.3# systemctl status naemon
 ● naemon.service - Naemon Monitoring Daemon
-   Loaded: loaded (/lib/systemd/system/naemon.service; disabled; vendor preset: enabled)
-   Active: active (running) since Wed 2018-08-29 11:06:15 UTC; 4s ago
-     Docs: http://naemon.org/documentation
-  Process: 17807 ExecStart=/opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
-  Process: 17804 ExecStartPre=/opt/naemon/bin/naemon --verify-config /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
- Main PID: 17809 (naemon)
-    Tasks: 6 (limit: 1152)
-   CGroup: /system.slice/naemon.service
-           ├─17809 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
-           ├─17810 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─17812 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─17813 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           ├─17814 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
-           └─17820 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+     Loaded: loaded (/lib/systemd/system/naemon.service; disabled; vendor preset: enabled)
+     Active: active (running) since Sun 2021-02-28 09:14:07 UTC; 4s ago
+       Docs: http://naemon.org/documentation
+    Process: 48031 ExecStartPre=/opt/naemon/bin/naemon --verify-config /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
+    Process: 48032 ExecStart=/opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg (code=exited, status=0/SUCCESS)
+   Main PID: 48033 (naemon)
+      Tasks: 6 (limit: 2344)
+     Memory: 2.3M
+     CGroup: /system.slice/naemon.service
+             ├─48033 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
+             ├─48034 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+             ├─48035 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+             ├─48036 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+             ├─48037 /opt/naemon/bin/naemon --worker /opt/naemon/var/naemon.qh
+             └─48051 /opt/naemon/bin/naemon --daemon /opt/naemon/etc/naemon/naemon.cfg
 
-Aug 29 11:06:15 bionic naemon[17804]:         Checked 0 service dependencies
-Aug 29 11:06:15 bionic naemon[17804]:         Checked 0 host dependencies
-Aug 29 11:06:15 bionic naemon[17804]:         Checked 5 timeperiods
-Aug 29 11:06:15 bionic naemon[17804]: Checking global event handlers...
-Aug 29 11:06:15 bionic naemon[17804]: Checking obsessive compulsive processor commands...
-Aug 29 11:06:15 bionic naemon[17804]: Checking misc settings...
-Aug 29 11:06:15 bionic naemon[17804]: Total Warnings: 0
-Aug 29 11:06:15 bionic naemon[17804]: Total Errors:   0
-Aug 29 11:06:15 bionic naemon[17804]: Things look okay - No serious problems were detected during the pre-flight check
-Aug 29 11:06:15 bionic systemd[1]: Started Naemon Monitoring Daemon.
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]:         Checked 0 service dependencies
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]:         Checked 0 host dependencies
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]:         Checked 5 timeperiods
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Checking global event handlers...
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Checking obsessive compulsive processor commands...
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Checking misc settings...
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Total Warnings: 0
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Total Errors:   0
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 naemon[48031]: Things look okay - No serious problems were detected during the pre-flight check
+Feb 28 09:14:07 ubuntu-s-2vcpu-2gb-intel-fra1-01 systemd[1]: Started Naemon Monitoring Daemon.
 ````
 To make sure that you Naemon will start automatically on boot, you need to
 enable the systemd configuration:
@@ -186,26 +181,27 @@ For some reasons it can be useful  to run Naemon in foreground.
 
 You can do this with this command `/opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg`
 ````nohighlight
-root@bionic:/opt/naemon# sudo -u naemon /bin/bash
-naemon@bionic:/opt/naemon$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
+root@focal:/opt/naemon# sudo -u naemon /bin/bash
+naemon@focal:/opt/naemon$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
 
-Naemon Core 1.1.0.source
+Naemon Core 1.2.3
 Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
 Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
 License: GPL
 
 Website: http://www.naemon.org
-Naemon 1.1.0.source starting... (PID=17851)
-Local time is Wed Aug 29 11:07:43 UTC 2018
+Naemon 1.2.3 starting... (PID=52156)
+Local time is Sun Feb 28 09:16:12 UTC 2021
 qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
 nerd: Channel hostchecks registered successfully
 nerd: Channel servicechecks registered successfully
 nerd: Fully initialized and ready to rock!
-Successfully launched command file worker with pid 17856
+Successfully launched command file worker with pid 52161
 ^CCaught 'Interrupt', shutting down...
-Successfully shutdown... (PID=17851)
+Retention data successfully saved.
+Successfully shutdown... (PID=52156)
 Event broker module 'NERD' deinitialized successfully.
-Successfully reaped command worker (PID = 17856)
-naemon@bionic:/opt/naemon$
+Successfully reaped command worker (PID = 52161)
+naemon@focal:/opt/naemon$
 ````

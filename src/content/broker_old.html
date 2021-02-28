@@ -1,0 +1,647 @@
+---
+layout: "page"
+title: "Legacy Broker Module"
+list_mode: false
+---
+
+<div ng-controller="BrokerOldController">
+    <section id="overview" class="doc-section">
+        <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
+
+        <div class="alert alert-info">
+            <h4><i class="icon fa fa-code"></i> Legacy code!</h4>
+            <div>
+                This is the plain C version of the Statusengine Broker Module. It can also be used with Statusengine 2.x and is compatible with old operating systems such as Ubuntu Trusty.
+                <br>
+                The documentation for the latest C++ broker module can be found <a href="/broker">here</a>
+            </div>
+        </div>
+
+        <p>
+            The Statusengine Broker Module is a small C binary that gets loaded into
+            your Naemon or Nagios Core.
+            <br /><br />
+            It will grab all status and configuration information, encode them as JSON,
+            and put them into the Gearman Job Server.
+            <br />
+            Due to the queuing engine (Gearman) your Monitoring Core will not get blocked by an slow
+            database or disk io issues.
+            <br />
+            <b>It is highly recommended to run the Gearman Job Server on the same node as the monitoring core.</b>
+        </p>
+    </section>
+
+    <section id="scale-out-to-multiple-nodes" class="doc-section">
+        <h2 class="page-header"><a href="#scale-out-to-multiple-nodes" class="anchor">Scale out to Multiple Nodes (if required)</a></h2>
+        <p>
+            I would recommend you, to split your monitoring node if you reach 50.000 services.
+            This highly depends on your hardware and check interval but just as a rough idea.
+            <br />
+            Depanding of your monitoring configuration this can be a challenging task.
+            <br />
+            For large environments I would recommend to use a config generator or something similar.
+            <br />
+            Once you have done splitting your configuration, you can deploy a new node with Naemon or Nagios
+            , Gearman as Queue and load the Statusengine Broker Module.
+            <br />
+            The Statusengine UI comes with support for multiple nodes, so you will see all monitored devices in one interface.
+        </p>
+    </section>
+
+    <section id="supported-monitoring-tools" class="doc-section">
+        <h2 class="page-header"><a href="#supported-monitoring-tools" class="anchor">Supported Monitoring Tools</a></h2>
+        <p>
+            <b>Naemon:</b>
+        <ul>
+            <li>Naemon > 1.0.1</li>
+        </ul>
+
+        <b>Nagios:</b>
+        <ul>
+            <li>Nagios > 4.0.1</li>
+        </ul>
+        Did not have a running installation yet?
+        Check the tutorials for
+        <a href="{{ site.url }}/tutorials/install-naemon-bionic">Naemon</a>
+        or
+        <a href="{{ site.url }}/tutorials/install-nagios4">Nagios</a>
+        </p>
+    </section>
+
+    <section id="installation" class="doc-section">
+        <h2 class="page-header"><a href="#installation" class="anchor">Installation</a></h2>
+
+        <p>
+            Please select your operating system first. If your operating system is not in the list, pick the operating system version that matches your operating system best. You can still install Statusengine on your system, even if it is not in the list.
+        <div class="form-group">
+            <label>Operating system</label>
+            <select class="form-control" ng-model="selectedOs">
+                <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
+                <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
+                <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+                <option value="centos7">CentOS 7.5</option>
+                <option value="centos8">CentOS 8</option>
+            </select>
+        </div>
+        </p>
+
+        <div>
+            <p>
+                <ol>
+                    <li ng-if="selectedOs == 'centos7'">
+                        <b>Load EPEL Repository and install CentOS dependencies</b>
+                        <pre>yum install epel-release
+yum check-update
+
+yum group install "Development Tools"</pre>
+                    </li>
+                    <li ng-if="selectedOs == 'centos8'">
+                        <b>Load EPEL Repository and install CentOS dependencies</b>
+                        <pre>yum install epel-release
+yum check-update
+
+yum group install "Development Tools"
+
+dnf --enablerepo=PowerTools install json-c-devel</pre>
+                    </li>
+                    <li>
+                        <b>Install dependencies</b>
+                        <pre>{[{commands[selectedOs].dependencies}]}</pre>
+                    </li>
+                    <li ng-if="selectedOs == 'centos7' || selectedOs == 'centos8'">
+                        <b>Start Gearman-Job-Server on system boot</b>
+                        <pre>systemctl enable gearmand
+systemctl start gearmand</pre>
+                    </li>
+                    <li>
+                        <b>Download and Install Statusengine Broker Module</b>
+                        <pre>cd /tmp
+git clone https://github.com/statusengine/module.git module
+cd module/
+make all
+
+mkdir -p /opt/statusengine/module
+cp src/bin/naemon/statusengine-1-1-0.o /opt/statusengine/module/statusengine-naemon-1-1-0.o
+cp src/bin/naemon/statusengine-1-0-5.o /opt/statusengine/module/statusengine-naemon-1-0-5.o
+cp src/bin/naemon/statusengine.o /opt/statusengine/module/statusengine-naemon.o
+cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
+</pre>
+                    </li>
+                    <li>
+                        <b>Load the Broker Module</b>
+            <p class="text-muted">
+                For <b>Naemon > 1.0.1</b> add the following to your <code>naemon.cfg</code>
+            <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon.o</code></pre>
+            </p>
+            <p class="text-muted">
+                For <b>Naemon >= 1.0.5</b> add the following to your <code>naemon.cfg</code>
+            <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o</code></pre>
+            </p>
+            <p>
+                For <b>Naemon >= 1.1.0</b> add the following to your <code>naemon.cfg</code>
+            <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-1-0.o</code></pre>
+            </p>
+            <p>
+                For <b>Nagios > 4.0.1</b> add the following to your <code>nagios.cfg</code>
+            <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-nagios.o</code></pre>
+            </p>
+            <p>
+                <div class="callout callout-info">
+                    <h4>Recommended Broker Options to use with Statusengine UI</h4>
+            <p>
+            <pre><code class="ini hljs">use_process_data=0 use_system_command_data=0 use_comment_data=0 use_external_command_data=0 use_flapping_data=0 use_notification_data=0 use_program_status_data=0 use_contact_status_data=0 use_contact_notification_data=0 use_event_handler_data=0 use_object_data=0 use_restart_data=1 use_service_perfdata=1</code></pre>
+            </p>
+        </div>
+        </p>
+        <p>
+            <div class="callout callout-warning">
+                <h4>Attention Nagios users</h4>
+        <p>
+            If you are using a Nagios version &lt; 4.4.0 and systemd, you should disable processing of log entries via
+        <pre><code class="ini hljs">use_log_data=0</code></pre>
+        to avoid issues on restart or stop of Nagios process.
+        </p>
+</div>
+</p>
+
+<p>
+    <div class="callout callout-warning">
+        <h4>Attention Naemon 1.1.0 users</h4>
+<p>
+    The Naemon developeres increased the <i></i>CURRENT_NEB_API_VERSION</i>.
+    Please make sure to install the latest version of Statusengine Broker.
+</p>
+</div>
+</p>
+
+</li>
+<li>
+    <b>Restart your Monitoring Tool</b>
+    <pre>{[{commands[selectedOs].restartMonitoring}]}</pre>
+</li>
+</ol>
+</p>
+</div>
+
+</section>
+
+
+<section id="broker-options" class="doc-section">
+    <h2 class="page-header"><a href="#broker-options" class="anchor">Broker Options</a></h2>
+    <p>
+        By default the Statusengine Event Broker Module will write every event data to the Gearman Job Server.
+        <br />
+        Normally there is always data you will not need for example 'statusngin_externalcommands' or 'statusngin_systemcommands'
+        <br />
+        For large environments this unnecessary data will slow down your database and increase your disk I/O, so you can disable data using the broker options.
+        <br /><br />
+        To use one or more broker options, just add them in your monitoring config like in this example:
+    <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o use_external_command_data=0 use_system_command_data=1</code></pre>
+    </p>
+    <p>
+        <b>List of available broker options:</b>
+    </p>
+    <p>
+    <div class="container-fluid">
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Option name</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-3"><span class="bold">Affected queue</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-4"><span class="bold">Description</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Recommended to disable</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="bold">Deprecated</span></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_host_status_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hoststatus</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Hoststatus table</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_service_status_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicestatus</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Servicestatus table</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_service_check_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_servicechecks</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Will update the servicechecks table</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_host_check_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_hostchecks</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Will update the hostchecks table</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_state_change_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_statechanges</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">If disabled, the table 'statehistory' for hosts and services will not get updated anymore</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_log_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_logentries</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Will update the table logentries</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-warning">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_comment_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_comments</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not implemented yet</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_acknowledgement_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_acknowledgements</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">The message of acknowledgements will not be saved in the database anymore. Will not affect the 'problem_has_been_acknowledged' field in host-/servicestatus tables.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_downtime_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_downtimes</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Downtime information will be saved in the database anymore. Will not affect the 'scheduled_downtime_depth' field in host-/servicestatus tables.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_method_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationmethod</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Event that conains all notification data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">enable_ochp</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ochp</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_hostchecks. You can use this as alternative for the classic OCHP command</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">enable_ocsp</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_ocsp</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Basically the same as statusngin_servicechecks. You can use this as alternative for the classic OCSP command</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_restart_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_core_restart</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Tell Statusengine Worker that a restart of the Monitoring Core occurse</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-danger">No!</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_service_perfdata</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_service_perfdata</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Used by Statusengine Worker to process performance data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-info">Depends</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_addr</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Address of the Gearman-Job-Server (default: 127.0.0.1)</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_port</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Port of the Gearman-Job-Server (default: 4730)</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">gearman_server_list</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">
+                A list of Gearman-Job-Servers separated by comma as failover servers.
+                <code>gearman_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">gearman_dup_server_list</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">n/a</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">
+                A list of Gearman-Job-Servers separated by comma. All records will be pushed to all servers.
+                <code>gearman_dup_server_list=127.0.0.1:4730,192.168.10.5:4730</code>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">&nbsp;</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_process_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_processdata</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_system_command_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_systemcommands</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_external_command_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_externalcommands</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_flapping_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_flappings</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_program_status_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_programmstatus</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_notification_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_notifications</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_status_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactstatus</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_contact_notification_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_contactnotificationdata</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_event_handler_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_eventhandler</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Not used anymore by Statusengine 3.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+
+        <div class="row myOdd">
+            <div class="col-xs-12 col-sm-12 col-lg-3">use_object_data</div>
+            <div class="col-xs-12 col-sm-12 col-lg-3">statusngin_objects</div>
+            <div class="col-xs-12 col-sm-12 col-lg-4">Statusengine 3 don't save a dump of the monitoring configuration to the database anymore.</div>
+            <div class="col-xs-12 col-sm-12 col-lg-1"><span class="label label-success">Yes</span></div>
+            <div class="col-xs-12 col-sm-12 col-lg-1">Yes</div>
+        </div>
+    </div>
+
+    <div class="callout callout-warning">
+        <h4>Only use ip addresses!</h4>
+        <p>
+            Due to a bug in the german library you should only use ip addresses to connect to a Gearman-Job-Server. Do not use host names like <code>localhost</code>!
+        </p>
+    </div>
+    </p>
+</section>
+
+<section id="ocsp-and-ochp" class="doc-section">
+    <h2 class="page-header"><a href="#ocsp-and-ochp" class="anchor">OCSP and OCHP</a></h2>
+    <p>
+        The default OCSP and OCHP allows you to run a command or script after a service or host check was executed.
+        <br />
+        <b>This will highly affect the performance of your monitoring core!</b>
+        <br />
+        To avoid this issue, Statusengine's "OCSP"/"OCHP" will create you a special Gearman Queue
+        and store a copy of every host check and service check event.
+        <br />
+        You can consume the events inside of the queue with a little script to get the data you need.
+    </p>
+
+    <p>
+        <b>Data Example:</b>
+        <br />
+        This example show all fields, you can receive via the Statusengine OCHP and OCSP queues.
+    <pre ><code class="json hljs">
+{
+"servicecheck": {
+  "return_code": 0,
+  "latency": 0,
+  "execution_time": 0.016237,
+  "check_type": 0,
+  "perf_data": "load1=0.020;4.000;7.000;0; load5=0.030;6.000;8.000;0; load15=0.000;6.000;8.000;0;",
+  "long_output": null,
+  "output": "OK - load average: 0.02, 0.03, 0.00",
+  "command_name": "check_by_nrpe!check_load",
+  "command_line": "$USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$",
+  "service_description": "CPU Load",
+  "host_name": "CrateDB1-Naemon",
+  "current_attempt": 1,
+  "max_attempts": 3,
+  "state_type": 1,
+  "state": 0,
+  "timeout": 60,
+  "start_time": 1500727171,
+  "end_time": 1500727171,
+  "early_timeout": 0
+},
+"timestamp": 1500727171,
+"attr": 0,
+"flags": 0,
+"type": 701
+}
+</code></pre>
+    </p>
+
+    <p>
+        <b>PHP Example Script:</b>
+        <br />
+        The given PHP example script will fetch all jobs out of the queue
+        and print the data to the shell.
+        <br />
+        Press STRG+C (^C) to exit.
+    <pre ><code class="php hljs">
+&lt;?php
+$StatusengineOcsp = new StatusengineOcspProcessor();
+$StatusengineOcsp->loop();
+
+//Example Class
+class StatusengineOcspProcessor{
+
+    /**
+     * @var \GearmanWorker
+     */
+    private $GearmanWorker;
+
+    public function __construct(){
+        //Create the GearmanWorker PHP Object
+        $this->GearmanWorker = new \GearmanWorker();
+
+        //Connect to the Gearman-Job-Server
+        $this->GearmanWorker->addServer('127.0.0.1', 4730);
+
+        //Consume data from the queue statusngin_ocsp and pass it
+        //to the php method handleOcsp of the this class
+        $this->GearmanWorker->addFunction('statusngin_ocsp', [$this, 'handleOcsp']);
+    }
+
+    public function loop(){
+        //Start infinite loop to consume incoming jobs
+        while(true){
+            $this->GearmanWorker->work();
+        }
+    }
+
+    public function handleOcsp($job){
+        //Print service check data to stdout
+        print_r(json_decode($job->workload()));
+    }
+
+}
+</code></pre>
+    </p>
+
+    <p>
+        <b>Bash Example Script:</b>
+    <pre>
+apt-get install jq
+</pre>
+
+    This example will print one job to the shell and exit
+    <pre ><code class="bash hljs">#!/bin/bash
+gearman -w -c 1 -f statusngin_ocsp | jq .
+</code></pre>
+    </p>
+
+    <p>
+        <br />
+        More languages are available in
+        <a href="http://gearman.org/download/#client--worker-apis" target="_blank">
+            the official Gearman documentation
+        </a>
+        .
+    </p>
+
+</section>
+
+<section id="how-to-update" class="doc-section">
+    <h2 class="page-header"><a href="#how-to-update" class="anchor">How to update</a></h2>
+    <p>
+        If you want to update to a new version of the Statusengine event broker, create a backup of your currently
+        installed version first.
+        <br /><br />
+        Stop your monitoring engine like: <code>systemctl stop naemon</code>.
+        <br /><br />
+        Than repeat the <a href="#installation">installation steps</a>.
+    </p>
+</section>
+
+<section id="debug-broker-module" class="doc-section">
+    <h2 class="page-header"><a href="#debug-broker-module" class="anchor">Debug Broker Module</a></h2>
+    <p>
+        To check if the Statusengine Broker Module save all events to the Gearman  Job Server
+        you can use the <code>gearadmin --status</code> command.
+        <br />
+        This will display you all existing queues, waiting jobs, active workers,
+        and how much workers are connected to the queue.
+    <pre>
+#                              Jobs    Active   Worker
+root@naemon:~# gearadmin --status
+statusngin_contactstatus         2       0       0
+statusngin_servicestatus        52       0       0
+statusngin_hoststatus           10       0       0
+statusngin_servicechecks         3       0       0
+statusngin_ocsp                  3       0       0
+statusngin_statechanges          0       0       0
+statusngin_hostchecks            1       0       0
+statusngin_logentries            4       0       0
+</pre>
+    In this example broker module put data into the queue but no process is consuming
+    the provided data (0 connected workers).
+    <br />
+    So the broker modules works fine.
+    <div class="callout callout-info">
+        <h4>Statusengine Worker</h4>
+        <p>
+            <a href="{{ site.url }}/worker">Let's continue setting up Statusengine Worker</a>.
+        </p>
+    </div>
+    </p>
+    <p>
+        In addition, you can also run your monitoring core in foreground
+        to debug issues or get more information about what's going on.
+    <pre>root@naemon:~# sudo -u naemon /bin/bash
+naemon@naemon:~$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
+
+Naemon Core 1.0.6-source
+Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
+Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
+Copyright (c) 1999-2009 Ethan Galstad
+License: GPL
+
+Website: http://www.naemon.org
+Naemon 1.0.6-source starting... (PID=22687)
+Local time is Tue May 16 19:57:07 CEST 2017
+qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
+nerd: Channel hostchecks registered successfully
+nerd: Channel servicechecks registered successfully
+nerd: Fully initialized and ready to rock!
+wproc: Successfully registered manager as @wproc with query handler
+wproc: Registry request: name=Core Worker 22689;pid=22689
+wproc: Registry request: name=Core Worker 22690;pid=22690
+
+Event broker module '/opt/statusengine/module/statusengine-naemon-1-0-5.o' initialized successfully.
+
+Successfully launched command file worker with pid 22705
+      </pre>
+    </p>
+</section>
+
+</div>

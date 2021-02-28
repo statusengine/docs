@@ -1,7 +1,7 @@
 ---
 layout: "page"
-title: "Install Grafana Ubuntu 18.04"
-description: "How to install Grafana on Ubuntu Bionic 18.04"
+title: "Install Grafana Ubuntu 20.04"
+description: "How to install Grafana on Ubuntu Focal 20.04"
 ---
 
 ## Install Grafana
@@ -16,9 +16,12 @@ Related topics:
 [http://docs.grafana.org/installation/debian/](http://docs.grafana.org/installation/debian/)**
 
 ````nohighlight
-echo "deb https://packagecloud.io/grafana/stable/debian/ stretch main" > /etc/apt/sources.list.d/grafana.list
-curl https://packagecloud.io/gpg.key | apt-key add -
+apt-get install apt-transport-https
+
+echo "deb https://packages.grafana.com/oss/deb stable main" > /etc/apt/sources.list.d/grafana.list
+curl https://packages.grafana.com/gpg.key | apt-key add -
 apt-get update
+
 apt-get install grafana
 
 systemctl daemon-reload
@@ -77,7 +80,7 @@ Password: `admin`
     <div class="container">
         <p>
             <center>
-                <img src="{{ site.url }}/assets/img/tutorials/grafana5-web.png" class="img-responsive" alt="Grafana via HTTPS"/>
+                <img src="{{ site.url }}/assets/img/tutorials/grafana7-web.png" class="img-responsive" alt="Grafana via HTTPS"/>
             </center>
         </p>
     </div>

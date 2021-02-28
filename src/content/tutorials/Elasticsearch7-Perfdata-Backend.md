@@ -1,9 +1,8 @@
 ---
 layout: "page"
-title: "Store Nagios or Naemon Performance Data to Elasticsearch 5.x"
-description: "How To store Nagios or Naemon Performance Data to Elasticsearch 5.x using Statusengine"
+title: "Store Nagios or Naemon Performance Data to Elasticsearch 7.x"
+description: "How To store Nagios or Naemon Performance Data to Elasticsearch 7.x using Statusengine"
 ---
-
 Related topics:
 
 - <a href="{{ site.url }}/tutorials/Elasticsearch-Perfdata-Backend">Store Nagios or Naemon Performance Data to Elasticsearch 5.x</a>
@@ -17,40 +16,39 @@ In addition, I will show you, how to use this data via Statusengine UI and Grafa
 All commands needs to run as user `root` or via `sudo`.
 
 ## Requirements
-- Elasticsearch 5.x - If you don't have Elasticsearch installed yet -
-[follow this guide](/tutorials/Elasticsearch-Xenial-Install).
+- Elasticsearch 7.x - If you don't have Elasticsearch installed yet -
+[follow this guide](/tutorials/Elasticsearch-Focal-Install).
 
-- [Nagios](/tutorials/install-nagios4) or [Naemon](/tutorials/install-naemon) with loaded [Statusengine Broker Module](/broker)
+- [Nagios](/tutorials/install-nagios4-focal) or [Naemon](/tutorials/install-naemon-focal) with loaded [Statusengine Broker Module](/broker)
 
 - Running [Statusengine Worker](/worker)
 
 ## Recommended
 - [Statusengine UI](/ui)
-- [Grafana](/tutorials/Graphite-Grafana) (You can skip the Graphite part.)
+- [Grafana](/tutorials/Grafana-Bionic)
 
 
 ## Install PHP Elasticsearch library
-**Why I have to do this by myself?**
-
->The PHP library for Elasticsearch will require at least PHP 5.6.6 which is not included in all distributions.
->
->I don't want to lock out users on older PHP versions, which are not plan to use Elasticsearch at all.
-
 To install the library, you need [PHP Composer](/tutorials/php-composer).
 ````nohighlight
 apt-get install php-curl php-json php-mbstring
 cd /opt/statusengine/worker
-composer require elasticsearch/elasticsearch:~5.0
+composer require elasticsearch/elasticsearch:~7.0
 ````
 
 #### Configure Statusengine Broker Module to export performance data
-If not already done, add `use_service_perfdata=1` to your [Statusengine Broker Module options](/broker#broker-options)
+If not already done, add `ServicePerfData = "statusngin_service_perfdata"` to your [Statusengine Broker Module config](https://github.com/statusengine/broker/blob/master/statusengine.toml#L13)
 and restart your Nagios or Naemon process.
 
 #### Configure Statusengine Worker to store performance data to Elasticsearch
 Open the file `/opt/statusengine/worker/etc/config.yml` to adjust the following values
 
 ````yml
+# If statusengine should process performance data or not
+# 1 = yes
+# 0 = no
+process_perfdata: 1
+
 # Uncomment to enable
 # You can enable as much backends as you want
 perfdata_backend:
@@ -136,7 +134,7 @@ You can use Cerebro to check if the index was created:
     <div class="container">
         <p>
             <center>
-                <img src="{{ site.url }}/assets/img/tutorials/statusengine-index-cerebro.png" class="img-responsive" alt="Check Statusengine index via Cerebro"/>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine-index-cerebro-es7.png" class="img-responsive" alt="Check Statusengine index via Cerebro"/>
             </center>
         </p>
     </div>
@@ -149,7 +147,7 @@ First of all, you need to install the PHP Elasticsearch library:
 ````nohighlight
 apt-get install php-curl php-json php-mbstring
 cd /usr/share/statusengine-ui
-composer require elasticsearch/elasticsearch:~5.0
+composer require elasticsearch/elasticsearch:~7.0
 ````
 
 Open the file `/usr/share/statusengine-ui/etc/config.yml` to adjust the following values
@@ -210,7 +208,7 @@ Also make sure, to use the same `elasticsearch_pattern` for Statusengine Ui, as 
     <div class="container">
         <p>
             <center>
-                <img src="{{ site.url }}/assets/img/tutorials/statusengine-ui-elasticsearch-perfdata.png" class="img-responsive" alt="Perfdata Elasticsearch Statusengine Ui"/>
+                <img src="{{ site.url }}/assets/img/tutorials/statusengine-ui-elasticsearch6-perfdata.png" class="img-responsive" alt="Perfdata Elasticsearch Statusengine Ui"/>
             </center>
         </p>
     </div>
@@ -224,12 +222,18 @@ Once performance data gets stored to Elasticsearch, you can also use Grafana to 
     <div class="container">
         <p>
             <center>
-                <img src="{{ site.url }}/assets/img/tutorials/grafana-elasticsearch-datasource.png" class="img-responsive" alt="Grafana add Elasticsearch data source"/>
+                <img src="{{ site.url }}/assets/img/tutorials/grafana-elasticsearch7-datasource.png" class="img-responsive" alt="Grafana add Elasticsearch data source"/>
             </center>
         </p>
     </div>
 </div>
 Notice: If you have a pattern, like "daily", the index name in Grafana will look like this: `[statusengine-metric-]YYYY.MM.DD`
+
+All patterns:
+
+- daily: `[statusengine-metric-]YYYY.MM.DD`
+- weekly: `[statusengine-metric-]GGGG.WW`
+- monthly: `[statusengine-metric-]YYYY.MM`
 
 ##### Build your first dashboard
 Every query will follow this schema:
@@ -238,26 +242,19 @@ Every query will follow this schema:
 Example:
 >hostname:"localhost"  AND service_description:"Total Processes" AND metric:"procs"
 
+Make sure, that you set **Display** <i class="fa fa-arrow-right"></i> **Null value** <i class="fa fa-arrow-right"></i> **connected**
+
+
 <div class="jumbotron jumbotron-black">
     <div class="container">
         <p>
             <center>
-                <img src="{{ site.url }}/assets/img/tutorials/grafana-elasticsearch-query.png" class="img-responsive" alt="Query data from Elasticsearch with Grafana"/>
+                <img src="{{ site.url }}/assets/img/tutorials/grafana-elasticsearch7-query.png" class="img-responsive" alt="Query data from Elasticsearch with Grafana"/>
             </center>
         </p>
     </div>
 </div>
 
-Make sure, that you set **Display** <i class="fa fa-arrow-right"></i> **Null value** <i class="fa fa-arrow-right"></i> **connected**
-<div class="jumbotron jumbotron-black">
-    <div class="container">
-        <p>
-            <center>
-                <img src="{{ site.url }}/assets/img/tutorials/grafana_null_value.png" class="img-responsive" alt="Grafana null value connected"/>
-            </center>
-        </p>
-    </div>
-</div>
 
 ##### Play around
 <div class="jumbotron jumbotron-black">

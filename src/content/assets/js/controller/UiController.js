@@ -1,11 +1,20 @@
 angular.module('StatusengineDocs')
 
     .controller("UiController", function ($scope) {
-        $scope.selectedOs = 'bionic';
+        $scope.selectedOs = 'focal';
         $scope.hasSystemd = true;
         
         
         $scope.commands = {
+            focal: {
+                dependencies: 'apt-get install git php-cli php-zip php-mysql php-ldap php-json',
+                apache2: 'apt-get install apache2 libapache2-mod-php',
+                apache2Restart: 'systemctl restart apache2.service',
+                nginx: 'apt-get install nginx php-fpm',
+                phpFpmRestart: 'systemctl restart php7.4-fpm',
+                fpmConfigPath: '/etc/php/7.4/fpm/pool.d/www.conf',
+                nginxRestart: 'systemctl restart nginx'
+            },
             bionic: {
                 dependencies: 'apt-get install git php-cli php-zip php-mysql php-ldap php-json',
                 apache2: 'apt-get install apache2 libapache2-mod-php',
