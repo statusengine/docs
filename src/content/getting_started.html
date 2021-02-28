@@ -19,10 +19,10 @@ list_mode: false
   <div class="row">
       <div class="col-xs-12 col-sm-6 col-md-4">
           <div class="small-box bg-light-blue">
-              <div class="inner">
+              <div class="inner min-height-150">
                   <h3>Broker Module</h3>
                   <p>
-                      This little C program gets loaded to your Monitoring Core.
+                      This little C++ program gets loaded to your Monitoring Core.
                       It will encode every event as JSON object and send it to a queue.
                   </p>
                   <br />
@@ -37,7 +37,7 @@ list_mode: false
       </div>
       <div class="col-xs-12 col-sm-6 col-md-4">
           <div class="small-box bg-light-blue">
-              <div class="inner">
+              <div class="inner min-height-150">
                   <h3>Worker</h3>
                   <p>
                       A PHP process that fetch all events out of the queue and
@@ -55,7 +55,7 @@ list_mode: false
       </div>
       <div class="col-xs-12 col-sm-12 col-md-4">
           <div class="small-box bg-light-blue">
-              <div class="inner">
+              <div class="inner min-height-150">
                   <h3>Statusengine UI</h3>
                   <p>
                       A modern, responsive web interface built with AngularJS.
@@ -81,17 +81,17 @@ list_mode: false
   <h2 class="page-header"><a href="#requirements" class="anchor">Requirements</a></h2>
   <p>
       <div class="callout callout-success">
-          <h4>PHP7 ready!</h4>
-          <p>Statusengine is tested on PHP5 and PHP7</p>
+          <h4>PHP 8 and MySQL 8 ready!</h4>
+          <p>Statusengine is tested on PHP7, PHP8, MySQL 5 and MySQL 8 </p>
       </div>
       <ul>
           <li>Naemon or Nagios 4</li>
           <li>Redis Server</li>
           <li>MySQL/MariaDB or CrateDB</li>
           <li>Ubuntu 14.04, 16.06 or 18.04</li>
-          <li>PHP 5.5 or greater</li>
+          <li>PHP 7 or greater</li>
       </ul>
-      Statusengine can also run on other Systems than Ubuntu 16.04/18.04 LTS.
+      Statusengine can also run on other Systems than Ubuntu 16.04/18.04/20.04 LTS.
       <br />
       All examples in this documentation refer to Ubuntu so maybe things are different on an other distribution.
   </p>
