@@ -7,6 +7,8 @@ description: "How to install Elasticsearch 6.x on Ubuntu Bionic"
 Related topics:
 
 - <a href="{{ site.url }}/tutorials/Elasticsearch-Xenial-Install">Install Elasticsearch 5.x on Ubuntu 16.04</a>
+- <a href="{{ site.url }}/tutorials/Elasticsearch-Bionic-Install">Install Elasticsearch 6.x on Ubuntu 18.04</a>
+- <a href="{{ site.url }}/tutorials/Elasticsearch-Focal-Install">Install Elasticsearch 7.x on Ubuntu 20.04</a>
 
 In this tutorial I'm going to show you, how to install Elasticsearch 6.x on your Ubuntu Bionic (18.04) Linux box.
 

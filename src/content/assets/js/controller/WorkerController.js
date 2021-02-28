@@ -1,11 +1,16 @@
 angular.module('StatusengineDocs')
 
     .controller("WorkerController", function ($scope) {
-        $scope.selectedOs = 'bionic';
+        $scope.selectedOs = 'focal';
         $scope.hasSystemd = true;
         
         
         $scope.commands = {
+            focal: {
+                dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql php-json php-bcmath php-mbstring unzip',
+                stopStatusengineWorker: 'systemctl stop statusengine',
+                startStatusengineWorker: 'systemctl start statusengine'
+            },
             bionic: {
                 dependencies: 'apt-get install git php-cli php-zip php-redis redis-server php-mysql php-json php-gearman php-bcmath php-mbstring unzip',
                 stopStatusengineWorker: 'systemctl stop statusengine',

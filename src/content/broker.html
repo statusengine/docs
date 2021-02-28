@@ -7,6 +7,15 @@ list_mode: false
 <div ng-controller="BrokerController">
 <section id="overview" class="doc-section">
   <h2 class="page-header"><a href="#overview" class="anchor">Overview</a></h2>
+
+    <div class="alert alert-info">
+        <h4><i class="icon fa fa-code"></i> C++ Broker Module</h4>
+        <div>
+            This documentation is for the new C++ Broker Module. It has several advantages over the old  <a href="/broker_old">legacy plain C broker module</a> such as support for Gearman and RabbitMQ
+            or the ability of processing external commands.
+        </div>
+    </div>
+
   <p>
       The Statusengine Broker Module is a small C++ dynamic library (so) that gets loaded into
       your Naemon or Nagios Core.
@@ -14,12 +23,12 @@ list_mode: false
       It will grab all status information, encode them as JSON,
       and put them into RabbitMQ Queues or the Gearman Job Server. Furthermore it can read commands
       and check results from the Queues, so you can easily exchange status information between nodes,
-      for example if you want to create a satellite setup or as an alternative to run external commands.
+      or as an alternative to run external commands.
       <br />
       Due to the queuing engine (RabbitMQ/Gearman) your Monitoring Core will not get blocked by an slow
       database or disk io issues.
       <br />
-      <b>It is highly recommended to run the Gearman Job Server on the same node as the monitoring core</b>
+      <b>It is highly recommended to run the Queue (RabbitMQ/Gearman) on the same node as the monitoring core to keep the latencies low</b>
   </p>
 </section>
 
@@ -31,12 +40,12 @@ list_mode: false
       <br />
       Depending of your monitoring configuration this can be a challenging task.
       <br />
-      For large environments I would recommand to use a config generator or something similar.
+      For large environments I would recommend to use a config generator (like <a href="https://openitcockpit.io/" target="_blank">openITCOCKPIT</a>) or something similar.
       <br />
       Once you have done splitting your configuration, you can deploy a new node with Naemon or Nagios
       , RabbitMQ (or Gearman) as Queue and load the Statusengine Broker Module.
       <br />
-      The Statusengine UI comes with support for multiple nodes, so you will see all monitored devices in one interface.
+      The <a href="/ui">Statusengine UI</a> comes with support for multiple nodes, so you will see all monitored devices in one interface.
   </p>
 </section>
 
@@ -56,7 +65,7 @@ list_mode: false
       <br/>
       Did not have a running installation yet?
       Check the tutorials for
-      <a href="{{ site.url }}/tutorials/install-naemon-bionic">Naemon</a>
+      <a href="{{ site.url }}/tutorials/install-naemon-focal">Naemon</a>
       or
       <a href="{{ site.url }}/tutorials/install-nagios4">Nagios</a>
   </p>
@@ -70,10 +79,8 @@ list_mode: false
       <div class="form-group">
           <label>Operating system</label>
           <select class="form-control" ng-model="selectedOs">
-              <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
-              <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
-              <option value="centos7">CentOS 7.5</option>
+              <option value="focal">Ubuntu 20.04 (Focal Fossa)</option>
               <option value="centos8">CentOS 8</option>
           </select>
       </div>
@@ -98,84 +105,47 @@ yum group install "Development Tools"</pre>
           <li ng-if="selectedOs == 'centos8'">
               <b>Load EPEL Repository and install CentOS dependencies</b>
               <pre>yum install epel-release
-<<<<<<< HEAD
 yum check-update
 
 yum group install "Development Tools"
 
 dnf --enablerepo=PowerTools install json-c-devel</pre>
-=======
 yum check-update</pre>
->>>>>>> df6c41f6d179406ce0f2f89d558b19bd5aad4769
           </li>
           <li>
               <b>Install dependencies</b>
-              <pre>{[{commands[selectedOs].dependencies}]} {[{commands[selectedOs].queueDep[selectedQueue]}]}</pre>
+              <pre>{[{commands[selectedOs].dependencies}]} {[{commands[selectedOs].queueDep[selectedQueue]}]}
+{[{commands[selectedOs].pip}]}</pre>
           </li>
-          <li ng-if="selectedOs == 'centos7' || selectedOs == 'centos8'">
+          <li ng-if="(selectedOs == 'centos7' || selectedOs == 'centos8') && selectedQueue == 'gearman'">
               <b>Start Gearman-Job-Server on system boot</b>
               <pre>systemctl enable gearmand
 systemctl start gearmand</pre>
           </li>
+          <li ng-if="(selectedOs == 'centos7' || selectedOs == 'centos8') && selectedQueue == 'rabbitmq'">
+              <b>Start RabbitMQ on system boot</b>
+              <pre>systemctl enable rabbitmq-server
+systemctl start rabbitmq-server</pre>
+          </li>
           <li>
               <b>Download and Install Statusengine Broker Module</b>
-<<<<<<< HEAD
               <pre>cd /tmp
-git clone https://github.com/statusengine/module.git module
-cd module/
-make all
+git clone https://github.com/statusengine/broker.git broker
+cd broker/
 
-mkdir -p /opt/statusengine/module
-cp src/bin/naemon/statusengine-1-1-0.o /opt/statusengine/module/statusengine-naemon-1-1-0.o
-cp src/bin/naemon/statusengine-1-0-5.o /opt/statusengine/module/statusengine-naemon-1-0-5.o
-cp src/bin/naemon/statusengine.o /opt/statusengine/module/statusengine-naemon.o
-cp src/bin/nagios/statusengine.o /opt/statusengine/module/statusengine-nagios.o
+export PKG_CONFIG_PATH=/opt/naemon/lib/pkgconfig/
+
+meson setup --buildtype=release build
+ninja -C build
+
+mkdir -p /opt/statusengine/lib
+cp build/src/libstatusengine.so /opt/statusengine/lib/libstatusengine.so
 </pre>
           </li>
-          <li>
-              <b>Load the Broker Module</b>
-              <p class="text-muted">
-                  For <b>Naemon > 1.0.1</b> add the following to your <code>naemon.cfg</code>
-                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon.o</code></pre>
-              </p>
-              <p class="text-muted">
-                For <b>Naemon >= 1.0.5</b> add the following to your <code>naemon.cfg</code>
-                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-0-5.o</code></pre>
-              </p>
-              <p>
-                For <b>Naemon >= 1.1.0</b> add the following to your <code>naemon.cfg</code>
-                <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-naemon-1-1-0.o</code></pre>
-            </p>
-              <p>
-                  For <b>Nagios > 4.0.1</b> add the following to your <code>nagios.cfg</code>
-                  <pre><code class="ini hljs">broker_module=/opt/statusengine/module/statusengine-nagios.o</code></pre>
-=======
-              <p>
-                  You can find the latest release on GitHub:
-                  <a href="https://github.com/statusengine/broker/releases" target="_blank">
-                      https://github.com/statusengine/broker/releases
-                  </a>
->>>>>>> df6c41f6d179406ce0f2f89d558b19bd5aad4769
-              </p>
-              <p>
-                  Please download the release from GitHub for your distribution or build it with the instructions in the README.
-                  Extract the file libstatusengine.so to <code>/opt/statusengine/lib/libstatusengine.so</code> or somewhere else where Naemon/Nagios can read it.
-              </p>
 
-              <p>
-                <div class="callout callout-warning">
-                    <h4>Attention Naemon 1.1.0 users</h4>
-                    <p>
-                        The Naemon developeres increased the <i></i>CURRENT_NEB_API_VERSION</i>.
-                        Please make sure to install the latest version of Statusengine Broker.
-                    </p>
-                </div>
-            </p>
-
-          </li>
       </ol>
-  </p>
-  
+
+
 </section>
 
 
@@ -201,6 +171,14 @@ curl https://raw.githubusercontent.com/statusengine/broker/master/statusengine.t
       <p><b>Restart Naemon/Nagios</b></p>
       <pre><code>systemctl restart naemon</code></pre>
   </p>
+
+    <div class="callout callout-info">
+        <h4>Statusengine Worker</h4>
+        <p>
+            <a href="{{ site.url }}/worker">Let's continue setting up Statusengine Worker</a>.
+        </p>
+    </div>
+
 </section>
 
 <section id="command-ocsp-and-ochp" class="doc-section">
@@ -208,10 +186,10 @@ curl https://raw.githubusercontent.com/statusengine/broker/master/statusengine.t
   <p>
       The default OCSP and OCHP allows you to run a command or script after a service or host check was executed.
       <br />
-      <b>This will highly affect the performance of your monitoring core!</b>
+      <b>This will highly affect the performance of your monitoring core in a bad manner!</b>
       <br />
-      To avoid this issue, Statusengine's "OCSP"/"OCHP" will create you a special Gearman Queue
-      and store a copy of every host check and service check event.
+      To avoid this issue, Statusengine's "OCSP"/"OCHP" will create you a special Queue
+      and store a copy of every host - and service check event.
       <br />
       You can consume the events inside of the queue with a little script to get the data you need.
   </p>
@@ -222,31 +200,65 @@ curl https://raw.githubusercontent.com/statusengine/broker/master/statusengine.t
   This example show all fields, you can receive via the Statusengine OCHP and OCSP queues.
 <pre ><code class="json hljs">
 {
-"servicecheck": {
-  "return_code": 0,
-  "latency": 0,
-  "execution_time": 0.016237,
-  "check_type": 0,
-  "perf_data": "load1=0.020;4.000;7.000;0; load5=0.030;6.000;8.000;0; load15=0.000;6.000;8.000;0;",
-  "long_output": null,
-  "output": "OK - load average: 0.02, 0.03, 0.00",
-  "command_name": "check_by_nrpe!check_load",
-  "command_line": "$USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$",
-  "service_description": "CPU Load",
-  "host_name": "CrateDB1-Naemon",
-  "current_attempt": 1,
-  "max_attempts": 3,
-  "state_type": 1,
-  "state": 0,
-  "timeout": 60,
-  "start_time": 1500727171,
-  "end_time": 1500727171,
-  "early_timeout": 0
-},
-"timestamp": 1500727171,
-"attr": 0,
-"flags": 0,
-"type": 701
+  "messages": [
+    {
+      "type": 701,
+      "flags": 0,
+      "attr": 0,
+      "timestamp": 1614507120,
+      "timestamp_usec": 41434,
+      "servicecheck": {
+        "host_name": "linksys-srw224p",
+        "service_description": "PING",
+        "command_line": "$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5",
+        "command_name": "check_ping!200.0,20%!600.0,60%",
+        "output": "PING CRITICAL - Packet loss = 100%",
+        "long_output": "",
+        "perf_data": "rta=600.000000ms;200.000000;600.000000;0.000000 pl=100%;20;60;0",
+        "check_type": 0,
+        "current_attempt": 3,
+        "max_attempts": 3,
+        "state_type": 1,
+        "state": 2,
+        "timeout": 60,
+        "start_time": 1614507110,
+        "end_time": 1614507120,
+        "early_timeout": 0,
+        "execution_time": 10.004374,
+        "latency": 0.03640900179743767,
+        "return_code": 2
+      }
+    },
+    {
+      "type": 701,
+      "flags": 0,
+      "attr": 0,
+      "timestamp": 1614507129,
+      "timestamp_usec": 131330,
+      "servicecheck": {
+        "host_name": "localhost",
+        "service_description": "PING",
+        "command_line": "$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5",
+        "command_name": "check_ping!100.0,20%!500.0,60%",
+        "output": "PING OK - Packet loss = 0%, RTA = 0.05 ms",
+        "long_output": "",
+        "perf_data": "rta=0.055000ms;100.000000;500.000000;0.000000 pl=0%;20;60;0",
+        "check_type": 0,
+        "current_attempt": 1,
+        "max_attempts": 4,
+        "state_type": 1,
+        "state": 0,
+        "timeout": 60,
+        "start_time": 1614507125,
+        "end_time": 1614507129,
+        "early_timeout": 0,
+        "execution_time": 4.093545,
+        "latency": 0.037303999066352844,
+        "return_code": 0
+      }
+    }
+  ],
+  "format": "none"
 }
 </code></pre>
   </p>
@@ -368,29 +380,68 @@ statusngin_logentries            4       0       0
   <p>
       In addition, you can also run your monitoring core in foreground
       to debug issues or get more information about what's going on.
-      <pre>root@naemon:~# sudo -u naemon /bin/bash
-naemon@naemon:~$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
+      <pre>root@focal:~# sudo -u naemon /bin/bash
+naemon@focal:/tmp/broker$ /opt/naemon/bin/naemon /opt/naemon/etc/naemon/naemon.cfg
 
-Naemon Core 1.0.6-source
+Naemon Core 1.2.3
 Copyright (c) 2013-present Naemon Core Development Team and Community Contributors
 Copyright (c) 2009-2013 Nagios Core Development Team and Community Contributors
 Copyright (c) 1999-2009 Ethan Galstad
 License: GPL
 
 Website: http://www.naemon.org
-Naemon 1.0.6-source starting... (PID=22687)
-Local time is Tue May 16 19:57:07 CEST 2017
+Naemon 1.2.3 starting... (PID=71902)
+Local time is Sun Feb 28 10:15:14 UTC 2021
 qh: Socket '/opt/naemon/var/naemon.qh' successfully initialized
 nerd: Channel hostchecks registered successfully
 nerd: Channel servicechecks registered successfully
 nerd: Fully initialized and ready to rock!
-wproc: Successfully registered manager as @wproc with query handler
-wproc: Registry request: name=Core Worker 22689;pid=22689
-wproc: Registry request: name=Core Worker 22690;pid=22690
+Statusengine: Logstream initalized
+Statusengine: the missing event broker
+Statusengine: This is the c++ version of statusengine event broker
+Statusengine: License:
+    statusengine - the missing event broker
+    Copyright (C) 2019  The statusengine team
 
-Event broker module '/opt/statusengine/module/statusengine-naemon-1-0-5.o' initialized successfully.
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
-Successfully launched command file worker with pid 22705
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+Statusengine: Finished loading config
+Statusengine: Gearman Clients: 1
+Statusengine: Gearman 1 queue name: statusngin_hoststatus
+Statusengine: Gearman 1 queue name: statusngin_hostchecks
+Statusengine: Gearman 1 queue name: statusngin_servicestatus
+Statusengine: Gearman 1 queue name: statusngin_servicechecks
+Statusengine: Gearman 1 queue name: statusngin_service_perfdata
+Statusengine: Gearman 1 queue name: statusngin_statechanges
+Statusengine: Gearman 1 queue name: statusngin_acknowledgements
+Statusengine: Gearman 1 queue name: statusngin_flappings
+Statusengine: Gearman 1 queue name: statusngin_downtimes
+Statusengine: Gearman 1 queue name: statusngin_contactnotificationmethod
+Statusengine: Gearman 1 queue name: statusngin_core_restart
+Statusengine: Gearman 1 queue name: statusngin_ocsp
+Statusengine: Gearman 1 queue name: statusngin_ochp
+Statusengine: Rabbitmq Clients: 0
+Event broker module '/opt/statusengine/lib/libstatusengine.so' initialized successfully.
+Successfully launched command file worker with pid 71907
+^C
+Caught 'Interrupt', shutting down...
+Retention data successfully saved.
+Successfully shutdown... (PID=71902)
+Event broker module 'NERD' deinitialized successfully.
+Event broker module '/opt/statusengine/lib/libstatusengine.so' deinitialized successfully.
+Successfully reaped command worker (PID = 71907)
+naemon@focal:/tmp/broker$
       </pre>
   </p>
 </section>

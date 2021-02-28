@@ -55,6 +55,7 @@ list_mode: false
               <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="focal">Ubuntu 20.04 (Focal Fossa)</option>
               <option value="centos7">CentOS 7.5</option>
               <option value="centos8">CentOS 8</option>
           </select>
@@ -90,9 +91,9 @@ dnf module install php:remi-7.3
               <b>Install dependencies</b>
               <pre>{[{commands[selectedOs].dependencies}]}</pre>
               <p>
-                  <div class="callout callout-danger" ng-show="selectedOs == 'xenial'">
+                  <div class="callout callout-danger" ng-show="selectedOs == 'xenial' || selectedOs == 'focal'">
                       <h4>php-gearman</h4>
-                      <p>Unfortunately the php-gearman extension is missing in Ubuntu 16.04
+                      <p>Unfortunately the php-gearman extension is missing or broken in Ubuntu 20.04 / Ubuntu 16.04
                           Follow <a href="{{ site.url }}/tutorials/php-gearman-extension">this guide</a> to install it manually</p>
                   </div>
               </p>
@@ -106,15 +107,6 @@ systemctl enable redis</pre>
           </li>
           <li>
               <b>Download and Install</b>
-              <div class="callout callout-info">
-                  <h4>Use stable versions for production</h4>
-                  <p>
-                      Stable versions could be found on the
-                      <a href="https://github.com/statusengine/worker/releases" target="_blank">
-                          release page
-                      </a>.
-                  </p>
-              </div>
               <pre>mkdir -p /opt/statusengine
 cd /opt/statusengine
 git clone https://github.com/statusengine/worker.git worker
@@ -143,6 +135,10 @@ composer install
       <br />
       <b>Notice: You need to run every sql query separately! Do NOT PASTE the whole file at once into the SQL Console</b>
       <br />
+      Unfortunately for now, CrateDB users have to manage the database schema manually due to
+      <a href="https://github.com/crate/crate-dbal/issues/92" target="_blank">crate/crate-dbal#92</a>
+      <br />
+      <br />
       With CrateDB, you don't have to create a separate database or user for Statusengine.
   </p>
   <p>
@@ -154,7 +150,10 @@ composer install
 CREATE DATABASE IF NOT EXISTS `statusengine` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 GRANT ALL PRIVILEGES ON `statusengine`.* TO 'statusengine'@'localhost';
 </code></pre>
-      Import the Statusengine Schema.
+    Since Statusengine 3.7 Statusengine will manage the database schema automatically
+    <br/>
+
+    <b style="color:red;">For Statusengine versions < 3.7 load the schema now. So only execute this if you are installing an old version</b>
 <pre>
 # -p statusengine does not mean that "statusengine" is the password! This is the name of the database!
 mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
@@ -248,9 +247,15 @@ mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
             <code>external_command_file</code>
             <br />
             Set the right path to your external command file (nagios.cmd/naemon.cmd)
+            <br />
+            Since Statusengine 3.7 the C++ Broker Module will be used by default to submit external commands to Naemon/Nagios
         </li>
       </ul>
   </p>
+    <p>
+        <b>Load MySQL database schema</b>
+    <pre>/opt/statusengine/worker/bin/Console.php database --update</pre>
+    </p>
 
 </section>
 
@@ -263,7 +268,9 @@ mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
            <li><a href="/tutorials/MySQL-Perfdata-Backend">MySQL</a></li>
            <li><a href="/tutorials/Elasticsearch-Perfdata-Backend">Elasticsearch 5.x</a>
                /
-           <a href="/tutorials/Elasticsearch6-Perfdata-Backend">Elasticsearch 6.x</a></li>
+           <a href="/tutorials/Elasticsearch6-Perfdata-Backend">Elasticsearch 6.x</a>
+               /
+           <a href="/tutorials/Elasticsearch7-Perfdata-Backend">Elasticsearch 7.x</a></li>
            <li><a href="/tutorials/Graphite-Grafana">Graphite</a></li>
        </ul>
   </p>

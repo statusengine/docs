@@ -1,37 +1,23 @@
 angular.module('StatusengineDocs')
 
     .controller("BrokerController", function ($scope) {
-        $scope.selectedOs = 'bionic';
+        $scope.selectedOs = 'focal';
         $scope.selectedCore = 'naemon';
-        $scope.selectedQueue = 'rabbitmq';
+        $scope.selectedQueue = 'gearman'; // rabbitmq
 
         $scope.commands = {
+            focal: {
+                dependencies: 'apt-get install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev',
+                pip: 'pip3 install meson ninja',
+                restartMonitoring: 'systemctl restart naemon',
+                queueDep: {
+                    rabbitmq: 'rabbitmq-server',
+                    gearman: 'gearman-job-server'
+                }
+            },
             bionic: {
-                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu60 libjson-c3 libssl1.1 librabbitmq4 libgearman8',
-                restartMonitoring: 'systemctl restart naemon',
-                queueDep: {
-                    rabbitmq: 'rabbitmq-server',
-                    gearman: 'gearman-job-server'
-                }
-            },
-            xenial: {
-                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu55 libjson-c2 libssl1.0.0 librabbitmq4 libgearman7',
-                restartMonitoring: 'systemctl restart naemon',
-                queueDep: {
-                    rabbitmq: 'rabbitmq-server',
-                    gearman: 'gearman-job-server'
-                }
-            },
-            trusty: {
-                dependencies: 'apt-get install libglib2.0-0 libuuid1 libicu52 libjson-c2 libssl1.0.0 librabbitmq1 libgearman7',
-                restartMonitoring: 'service naemon restart',
-                queueDep: {
-                    rabbitmq: 'rabbitmq-server',
-                    gearman: 'gearman-job-server'
-                }
-            },
-            centos7: {
-                dependencies: 'yum install git gearmand libgearman-devel libuuid-devel json-c-devel glib2-devel',
+                dependencies: 'apt-get install git python3-pip gcc g++ cmake build-essential libglib2.0-dev libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config libssl-dev librabbitmq-dev',
+                pip: 'pip3 install meson ninja',
                 restartMonitoring: 'systemctl restart naemon',
                 queueDep: {
                     rabbitmq: 'rabbitmq-server',
@@ -39,7 +25,8 @@ angular.module('StatusengineDocs')
                 }
             },
             centos8: {
-                dependencies: 'yum install git gearmand libgearman-devel libuuid-devel json-c-devel glib2-devel',
+                dependencies: 'yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel',
+                pip: 'pip install meson ninja',
                 restartMonitoring: 'systemctl restart naemon',
                 queueDep: {
                     rabbitmq: 'rabbitmq-server',

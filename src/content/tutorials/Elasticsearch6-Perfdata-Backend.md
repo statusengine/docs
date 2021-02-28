@@ -6,6 +6,8 @@ description: "How To store Nagios or Naemon Performance Data to Elasticsearch 6.
 Related topics:
 
 - <a href="{{ site.url }}/tutorials/Elasticsearch-Perfdata-Backend">Store Nagios or Naemon Performance Data to Elasticsearch 5.x</a>
+- <a href="{{ site.url }}/tutorials/Elasticsearch6-Perfdata-Backend">Store Nagios or Naemon Performance Data to Elasticsearch 6.x</a>
+- <a href="{{ site.url }}/tutorials/Elasticsearch7-Perfdata-Backend">Store Nagios or Naemon Performance Data to Elasticsearch 7.x</a>
 
 In this tutorial, we are going to configure your system, to store Nagios and Naemon Performance Data into an Elasticsearch Cluster.
 

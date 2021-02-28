@@ -6,7 +6,9 @@ description: "In this tutorial I show you, how to install Naemon Core by yoursel
 
 Related topics:
 
+- <a href="{{ site.url }}/tutorials/install-naemon">Install Naemon Core on Ubuntu Xenial 16.04</a>
 - <a href="{{ site.url }}/tutorials/install-naemon-bionic">Install Naemon Core on Ubuntu Bionic 18.04</a>
+- <a href="{{ site.url }}/tutorials/install-naemon-focal">Install Naemon Core on Ubuntu Focal 20.04</a>
 - <a href="{{ site.url }}/tutorials/install-naemon-centos7">Install Naemon Core on CentOS 7.5</a>
 - <a href="{{ site.url }}/tutorials/install-naemon-centos8">Install Naemon Core on CentOS 8</a>
 

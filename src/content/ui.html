@@ -111,6 +111,7 @@ list_mode: false
               <option value="trusty">Ubuntu 14.04 (Trusty Tahr)</option>
               <option value="xenial">Ubuntu 16.04 (Xenial Xerus)</option>
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
+              <option value="focal">Ubuntu 20.04 (Focal Fossa)</option>
               <option value="centos7">CentOS 7.5</option>
               <option value="centos8">CentOS 8</option>
           </select>
@@ -148,15 +149,7 @@ dnf module install php:remi-7.3
           </li>
           <li>
               <b>Download and Install</b>
-              <div class="callout callout-info">
-                  <h4>Use stable versions for production</h4>
-                  <p>
-                      Stable versions could be found on the
-                      <a href="https://github.com/statusengine/interface/releases" target="_blank">
-                          release page
-                      </a>.
-                  </p>
-              </div>
+
               <pre>cd /usr/share/
 git clone https://github.com/statusengine/interface.git statusengine-ui
 cd /usr/share/statusengine-ui
