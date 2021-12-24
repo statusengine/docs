@@ -81,7 +81,7 @@ list_mode: false
           <select class="form-control" ng-model="selectedOs">
               <option value="bionic">Ubuntu 18.04 (Bionic Beaver)</option>
               <option value="focal">Ubuntu 20.04 (Focal Fossa)</option>
-              <option value="centos8">CentOS 8</option>
+              <option value="centos8">CentOS 8.5</option>
           </select>
       </div>
       <div class="form-group">
@@ -109,7 +109,10 @@ yum check-update
 
 yum group install "Development Tools"
 
-dnf --enablerepo=PowerTools install json-c-devel</pre>
+dnf -y config-manager --set-enabled powertools
+dnf install json-c-devel
+
+</pre>
 yum check-update</pre>
           </li>
           <li>

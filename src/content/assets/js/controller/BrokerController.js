@@ -25,12 +25,12 @@ angular.module('StatusengineDocs')
                 }
             },
             centos8: {
-                dependencies: 'yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel',
-                pip: 'pip install meson ninja',
+                dependencies: 'yum install git python3-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel libgearman-devel uchardet-devel json-c-devel openssl-devel glib2-devel',
+                pip: 'pip3 install meson ninja',
                 restartMonitoring: 'systemctl restart naemon',
                 queueDep: {
                     rabbitmq: 'rabbitmq-server',
-                    gearman: 'gearman-job-server'
+                    gearman: 'gearmand'
                 }
             }
         };
