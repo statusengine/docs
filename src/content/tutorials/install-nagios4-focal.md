@@ -54,6 +54,7 @@ make install
 make install-commandmode
 make install-config
 make install install-devel
+make install-devel
 ````
 
 ## Start Nagios Core (through systemd - recommended)
