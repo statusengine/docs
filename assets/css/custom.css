@@ -351,6 +351,125 @@ article.content h2 {
   color: var(--se-brand);
 }
 
+/* --- Theme toggle --------------------------------------------------------- */
+
+/* Written by hand rather than as Tailwind variants: the theme ships a
+   precompiled stylesheet, so any group-data-[...] class upstream never used
+   would silently not exist. See layouts/partials/theme-toggle.html. */
+.se-theme-toggle__inner {
+  display: flex;
+  align-items: center;
+}
+.se-theme-state {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: capitalize;
+}
+.se-theme-toggle[data-theme="system"] .se-theme-state[data-for="system"],
+.se-theme-toggle[data-theme="light"] .se-theme-state[data-for="light"],
+.se-theme-toggle[data-theme="dark"] .se-theme-state[data-for="dark"] {
+  display: flex;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+
+/* Upstream gives this container a max-width but no auto margins, so it sits
+   flush left inside a full-width footer. The copyright row below it does get
+   hx-mx-auto, which is what makes the mismatch obvious. */
+.hextra-custom-footer {
+  margin-inline: auto;
+}
+
+/* --- Diagrams ------------------------------------------------------------- */
+
+/* Mermaid renders at the diagram's natural size and caps it with an inline
+   max-width, which on a wide column leaves a small graphic floating in white
+   space. Let it fill the column instead. */
+pre.mermaid {
+  margin-block: 2rem;
+  padding: 1.25rem;
+  border: 1px solid var(--se-hairline);
+  border-radius: 0.75rem;
+  background: var(--se-surface-sunken);
+  text-align: center;
+  cursor: zoom-in;
+  transition: border-color 0.15s ease;
+}
+pre.mermaid:hover,
+pre.mermaid:focus-visible {
+  border-color: color-mix(in srgb, var(--se-brand) 45%, transparent);
+}
+pre.mermaid > svg {
+  width: 100%;
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* The affordance, so it is discoverable without hovering everything. */
+pre.mermaid[data-se-expandable="1"] {
+  position: relative;
+}
+pre.mermaid[data-se-expandable="1"]::after {
+  content: "Click to enlarge";
+  position: absolute;
+  top: 0.6rem;
+  inset-inline-end: 0.75rem;
+  font-family: var(--se-font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.02em;
+  color: var(--se-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+pre.mermaid[data-se-expandable="1"]:hover::after {
+  opacity: 1;
+}
+
+.se-diagram-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgb(0 0 0 / 72%);
+  backdrop-filter: blur(3px);
+  cursor: zoom-out;
+}
+.se-diagram-overlay__stage {
+  width: 100%;
+  max-width: 1400px;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--se-surface);
+  cursor: default;
+}
+.se-diagram-overlay__stage svg {
+  width: 100%;
+  max-width: 100% !important;
+  height: auto;
+}
+.se-diagram-overlay__close {
+  position: absolute;
+  top: 1rem;
+  inset-inline-end: 1.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 25%);
+  background: rgb(0 0 0 / 35%);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.se-diagram-overlay__close:hover {
+  background: rgb(0 0 0 / 55%);
+}
+
 /* --- Motion --------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

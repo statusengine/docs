@@ -1,0 +1,127 @@
+{{/*
+  Project override of themes/hextra/layouts/partials/scripts/mermaid.html.
+
+  Upstream renders the diagram at its natural size and leaves it there. Two
+  additions:
+    1. maxTextSize/fontFamily so the diagram uses the site's own font.
+    2. A click-to-expand overlay, because a flowchart that fits a 700px column
+       is not always readable and there is no other way to enlarge it.
+
+  Everything else — the dark/light re-render on the html class MutationObserver —
+  is upstream's and must stay: mermaid bakes its colours into the SVG, so the
+  diagram has to be rebuilt whenever the theme changes.
+
+  Keep in sync when bumping the theme.
+*/}}
+
+{{- $mermaidJS := resources.Get "lib/mermaid/mermaid.min.js" | fingerprint -}}
+<script defer src="{{ $mermaidJS.RelPermalink }}" integrity="{{ $mermaidJS.Data.Integrity }}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const config = () => ({
+      startOnLoad: true,
+      theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
+      fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--se-font-sans").trim()
+        || "sans-serif",
+      flowchart: { htmlLabels: true, padding: 12 }
+    });
+
+    document.querySelectorAll(".mermaid").forEach(el => {
+      el.dataset.original = el.innerHTML;
+    });
+
+    mermaid.initialize(config());
+
+    let timeout;
+    new MutationObserver(() => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        document.querySelectorAll(".mermaid").forEach(el => {
+          el.innerHTML = el.dataset.original;
+          el.removeAttribute("data-processed");
+        });
+        mermaid.initialize(config());
+        mermaid.init();
+        decorate();
+      }, 150);
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    /* --- Click to expand ------------------------------------------------- */
+
+    let overlay;
+
+    const closeOverlay = () => {
+      if (!overlay) return;
+      overlay.remove();
+      overlay = null;
+      document.body.style.overflow = "";
+    };
+
+    const openOverlay = (svg) => {
+      closeOverlay();
+      overlay = document.createElement("div");
+      overlay.className = "se-diagram-overlay";
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute("aria-label", "Enlarged diagram");
+
+      const stage = document.createElement("div");
+      stage.className = "se-diagram-overlay__stage";
+      stage.appendChild(svg.cloneNode(true));
+
+      const close = document.createElement("button");
+      close.type = "button";
+      close.className = "se-diagram-overlay__close";
+      close.setAttribute("aria-label", "Close");
+      close.textContent = "×";
+      close.addEventListener("click", closeOverlay);
+
+      overlay.append(stage, close);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) closeOverlay();
+      });
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      close.focus();
+    };
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeOverlay();
+    });
+
+    const decorate = () => {
+      document.querySelectorAll("pre.mermaid").forEach(pre => {
+        const svg = pre.querySelector("svg");
+        if (!svg || pre.dataset.seExpandable === "1") return;
+        pre.dataset.seExpandable = "1";
+        pre.tabIndex = 0;
+        pre.setAttribute("role", "button");
+        pre.setAttribute("aria-label", "Enlarge diagram");
+        pre.addEventListener("click", () => {
+          const current = pre.querySelector("svg");
+          if (current) openOverlay(current);
+        });
+        pre.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            const current = pre.querySelector("svg");
+            if (current) openOverlay(current);
+          }
+        });
+      });
+    };
+
+    // mermaid renders asynchronously after initialize(); poll briefly rather
+    // than guess a fixed delay.
+    let tries = 0;
+    const wait = setInterval(() => {
+      decorate();
+      if (++tries > 40 || document.querySelector('pre.mermaid[data-se-expandable="1"]')) {
+        clearInterval(wait);
+      }
+    }, 100);
+  });
+</script>

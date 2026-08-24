@@ -1,0 +1,35 @@
+{{/*
+  Project override of themes/hextra/layouts/partials/theme-toggle.html.
+
+  Three states instead of two, so "follow the system" stays reachable after the
+  first click. The button shows the state it is *in*, not the one it would
+  switch to; assets/js/theme.js sets data-theme on the button.
+
+  Visibility is driven by hand-written rules in assets/css/custom.css, not by
+  Tailwind variants: the theme ships a precompiled stylesheet, so a
+  group-data-[...] class that upstream never used would not exist in it.
+*/}}
+{{- $hideLabel := .hideLabel | default false -}}
+
+<button
+  title="Change theme"
+  data-theme="system"
+  class="theme-toggle se-theme-toggle hx-h-7 hx-rounded-md hx-px-2 hx-text-left hx-text-xs hx-font-medium hx-text-gray-600 hx-transition-colors dark:hx-text-gray-400 hover:hx-bg-gray-100 hover:hx-text-gray-900 dark:hover:hx-bg-primary-100/5 dark:hover:hx-text-gray-50"
+  type="button"
+  aria-label="Change theme"
+>
+  <span class="se-theme-toggle__inner">
+    <span class="se-theme-state" data-for="system">
+      {{- partial "utils/icon.html" (dict "name" "desktop-computer" "attributes" "height=12") -}}
+      {{- if not $hideLabel }}<span>System</span>{{ end -}}
+    </span>
+    <span class="se-theme-state" data-for="light">
+      {{- partial "utils/icon.html" (dict "name" "sun" "attributes" "height=12") -}}
+      {{- if not $hideLabel }}<span>Light</span>{{ end -}}
+    </span>
+    <span class="se-theme-state" data-for="dark">
+      {{- partial "utils/icon.html" (dict "name" "moon" "attributes" "height=12") -}}
+      {{- if not $hideLabel }}<span>Dark</span>{{ end -}}
+    </span>
+  </span>
+</button>
