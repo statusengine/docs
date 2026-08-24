@@ -1,0 +1,26 @@
+{{- $ctx := .context -}}
+<div class="se-footer">
+  <div>
+    <div class="se-footer__brand">
+      <img src="{{ "images/logo-mark.svg" | relURL }}" width="24" height="24" alt="" />
+      <span>Statusengine</span>
+    </div>
+    <p class="se-footer__note">
+      Free software for scaling Nagios and Naemon monitoring. Broker module and
+      worker are licensed under the GPL.
+    </p>
+  </div>
+
+  <div class="se-footer__links">
+    <a href="{{ "docs/broker/" | relURL }}">Broker</a>
+    <a href="{{ "docs/worker/" | relURL }}">Worker</a>
+    <a href="{{ "tutorials/" | relURL }}">Tutorials</a>
+    <a href="https://github.com/statusengine" target="_blank" rel="noreferrer">GitHub</a>
+    <a href="https://demo.statusengine.org" target="_blank" rel="noreferrer">Demo</a>
+  </div>
+
+  <div class="se-footer__links">
+    <span>© {{ now.Year }} The Statusengine team</span>
+    <a href="https://github.com/imfing/hextra" target="_blank" rel="noreferrer">Built with Hextra</a>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+# Every Hugo invocation for this site runs through this file.
+#
+# Do not build the site with a locally installed Hugo: Hextra requires the
+# *extended* edition (themes/hextra/theme.toml: min_version 0.134.0), and a
+# plain Hugo build fails on the theme's SCSS. The image below is pinned to an
+# exact extended release so builds stay reproducible.
+services:
+  dev:
+    image: &hugo hugomods/hugo:exts-0.154.5
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    working_dir: /src
+    volumes:
+      - .:/src
+    ports:
+      - "1313:1313"
+    command: >
+      hugo server
+      --bind 0.0.0.0
+      --port 1313
+      --disableFastRender
+      --navigateToChanged
+
+  build:
+    image: *hugo
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    working_dir: /src
+    volumes:
+      - .:/src
+    profiles: ["cli"]
+    command: hugo --minify --gc --cleanDestinationDir
+
+  shell:
+    image: *hugo
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    working_dir: /src
+    volumes:
+      - .:/src
+    profiles: ["cli"]
+    entrypoint: sh

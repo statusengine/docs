@@ -1,0 +1,365 @@
+/* ---------------------------------------------------------------------------
+   Statusengine — site theme on top of Hextra.
+
+   Hextra picks this file up automatically (themes/hextra/layouts/partials/
+   head-css.html). Never edit anything under themes/hextra/ — it is a vendored
+   upstream copy and gets overwritten by `make upgrade-theme`.
+
+   All web fonts are served from this origin. No CDN, no Google Fonts request.
+   --------------------------------------------------------------------------- */
+
+/* --- Self-hosted fonts ---------------------------------------------------- */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/inter-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/jetbrains-mono-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- Tokens --------------------------------------------------------------- */
+
+:root {
+  /* Hextra derives every accent from these three. #b03b2d == hsl(6.4 59.3% 43.3%) */
+  --primary-hue: 6.4deg;
+  --primary-saturation: 59.3%;
+  --primary-lightness: 43.3%;
+
+  --se-brand: #b03b2d;
+  --se-brand-bright: #c9503d;
+  --se-brand-deep: #8c2f24;
+
+  --se-ink: #16110f;
+  --se-muted: #6b625f;
+  --se-surface: #ffffff;
+  --se-surface-sunken: #faf7f6;
+  --se-hairline: rgb(0 0 0 / 8%);
+
+  --se-gradient-accent: linear-gradient(
+    135deg,
+    var(--se-brand-bright) 0%,
+    var(--se-brand-deep) 100%
+  );
+  --se-gradient-hero: radial-gradient(
+      1100px 480px at 12% -12%,
+      rgb(176 59 45 / 14%) 0%,
+      transparent 62%
+    ),
+    radial-gradient(820px 420px at 88% 0%, rgb(140 47 36 / 9%) 0%, transparent 60%);
+  --se-gradient-text: linear-gradient(
+    100deg,
+    var(--se-brand-deep) 0%,
+    var(--se-brand-bright) 55%,
+    #d9705d 100%
+  );
+
+  --se-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --se-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono",
+    Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+.dark {
+  /* At 43% lightness the brand red sits too close to the dark background;
+     lifting it keeps link text above 4.5:1 without changing the hue. */
+  --primary-lightness: 56%;
+
+  --se-ink: #f2eeec;
+  --se-muted: #a49b98;
+  --se-surface: #111010;
+  --se-surface-sunken: #1a1717;
+  --se-hairline: rgb(255 255 255 / 10%);
+
+  --se-gradient-hero: radial-gradient(
+      1100px 480px at 12% -12%,
+      rgb(201 80 61 / 20%) 0%,
+      transparent 62%
+    ),
+    radial-gradient(820px 420px at 88% 0%, rgb(140 47 36 / 16%) 0%, transparent 60%);
+  --se-gradient-text: linear-gradient(
+    100deg,
+    #e08573 0%,
+    #cf6552 45%,
+    var(--se-brand-bright) 100%
+  );
+}
+
+/* --- Typography ----------------------------------------------------------- */
+
+html {
+  font-family: var(--se-font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+code,
+kbd,
+pre,
+samp,
+.hextra-code-block,
+.chroma {
+  font-family: var(--se-font-mono);
+  font-variant-ligatures: none;
+}
+
+article.content h1,
+article.content h2,
+article.content h3 {
+  letter-spacing: -0.018em;
+}
+
+article.content h2 {
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--se-hairline);
+}
+
+/* --- Navbar --------------------------------------------------------------- */
+
+/* A hairline in the brand gradient instead of Hextra's flat grey shadow. */
+.nav-container-blur {
+  box-shadow: none;
+  border-bottom: 1px solid var(--se-hairline);
+}
+.nav-container::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--se-gradient-accent);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.nav-container nav > a:first-child span {
+  letter-spacing: -0.02em;
+}
+
+/* --- Landing page --------------------------------------------------------- */
+
+.se-hero {
+  position: relative;
+  margin-block: 1rem 3.5rem;
+  padding-block: 3.5rem 1rem;
+}
+.se-hero::before {
+  content: "";
+  position: absolute;
+  inset: -6rem -50vw 0;
+  background: var(--se-gradient-hero);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.se-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--se-hairline);
+  border-radius: 999px;
+  background: var(--se-surface-sunken);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--se-muted);
+}
+.se-hero__eyebrow::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--se-brand);
+}
+
+.se-hero__title {
+  margin-block: 1.25rem 0;
+  font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+.se-hero__title em {
+  font-style: normal;
+  background: var(--se-gradient-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.se-hero__lead {
+  max-width: 46rem;
+  margin-top: 1.25rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--se-muted);
+}
+
+.se-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.se-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.se-btn--primary {
+  background: var(--se-gradient-accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(140 47 36 / 40%), 0 8px 24px -8px rgb(176 59 45 / 55%);
+}
+.se-btn--ghost {
+  border: 1px solid var(--se-hairline);
+  background: var(--se-surface);
+  color: var(--se-ink);
+}
+.se-btn:hover {
+  transform: translateY(-1px);
+}
+.se-btn--primary:hover {
+  box-shadow: 0 2px 4px rgb(140 47 36 / 45%), 0 14px 32px -10px rgb(176 59 45 / 65%);
+}
+
+/* Cards: give Hextra's grid a brand-tinted hover instead of the default grey. */
+.hextra-card:hover {
+  border-color: color-mix(in srgb, var(--se-brand) 45%, transparent);
+  box-shadow: 0 10px 30px -18px rgb(176 59 45 / 55%);
+}
+
+.se-section-label {
+  margin-block: 3.5rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--se-brand);
+}
+
+/* --- Code blocks ---------------------------------------------------------- */
+
+.hextra-code-block pre {
+  border: 1px solid var(--se-hairline);
+  border-radius: 0.5rem;
+}
+/* The language of a fenced block, surfaced on hover, so a toml block is never
+   mistaken for a yaml one. */
+.hextra-code-block {
+  position: relative;
+}
+.hextra-code-block[data-lang]::after {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.4rem;
+  inset-inline-end: 3rem;
+  font-family: var(--se-font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--se-muted);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.hextra-code-block:hover[data-lang]::after {
+  opacity: 1;
+}
+
+/* --- Footer --------------------------------------------------------------- */
+
+.hextra-footer {
+  border-top: 1px solid var(--se-hairline);
+  background: var(--se-surface-sunken);
+}
+
+.se-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 3rem;
+  justify-content: space-between;
+  padding-block: 2.5rem;
+  font-size: 0.875rem;
+}
+.se-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--se-ink);
+}
+.se-footer__brand img {
+  width: 24px;
+  height: 24px;
+}
+.se-footer__note {
+  max-width: 24rem;
+  margin-top: 0.5rem;
+  color: var(--se-muted);
+}
+.se-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+}
+.se-footer__links a {
+  color: var(--se-muted);
+  text-decoration: none;
+}
+.se-footer__links a:hover {
+  color: var(--se-brand);
+}
+
+/* --- Motion --------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .se-btn,
+  .hextra-card,
+  .hextra-code-block[data-lang]::after {
+    transition: none;
+  }
+  .se-btn:hover {
+    transform: none;
+  }
+}

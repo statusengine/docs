@@ -1,0 +1,126 @@
+# Statusengine documentation site.
+# Build only via `make dev` / `make build` (pinned Hugo extended container).
+
+baseURL: "https://statusengine.org/"
+title: "Statusengine"
+theme: "hextra"
+
+languageCode: "en"
+defaultContentLanguage: "en"
+enableRobotsTXT: true
+enableEmoji: true
+# No git remote yet; re-enable together with params.editURL when there is one.
+enableGitInfo: false
+
+# Refuse to build on a non-extended Hugo instead of failing deep inside the
+# theme's SCSS pipeline.
+module:
+  hugoVersion:
+    extended: true
+    min: "0.134.0"
+
+outputs:
+  home: [HTML]
+  page: [HTML]
+  section: [HTML, RSS]
+
+markup:
+  highlight:
+    # CSS classes instead of inline styles, so the theme's chroma stylesheets
+    # can switch between light and dark. Never set this to true.
+    noClasses: false
+    lineNumbersInTable: true
+    tabWidth: 4
+    wrapperClass: "highlight"
+  goldmark:
+    renderer:
+      # Required by Hextra's shortcodes.
+      unsafe: true
+    extensions:
+      passthrough:
+        enable: true
+        delimiters:
+          block: [["\\[", "\\]"], ["$$", "$$"]]
+          inline: [["\\(", "\\)"]]
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
+
+menu:
+  main:
+    - name: "Documentation"
+      pageRef: "/docs"
+      weight: 1
+    - name: "Tutorials"
+      pageRef: "/tutorials"
+      weight: 2
+    - name: "Search"
+      weight: 3
+      params:
+        type: search
+    - name: "GitHub"
+      weight: 4
+      url: "https://github.com/statusengine"
+      params:
+        icon: github
+
+  sidebar:
+    - identifier: "demo"
+      name: "Demo instance ↗"
+      url: "https://demo.statusengine.org"
+      weight: 1
+
+params:
+  description: "Scale your Nagios or Naemon monitoring horizontally with a C++ event broker and a Go worker."
+
+  navbar:
+    displayTitle: true
+    displayLogo: true
+    logo:
+      path: "images/logo-mark.svg"
+      link: "/"
+      width: 28
+      height: 28
+
+  footer:
+    enable: true
+    width: "normal"
+    # Rendered by layouts/partials/custom/footer.html instead.
+    displayCopyright: false
+    displayPoweredBy: false
+
+  theme:
+    default: "system"
+    displayToggle: true
+
+  search:
+    enable: true
+    # FlexSearch is bundled in the theme and indexes locally. No external service.
+    type: "flexsearch"
+    flexsearch:
+      index: "content"
+      tokenize: "forward"
+
+  highlight:
+    copy:
+      enable: true
+      display: "hover"
+
+  editURL:
+    enable: false
+
+  displayUpdatedDate: false
+  dateFormat: "2 January 2006"
+  enableImageLazyLoading: true
+
+  # Deliberately absent: services.googleAnalytics and params.comments.
+  # They are the only two places where Hextra would contact an external host.
+
+privacy:
+  # Belt and braces: even if a shortcode for these is ever added, no request leaves.
+  youtube:
+    disable: true
+  vimeo:
+    disable: true
+  x:
+    disable: true

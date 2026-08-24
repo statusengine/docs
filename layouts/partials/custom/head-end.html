@@ -1,0 +1,8 @@
+{{/* Preload the two font subsets that every page needs immediately. The
+     -ext subsets stay lazy: they only load if the page actually contains a
+     character in their unicode-range. */}}
+<link rel="preload" href="{{ "fonts/inter-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="{{ "fonts/jetbrains-mono-latin.woff2" | relURL }}" as="font" type="font/woff2" crossorigin />
+
+<meta name="theme-color" content="#b03b2d" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#111010" media="(prefers-color-scheme: dark)" />

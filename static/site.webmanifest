@@ -1,0 +1,8 @@
+{
+  "name": "Statusengine",
+  "short_name": "Statusengine",
+  "icons": [{ "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" }],
+  "theme_color": "#b03b2d",
+  "background_color": "#ffffff",
+  "display": "browser"
+}

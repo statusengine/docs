@@ -1,0 +1,20 @@
+{{/*
+  Copy of themes/hextra/layouts/_default/_markup/render-codeblock.html with one
+  addition: data-lang on the wrapper, so custom.css can surface the language of
+  a fenced block on hover. CLAUDE.md requires every example to carry a correct
+  language tag; this makes a missing or wrong one visible while reading.
+
+  Keep in sync when bumping the theme.
+*/}}
+{{- $class := .Attributes.class | default "" -}}
+{{- $filename := .Attributes.filename | default "" -}}
+{{- $base_url := .Attributes.base_url | default "" -}}
+{{- $lang := .Attributes.lang | default .Type -}}
+
+<div class="hextra-code-block hx-relative hx-mt-6 first:hx-mt-0 hx-group/code"{{ with $lang }} data-lang="{{ . }}"{{ end }}>
+  {{- partial "components/codeblock" (dict "filename" $filename "lang" $lang "base_url" $base_url "content" .Inner "options" .Options) -}}
+
+  {{- if or (eq site.Params.highlight.copy.enable nil) (site.Params.highlight.copy.enable) -}}
+    {{- partialCached "components/codeblock-copy-button" (dict "filename" $filename) $filename -}}
+  {{- end -}}
+</div>
