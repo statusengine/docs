@@ -64,12 +64,12 @@
          reach the page's self-hosted fonts, and pulling one from a font CDN is
          out of the question. Paths render identically everywhere. -->
     <g stroke="none" fill="#FFFFFF">
-      <path fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"
-            d="M103.5 179.9 A21 21 0 1 0 103.5 212.1"/>
-      <rect x="123" y="191" width="24" height="10" rx="2"/>
-      <rect x="130" y="184" width="10" height="24" rx="2"/>
-      <rect x="153" y="191" width="24" height="10" rx="2"/>
-      <rect x="160" y="184" width="10" height="24" rx="2"/>
+      <path fill="none" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"
+            d="M99.9 182.7 A20 20 0 1 0 99.9 213.3"/>
+      <rect x="116" y="193" width="28" height="10" rx="2"/>
+      <rect x="125" y="184" width="10" height="28" rx="2"/>
+      <rect x="150" y="193" width="28" height="10" rx="2"/>
+      <rect x="159" y="184" width="10" height="28" rx="2"/>
     </g>
 
     <!-- Antenna. -->

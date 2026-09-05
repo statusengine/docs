@@ -29,6 +29,21 @@ services:
     profiles: ["cli"]
     command: hugo --minify --gc --cleanDestinationDir
 
+  # Visual review of the built site. Behind the cli profile so a plain
+  # `docker compose up` never pulls a browser image.
+  shots:
+    build:
+      context: ./scripts/shots
+    image: statusengine-docs-shots:pw1.63.0
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    environment:
+      HOME: /tmp
+    working_dir: /shots
+    volumes:
+      - .:/src
+    profiles: ["cli"]
+    command: node shoot.js
+
   shell:
     image: *hugo
     user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"

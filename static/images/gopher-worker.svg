@@ -42,8 +42,8 @@
     <circle cx="182" cy="88" r="19" fill="url(#seBody)"/>
     <circle cx="58" cy="88" r="9" fill="#5FAFC8" stroke="none"/>
     <circle cx="182" cy="88" r="9" fill="#5FAFC8" stroke="none"/>
-    <ellipse cx="212" cy="222" rx="10" ry="15" fill="url(#seBody)"
-             transform="rotate(-18 212 222)"/>
+    <ellipse cx="196" cy="233" rx="8" ry="13" fill="url(#seBody)"
+             transform="rotate(-40 196 233)"/>
 
     <!-- Body. -->
     <path fill="url(#seBody)" d="M120 62
@@ -71,15 +71,15 @@
     <circle cx="134" cy="126" r="5" fill="#FFFFFF" stroke="none"/>
 
     <!-- Snout. -->
-    <ellipse cx="120" cy="168" rx="10" ry="8" fill="#1F3A45" stroke="none"/>
-    <rect x="109" y="176" width="10.5" height="23" rx="3" fill="#FFFFFF" stroke-width="3"/>
-    <rect x="120.5" y="176" width="10.5" height="23" rx="3" fill="#FFFFFF" stroke-width="3"/>
+    <ellipse cx="120" cy="166" rx="11" ry="8.5" fill="#1F3A45" stroke="none"/>
+    <rect x="103.5" y="172" width="16" height="21" rx="4" fill="#FFFFFF" stroke-width="3"/>
+    <rect x="120.5" y="172" width="16" height="21" rx="4" fill="#FFFFFF" stroke-width="3"/>
 
     <!-- Beacon. -->
     <circle class="se-glow" cx="120" cy="42" r="34" fill="url(#seGlow)" stroke="none"/>
-    <path class="se-cone-l" d="M118 44 L44 12 L52 42 Z" fill="#c9503d" stroke="none"/>
-    <path class="se-cone-r" d="M122 44 L196 12 L188 42 Z" fill="#c9503d" stroke="none"/>
-    <rect x="104" y="46" width="32" height="18" rx="6" fill="#2A2320"/>
+    <path class="se-cone-l" d="M112 34 L80 6 L94 2 Z" fill="#c9503d" stroke="none"/>
+    <path class="se-cone-r" d="M128 34 L160 6 L146 2 Z" fill="#c9503d" stroke="none"/>
+    <rect x="106" y="46" width="28" height="13" rx="5" fill="#2A2320"/>
     <path d="M104 47 A16 16 0 0 1 136 47 Z" fill="url(#seDome)"/>
     <ellipse cx="112" cy="39" rx="3.5" ry="6" fill="#FFFFFF" stroke="none" opacity=".45"
              transform="rotate(-20 112 39)"/>

@@ -17,7 +17,7 @@ weight: 20
          alt="A Go gopher wearing a red warning beacon on its head." />
     <figcaption>
       Based on the Go gopher by Renée French,
-      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>.
+      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>.
     </figcaption>
   </figure>
 </div>
