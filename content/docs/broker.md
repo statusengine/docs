@@ -5,9 +5,18 @@ date: 2026-08-24
 weight: 10
 ---
 
-The Statusengine Broker Module is a small C++ library that gets loaded into your
-Naemon or Nagios Core. It grabs status information as it happens, encodes it as
-JSON, and publishes it to a Gearman job server or to RabbitMQ.
+<div class="se-intro">
+  <p>
+    The Statusengine Broker Module is a small C++ library that gets loaded into
+    your Naemon or Nagios Core. It grabs status information as it happens,
+    encodes it as JSON, and publishes it to a Gearman job server or to RabbitMQ.
+  </p>
+
+  <figure class="se-mascot">
+    <img src="/images/cpp-broker.svg" width="240" height="290"
+         alt="A blue hexagonal character marked C++, transmitting from a red antenna." />
+  </figure>
+</div>
 
 Because a queue sits in between, the monitoring core never waits on a database or
 on disk I/O. Publishing is a local hand-off; everything after that is somebody

@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 290" width="240" height="290"
+     role="img" aria-labelledby="cppTitle cppDesc">
+  <title id="cppTitle">The Statusengine Broker hexagon</title>
+  <desc id="cppDesc">A blue hexagonal character marked C++, with a red transmitting antenna.</desc>
+
+  <defs>
+    <linearGradient id="seHex" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8FBFEA"/>
+      <stop offset="1" stop-color="#4A82BC"/>
+    </linearGradient>
+    <linearGradient id="seBulb" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8c2f24"/>
+      <stop offset="1" stop-color="#c9503d"/>
+    </linearGradient>
+    <radialGradient id="seBulbGlow">
+      <stop offset="0" stop-color="#c9503d" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#c9503d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <style>
+    /* The gopher receives, this one transmits: three arcs firing outward in
+       sequence. Same 2.2s period and the same red as the gopher's beacon, so
+       the pair reads as one family. */
+    @keyframes se-emit { 0%, 100% { opacity: .08 } 40% { opacity: .9 } }
+    @keyframes se-pulse { 0%, 100% { opacity: .35 } 50% { opacity: .95 } }
+
+    .se-wave-1 { animation: se-emit 2.2s ease-in-out infinite; }
+    .se-wave-2 { animation: se-emit 2.2s ease-in-out .25s infinite; }
+    .se-wave-3 { animation: se-emit 2.2s ease-in-out .5s infinite; }
+    .se-glow   { animation: se-pulse 2.2s ease-in-out infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .se-wave-1, .se-wave-2, .se-wave-3, .se-glow { animation: none; opacity: .4; }
+    }
+  </style>
+
+  <g fill="none" stroke="#1F3A45" stroke-width="4"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Behind the body: limbs and the antenna stem. -->
+    <ellipse cx="34" cy="168" rx="14" ry="11" fill="url(#seHex)"/>
+    <ellipse cx="206" cy="168" rx="14" ry="11" fill="url(#seHex)"/>
+    <ellipse cx="86" cy="236" rx="20" ry="12" fill="url(#seHex)"/>
+    <ellipse cx="154" cy="236" rx="20" ry="12" fill="url(#seHex)"/>
+    <rect x="115" y="46" width="10" height="30" rx="5" fill="#2A2320"/>
+
+    <!-- Body: a pointy-top hexagon on the same footprint as the gopher, so the
+         two sit at a matching size on the page. -->
+    <path fill="url(#seHex)" d="M137.3 76.0 Q120.0 66.0 102.7 76.0 L57.6 102.0
+      Q40.3 112.0 40.3 132.0 L40.3 184.0 Q40.3 204.0 57.6 214.0 L102.7 240.0
+      Q120.0 250.0 137.3 240.0 L182.4 214.0 Q199.7 204.0 199.7 184.0 L199.7 132.0
+      Q199.7 112.0 182.4 102.0 Z"/>
+
+    <!-- Eyes: same radius, pupils and highlights as the gopher. -->
+    <circle cx="86" cy="132" r="35" fill="#FFFFFF"/>
+    <circle cx="154" cy="132" r="35" fill="#FFFFFF"/>
+    <circle cx="97" cy="138" r="14" fill="#1F3A45" stroke="none"/>
+    <circle cx="143" cy="138" r="14" fill="#1F3A45" stroke="none"/>
+    <circle cx="92" cy="132" r="5" fill="#FFFFFF" stroke="none"/>
+    <circle cx="138" cy="132" r="5" fill="#FFFFFF" stroke="none"/>
+
+    <!-- "C++" drawn as geometry, not type: an SVG loaded as an image cannot
+         reach the page's self-hosted fonts, and pulling one from a font CDN is
+         out of the question. Paths render identically everywhere. -->
+    <g stroke="none" fill="#FFFFFF">
+      <path fill="none" stroke="#FFFFFF" stroke-width="11" stroke-linecap="round"
+            d="M103.5 179.9 A21 21 0 1 0 103.5 212.1"/>
+      <rect x="123" y="191" width="24" height="10" rx="2"/>
+      <rect x="130" y="184" width="10" height="24" rx="2"/>
+      <rect x="153" y="191" width="24" height="10" rx="2"/>
+      <rect x="160" y="184" width="10" height="24" rx="2"/>
+    </g>
+
+    <!-- Antenna. -->
+    <g stroke="#c9503d" stroke-width="5" fill="none" stroke-linecap="round">
+      <path class="se-wave-1" d="M102.7 34 A20 20 0 0 1 137.3 34"/>
+      <path class="se-wave-2" d="M94.9 29.5 A29 29 0 0 1 145.1 29.5"/>
+      <path class="se-wave-3" d="M87.1 25 A38 38 0 0 1 152.9 25"/>
+    </g>
+    <circle class="se-glow" cx="120" cy="44" r="26" fill="url(#seBulbGlow)" stroke="none"/>
+    <circle cx="120" cy="44" r="11" fill="url(#seBulb)"/>
+    <ellipse cx="116" cy="40" rx="3" ry="4.5" fill="#FFFFFF" stroke="none" opacity=".45"
+             transform="rotate(-20 116 40)"/>
+  </g>
+</svg>
