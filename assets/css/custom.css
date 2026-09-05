@@ -455,6 +455,40 @@ body.se-scrolled .nav-container::after {
   margin-top: 2rem;
 }
 
+/* --- Mascot --------------------------------------------------------------- */
+
+/* Flex rather than a float: the callout that follows this intro is a block
+   formatting context, so it would sit beside a float instead of below it. */
+.se-intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2.5rem;
+  margin-top: 1.5rem;
+}
+.se-intro > p {
+  flex: 1 1 22rem;
+  margin: 0;
+}
+
+.se-mascot {
+  flex: 0 0 auto;
+  width: 170px;
+  margin: 0 auto;
+  text-align: center;
+}
+.se-mascot img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 14px 30px var(--se-glow));
+}
+.se-mascot figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  color: var(--se-muted);
+}
+
 /* --- Buttons -------------------------------------------------------------- */
 
 .se-btn {

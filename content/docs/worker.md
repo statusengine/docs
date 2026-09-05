@@ -5,9 +5,22 @@ date: 2026-08-24
 weight: 20
 ---
 
-The Statusengine Worker is the other half of the pipeline: it drains the queue
-that the [broker module](../broker/) fills. It is written in Go and is the
-successor to the original PHP worker.
+<div class="se-intro">
+  <p>
+    The Statusengine Worker is the other half of the pipeline: it drains the
+    queue that the <a href="../broker/">broker module</a> fills. It is written
+    in Go and is the successor to the original PHP worker.
+  </p>
+
+  <figure class="se-mascot">
+    <img src="/images/gopher-worker.svg" width="240" height="290"
+         alt="A Go gopher wearing a red warning beacon on its head." />
+    <figcaption>
+      Based on the Go gopher by Renée French,
+      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>.
+    </figcaption>
+  </figure>
+</div>
 
 {{< callout type="warning" >}}
 This is **not** the PHP worker. Configuration, database backends and command-line

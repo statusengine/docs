@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 290" width="240" height="290"
+     role="img" aria-labelledby="gopherTitle gopherDesc">
+  <title id="gopherTitle">The Statusengine Worker gopher</title>
+  <desc id="gopherDesc">A Go gopher with a red rotating warning beacon on its head.</desc>
+
+  <defs>
+    <linearGradient id="seBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B4E6F4"/>
+      <stop offset="1" stop-color="#77C4DC"/>
+    </linearGradient>
+    <linearGradient id="seDome" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8c2f24"/>
+      <stop offset="1" stop-color="#c9503d"/>
+    </linearGradient>
+    <radialGradient id="seGlow">
+      <stop offset="0" stop-color="#c9503d" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#c9503d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <style>
+    /* The beacon does not sweep across the face — two cones alternating read
+       as a rotating light without a red bar wiping over the eyes every cycle. */
+    @keyframes se-pulse { 0%, 100% { opacity: .35 } 50% { opacity: .95 } }
+    @keyframes se-cone-l { 0%, 100% { opacity: .06 } 28% { opacity: .42 } }
+    @keyframes se-cone-r { 0%, 100% { opacity: .06 } 78% { opacity: .42 } }
+
+    .se-glow   { animation: se-pulse  2.2s ease-in-out infinite; }
+    .se-cone-l { animation: se-cone-l 2.2s ease-in-out infinite; }
+    .se-cone-r { animation: se-cone-r 2.2s ease-in-out infinite; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .se-glow, .se-cone-l, .se-cone-r { animation: none; opacity: .4; }
+    }
+  </style>
+
+  <g fill="none" stroke="#1F3A45" stroke-width="4"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Behind the body: ears and tail. -->
+    <circle cx="58" cy="88" r="19" fill="url(#seBody)"/>
+    <circle cx="182" cy="88" r="19" fill="url(#seBody)"/>
+    <circle cx="58" cy="88" r="9" fill="#5FAFC8" stroke="none"/>
+    <circle cx="182" cy="88" r="9" fill="#5FAFC8" stroke="none"/>
+    <ellipse cx="212" cy="222" rx="10" ry="15" fill="url(#seBody)"
+             transform="rotate(-18 212 222)"/>
+
+    <!-- Body. -->
+    <path fill="url(#seBody)" d="M120 62
+      C170 62 206 102 206 154
+      L206 192
+      C206 228 170 252 120 252
+      C70 252 34 228 34 192
+      L34 154
+      C34 102 70 62 120 62 Z"/>
+    <ellipse cx="120" cy="204" rx="54" ry="42" fill="#DFF4FB" stroke="none" opacity=".55"/>
+
+    <!-- Arms and feet. -->
+    <ellipse cx="41" cy="202" rx="15" ry="12" fill="url(#seBody)"/>
+    <ellipse cx="199" cy="202" rx="15" ry="12" fill="url(#seBody)"/>
+    <ellipse cx="92" cy="256" rx="23" ry="14" fill="url(#seBody)"/>
+    <ellipse cx="148" cy="256" rx="23" ry="14" fill="url(#seBody)"/>
+
+    <!-- Eyes. They deliberately break the head outline; that overlap is the
+         single most recognisable thing about the gopher. -->
+    <circle cx="90" cy="126" r="36" fill="#FFFFFF"/>
+    <circle cx="150" cy="126" r="36" fill="#FFFFFF"/>
+    <circle cx="101" cy="132" r="14" fill="#1F3A45" stroke="none"/>
+    <circle cx="139" cy="132" r="14" fill="#1F3A45" stroke="none"/>
+    <circle cx="96" cy="126" r="5" fill="#FFFFFF" stroke="none"/>
+    <circle cx="134" cy="126" r="5" fill="#FFFFFF" stroke="none"/>
+
+    <!-- Snout. -->
+    <ellipse cx="120" cy="168" rx="10" ry="8" fill="#1F3A45" stroke="none"/>
+    <rect x="109" y="176" width="10.5" height="23" rx="3" fill="#FFFFFF" stroke-width="3"/>
+    <rect x="120.5" y="176" width="10.5" height="23" rx="3" fill="#FFFFFF" stroke-width="3"/>
+
+    <!-- Beacon. -->
+    <circle class="se-glow" cx="120" cy="42" r="34" fill="url(#seGlow)" stroke="none"/>
+    <path class="se-cone-l" d="M118 44 L44 12 L52 42 Z" fill="#c9503d" stroke="none"/>
+    <path class="se-cone-r" d="M122 44 L196 12 L188 42 Z" fill="#c9503d" stroke="none"/>
+    <rect x="104" y="46" width="32" height="18" rx="6" fill="#2A2320"/>
+    <path d="M104 47 A16 16 0 0 1 136 47 Z" fill="url(#seDome)"/>
+    <ellipse cx="112" cy="39" rx="3.5" ry="6" fill="#FFFFFF" stroke="none" opacity=".45"
+             transform="rotate(-20 112 39)"/>
+  </g>
+</svg>
