@@ -6,3 +6,15 @@
 
 <meta name="theme-color" content="#b03b2d" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#111010" media="(prefers-color-scheme: dark)" />
+
+
+{{/* The glass layer's behavioural half: navbar scroll state and the glow that
+     follows the pointer across a card. Deferred and entirely optional — the
+     stylesheet renders a complete static surface without it. */}}
+{{- $glass := resources.Get "js/se-glass.js" -}}
+{{- if hugo.IsProduction -}}
+  {{- $glass = $glass | minify | fingerprint -}}
+  <script defer src="{{ $glass.RelPermalink }}" integrity="{{ $glass.Data.Integrity }}"></script>
+{{- else -}}
+  <script defer src="{{ $glass.RelPermalink }}"></script>
+{{- end -}}

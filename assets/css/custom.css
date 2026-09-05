@@ -69,6 +69,26 @@
   --se-surface-sunken: #faf7f6;
   --se-hairline: rgb(0 0 0 / 8%);
 
+  /* Glass: a translucent pane, a light-catching rim, and a highlight that
+     runs along the top edge. The rim is what sells it — a flat translucent
+     box reads as "faded", a rimmed one reads as "glass". */
+  --se-glass: rgb(255 255 255 / 55%);
+  --se-glass-strong: rgb(255 255 255 / 74%);
+  --se-glass-rim: rgb(255 255 255 / 85%);
+  --se-glass-edge: rgb(0 0 0 / 7%);
+  --se-glass-blur: saturate(180%) blur(16px);
+  --se-glass-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 75%) 0%,
+    rgb(255 255 255 / 0%) 60%
+  );
+
+  /* Glow, in three strengths. Everything that lights up pulls from these so
+     the whole site glows in one colour. */
+  --se-glow: rgb(176 59 45 / 30%);
+  --se-glow-soft: rgb(176 59 45 / 14%);
+  --se-glow-faint: rgb(176 59 45 / 6%);
+
   --se-gradient-accent: linear-gradient(
     135deg,
     var(--se-brand-bright) 0%,
@@ -104,6 +124,22 @@
   --se-surface-sunken: #1a1717;
   --se-hairline: rgb(255 255 255 / 10%);
 
+  /* Dark glass is the inverse trick: the pane darkens what is behind it and
+     the rim is a faint white line, not a bright one. */
+  --se-glass: rgb(30 26 25 / 55%);
+  --se-glass-strong: rgb(23 20 19 / 78%);
+  --se-glass-rim: rgb(255 255 255 / 14%);
+  --se-glass-edge: rgb(255 255 255 / 8%);
+  --se-glass-sheen: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 10%) 0%,
+    rgb(255 255 255 / 0%) 60%
+  );
+
+  --se-glow: rgb(224 133 115 / 34%);
+  --se-glow-soft: rgb(201 80 61 / 20%);
+  --se-glow-faint: rgb(201 80 61 / 9%);
+
   --se-gradient-hero: radial-gradient(
       1100px 480px at 12% -12%,
       rgb(201 80 61 / 20%) 0%,
@@ -116,6 +152,33 @@
     #cf6552 45%,
     var(--se-brand-bright) 100%
   );
+}
+
+/* --- Ambient background --------------------------------------------------- */
+
+/* Glass needs something behind it to refract. A flat white page makes every
+   blurred pane look grey, so the page itself carries two very faint brand
+   washes. background-image composites over whatever background-color the
+   theme sets, so this does not fight Hextra's light/dark switch. */
+/* The hero's full-bleed wash and its drifting blob deliberately reach past
+   the content column. Overflow to the right of the page is scrollable
+   overflow, so without this the landing page grows a horizontal scrollbar.
+   `clip` rather than `hidden`: hidden would turn the body into a scroll
+   container and break the sticky navbar, and it cannot be limited to one
+   axis — clip can, and leaves vertical scrolling to the viewport. */
+body {
+  overflow-x: clip;
+}
+
+body {
+  background-image: radial-gradient(
+      900px 620px at 8% -8%,
+      var(--se-glow-faint) 0%,
+      transparent 60%
+    ),
+    radial-gradient(760px 560px at 100% 8%, var(--se-glow-faint) 0%, transparent 62%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 /* --- Typography ----------------------------------------------------------- */
@@ -142,31 +205,128 @@ article.content h3 {
   letter-spacing: -0.018em;
 }
 
+/* The rule under a heading fades out rather than stopping dead. */
 article.content h2 {
   padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--se-hairline);
+  border-bottom: 0;
+  background-image: linear-gradient(
+    90deg,
+    var(--se-glow) 0%,
+    var(--se-hairline) 35%,
+    transparent 100%
+  );
+  background-size: 100% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
 }
 
 /* --- Navbar --------------------------------------------------------------- */
 
-/* A hairline in the brand gradient instead of Hextra's flat grey shadow. */
-.nav-container-blur {
-  box-shadow: none;
-  border-bottom: 1px solid var(--se-hairline);
+/* Hextra names this element "nav-container-blur" but only paints it opaque
+   white; the blur is ours. It sits at z-index -1 behind the nav content with
+   pointer-events off, which is exactly where a backdrop pane belongs. */
+.nav-container > .nav-container-blur {
+  background-color: var(--se-glass);
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim);
+  border-bottom: 1px solid var(--se-glass-edge);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
+.dark .nav-container > .nav-container-blur {
+  background-color: var(--se-glass);
+}
+
+/* Once the page scrolls under it the pane firms up, so text never has to
+   compete with body copy sliding beneath it. se-scrolled comes from
+   assets/js/se-glass.js. */
+body.se-scrolled .nav-container > .nav-container-blur {
+  background-color: var(--se-glass-strong);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim), 0 10px 30px -18px var(--se-glow);
+}
+
+/* A brand hairline that glows brighter the moment the page leaves the top. */
 .nav-container::after {
   content: "";
   position: absolute;
   inset-inline: 0;
   bottom: 0;
-  height: 2px;
-  background: var(--se-gradient-accent);
-  opacity: 0.85;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--se-brand) 22%,
+    var(--se-brand-bright) 50%,
+    var(--se-brand) 78%,
+    transparent 100%
+  );
+  opacity: 0.55;
+  filter: drop-shadow(0 0 6px var(--se-glow));
+  transition: opacity 0.3s ease;
   pointer-events: none;
+}
+body.se-scrolled .nav-container::after {
+  opacity: 1;
 }
 
 .nav-container nav > a:first-child span {
   letter-spacing: -0.02em;
+}
+
+/* The logo mark picks up a soft halo in its own colour. */
+.nav-container nav > a:first-child img {
+  filter: drop-shadow(0 2px 8px var(--se-glow));
+}
+
+/* --- Search --------------------------------------------------------------- */
+
+/* The input is a Hextra-owned element; only its skin is ours. */
+.search-wrapper input {
+  background-color: var(--se-glass) !important;
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  border-color: var(--se-glass-edge) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+/* Chrome and Firefox paint their own focus ring here, in their own blue.
+   Suppressing it is only safe because the box-shadow below replaces it: a
+   keyboard user still has to be able to see where focus sits.
+
+   The ring is a shadow rather than a border because Tailwind's preflight sets
+   border-width: 0 on the input — Hextra only turns a border on under
+   contrast-more, so border-color alone would paint nothing. */
+.search-wrapper input:focus {
+  outline: none;
+  background-color: var(--se-glass-strong) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--se-brand) 34%, transparent),
+    0 10px 26px -16px var(--se-glow);
+}
+
+/* The results panel floats, so it gets the full treatment. */
+.search-wrapper ul {
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 24px 60px -30px rgb(0 0 0 / 45%);
+}
+
+/* --- Sidebar -------------------------------------------------------------- */
+
+/* The active page reads as a lit pane rather than a flat pink block. */
+.sidebar-active-item {
+  position: relative;
+  background-color: var(--se-glass-strong) !important;
+  box-shadow: inset 0 1px 0 var(--se-glass-rim), 0 6px 20px -14px var(--se-glow);
+}
+.sidebar-active-item::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.35rem;
+  inset-inline-start: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: var(--se-gradient-accent);
+  box-shadow: 0 0 8px var(--se-glow);
 }
 
 /* --- Landing page --------------------------------------------------------- */
@@ -175,6 +335,7 @@ article.content h2 {
   position: relative;
   margin-block: 1rem 3.5rem;
   padding-block: 3.5rem 1rem;
+  isolation: isolate;
 }
 .se-hero::before {
   content: "";
@@ -182,17 +343,48 @@ article.content h2 {
   inset: -6rem -50vw 0;
   background: var(--se-gradient-hero);
   pointer-events: none;
+  z-index: -2;
+}
+
+/* Two blurred blobs drifting behind the headline. They are the only
+   always-on animation on the site; both are switched off under
+   prefers-reduced-motion at the bottom of this file. */
+.se-hero::after {
+  content: "";
+  position: absolute;
+  top: -8rem;
+  inset-inline-start: -12rem;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--se-glow) 0%, transparent 68%);
+  filter: blur(48px);
+  opacity: 0.85;
+  pointer-events: none;
   z-index: -1;
+  animation: se-drift 22s ease-in-out infinite alternate;
+}
+
+@keyframes se-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6rem, 2.5rem, 0) scale(1.12);
+  }
 }
 
 .se-hero__eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.75rem;
-  border: 1px solid var(--se-hairline);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--se-glass-edge);
   border-radius: 999px;
-  background: var(--se-surface-sunken);
+  background: var(--se-glass);
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim);
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--se-muted);
@@ -203,6 +395,21 @@ article.content h2 {
   height: 0.5rem;
   border-radius: 999px;
   background: var(--se-brand);
+  box-shadow: 0 0 0 0 var(--se-glow);
+  animation: se-pulse 2.4s ease-out infinite;
+}
+
+/* A monitoring site may as well have a heartbeat in it. */
+@keyframes se-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(176 59 45 / 55%);
+  }
+  70% {
+    box-shadow: 0 0 0 0.55rem rgb(176 59 45 / 0%);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(176 59 45 / 0%);
+  }
 }
 
 .se-hero__title {
@@ -213,11 +420,24 @@ article.content h2 {
   letter-spacing: -0.035em;
 }
 .se-hero__title em {
+  position: relative;
   font-style: normal;
   background: var(--se-gradient-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+/* background-clip:text cannot take a text-shadow, so the glow is a blurred
+   copy of the word sitting behind it. */
+.se-hero__title em::after {
+  content: "";
+  position: absolute;
+  inset: 12% -6%;
+  background: var(--se-gradient-text);
+  filter: blur(28px);
+  opacity: 0.35;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .se-hero__lead {
@@ -235,65 +455,148 @@ article.content h2 {
   margin-top: 2rem;
 }
 
+/* --- Buttons -------------------------------------------------------------- */
+
 .se-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.65rem 1.25rem;
-  border-radius: 0.6rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 0.7rem;
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none !important;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  transition: transform 0.18s ease, box-shadow 0.25s ease, background 0.2s ease;
 }
+
 .se-btn--primary {
   background: var(--se-gradient-accent);
   color: #fff;
-  box-shadow: 0 1px 2px rgb(140 47 36 / 40%), 0 8px 24px -8px rgb(176 59 45 / 55%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%),
+    0 1px 2px rgb(140 47 36 / 40%), 0 10px 30px -10px rgb(176 59 45 / 70%);
 }
 .se-btn--ghost {
-  border: 1px solid var(--se-hairline);
-  background: var(--se-surface);
+  border: 1px solid var(--se-glass-edge);
+  background: var(--se-glass);
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim);
   color: var(--se-ink);
 }
 .se-btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 .se-btn--primary:hover {
-  box-shadow: 0 2px 4px rgb(140 47 36 / 45%), 0 14px 32px -10px rgb(176 59 45 / 65%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%),
+    0 2px 4px rgb(140 47 36 / 45%), 0 18px 40px -12px rgb(176 59 45 / 85%);
+}
+.se-btn--ghost:hover {
+  border-color: color-mix(in srgb, var(--se-brand) 45%, transparent);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 14px 34px -18px var(--se-glow);
+}
+.se-btn:active {
+  transform: translateY(0);
 }
 
-/* Cards: give Hextra's grid a brand-tinted hover instead of the default grey. */
-.hextra-card:hover {
-  border-color: color-mix(in srgb, var(--se-brand) 45%, transparent);
-  box-shadow: 0 10px 30px -18px rgb(176 59 45 / 55%);
+/* --- Cards ---------------------------------------------------------------- */
+
+/* Hextra's card is a plain bordered box. Three layers turn it into glass:
+   the pane itself, a highlight along the top edge (::after), and a glow that
+   follows the pointer (::before, fed by --se-mx / --se-my from
+   assets/js/se-glass.js). Without the JS the glow simply centres itself. */
+.hextra-card {
+  position: relative;
+  background-color: var(--se-glass) !important;
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  border-color: var(--se-glass-edge) !important;
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 1px 2px rgb(0 0 0 / 4%);
+  transition: transform 0.22s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.hextra-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    22rem circle at var(--se-mx, 50%) var(--se-my, 0%),
+    var(--se-glow) 0%,
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.hextra-card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 55%;
+  border-radius: inherit;
+  background: var(--se-glass-sheen);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Both pseudo-elements are positioned, so the card's own content has to be
+   lifted out of their way or it renders underneath them. */
+.hextra-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.hextra-card:hover,
+.dark .hextra-card:hover {
+  transform: translateY(-3px);
+  background-color: var(--se-glass-strong) !important;
+  border-color: color-mix(in srgb, var(--se-brand) 40%, transparent) !important;
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 18px 40px -22px var(--se-glow), 0 2px 6px rgb(0 0 0 / 6%);
+}
+.hextra-card:hover::before {
+  opacity: 1;
 }
 
 .se-section-label {
-  margin-block: 3.5rem 0.5rem;
+  position: relative;
+  display: inline-block;
+  margin-block: 3.5rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--se-brand);
+  text-shadow: 0 0 18px var(--se-glow);
 }
 
 /* --- Code blocks ---------------------------------------------------------- */
 
-.hextra-code-block pre {
-  border: 1px solid var(--se-hairline);
-  border-radius: 0.5rem;
-}
-/* The language of a fenced block, surfaced on hover, so a toml block is never
-   mistaken for a yaml one. */
 .hextra-code-block {
   position: relative;
 }
+.hextra-code-block pre {
+  border: 1px solid var(--se-glass-edge);
+  border-radius: 0.6rem;
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 12px 30px -24px rgb(0 0 0 / 55%);
+}
+
+/* The language of a fenced block, surfaced on hover, so a toml block is never
+   mistaken for a yaml one. */
 .hextra-code-block[data-lang]::after {
   content: attr(data-lang);
   position: absolute;
   top: 0.4rem;
   inset-inline-end: 3rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.3rem;
+  background: var(--se-glass);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   font-family: var(--se-font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.06em;
@@ -301,6 +604,7 @@ article.content h2 {
   color: var(--se-muted);
   opacity: 0;
   transition: opacity 0.15s ease;
+  pointer-events: none;
 }
 .hextra-code-block:hover[data-lang]::after {
   opacity: 1;
@@ -309,8 +613,37 @@ article.content h2 {
 /* --- Footer --------------------------------------------------------------- */
 
 .hextra-footer {
-  border-top: 1px solid var(--se-hairline);
-  background: var(--se-surface-sunken);
+  position: relative;
+  border-top: 1px solid var(--se-glass-edge);
+  background-color: var(--se-glass) !important;
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+}
+/* Mirrors the navbar hairline, so the page is bracketed top and bottom. */
+.hextra-footer::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--se-brand) 25%,
+    var(--se-brand-bright) 50%,
+    var(--se-brand) 75%,
+    transparent 100%
+  );
+  opacity: 0.5;
+  filter: drop-shadow(0 0 6px var(--se-glow));
+  pointer-events: none;
+}
+
+/* Upstream gives this container a max-width but no auto margins, so it sits
+   flush left inside a full-width footer. The copyright row below it does get
+   hx-mx-auto, which is what makes the mismatch obvious. */
+.hextra-custom-footer {
+  margin-inline: auto;
 }
 
 .se-footer {
@@ -332,6 +665,7 @@ article.content h2 {
 .se-footer__brand img {
   width: 24px;
   height: 24px;
+  filter: drop-shadow(0 2px 8px var(--se-glow));
 }
 .se-footer__note {
   max-width: 24rem;
@@ -346,9 +680,11 @@ article.content h2 {
 .se-footer__links a {
   color: var(--se-muted);
   text-decoration: none;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 .se-footer__links a:hover {
   color: var(--se-brand);
+  text-shadow: 0 0 14px var(--se-glow);
 }
 
 /* --- Theme toggle --------------------------------------------------------- */
@@ -372,33 +708,31 @@ article.content h2 {
   display: flex;
 }
 
-/* --- Footer --------------------------------------------------------------- */
-
-/* Upstream gives this container a max-width but no auto margins, so it sits
-   flush left inside a full-width footer. The copyright row below it does get
-   hx-mx-auto, which is what makes the mismatch obvious. */
-.hextra-custom-footer {
-  margin-inline: auto;
-}
-
 /* --- Diagrams ------------------------------------------------------------- */
 
 /* Mermaid renders at the diagram's natural size and caps it with an inline
    max-width, which on a wide column leaves a small graphic floating in white
    space. Let it fill the column instead. */
 pre.mermaid {
+  position: relative;
   margin-block: 2rem;
-  padding: 1.25rem;
-  border: 1px solid var(--se-hairline);
-  border-radius: 0.75rem;
-  background: var(--se-surface-sunken);
+  padding: 1.5rem;
+  border: 1px solid var(--se-glass-edge);
+  border-radius: 0.9rem;
+  background: var(--se-glass);
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 16px 40px -30px rgb(0 0 0 / 60%);
   text-align: center;
   cursor: zoom-in;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.2s ease, box-shadow 0.25s ease;
 }
 pre.mermaid:hover,
 pre.mermaid:focus-visible {
   border-color: color-mix(in srgb, var(--se-brand) 45%, transparent);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 20px 50px -28px var(--se-glow);
 }
 pre.mermaid > svg {
   width: 100%;
@@ -407,20 +741,21 @@ pre.mermaid > svg {
 }
 
 /* The affordance, so it is discoverable without hovering everything. */
-pre.mermaid[data-se-expandable="1"] {
-  position: relative;
-}
 pre.mermaid[data-se-expandable="1"]::after {
   content: "Click to enlarge";
   position: absolute;
-  top: 0.6rem;
-  inset-inline-end: 0.75rem;
+  top: 0.7rem;
+  inset-inline-end: 0.85rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--se-glass-strong);
   font-family: var(--se-font-sans);
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
   color: var(--se-muted);
   opacity: 0;
   transition: opacity 0.15s ease;
+  pointer-events: none;
 }
 pre.mermaid[data-se-expandable="1"]:hover::after {
   opacity: 1;
@@ -433,8 +768,9 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
   display: grid;
   place-items: center;
   padding: clamp(1rem, 4vw, 3rem);
-  background: rgb(0 0 0 / 72%);
-  backdrop-filter: blur(3px);
+  background: rgb(12 8 7 / 62%);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
   cursor: zoom-out;
 }
 .se-diagram-overlay__stage {
@@ -442,9 +778,14 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
   max-width: 1400px;
   max-height: 90vh;
   overflow: auto;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  background: var(--se-surface);
+  padding: 1.75rem;
+  border: 1px solid var(--se-glass-rim);
+  border-radius: 1rem;
+  background: var(--se-glass-strong);
+  backdrop-filter: var(--se-glass-blur);
+  -webkit-backdrop-filter: var(--se-glass-blur);
+  box-shadow: inset 0 1px 0 var(--se-glass-rim),
+    0 40px 90px -40px rgb(0 0 0 / 80%);
   cursor: default;
 }
 .se-diagram-overlay__stage svg {
@@ -460,25 +801,50 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
   height: 2.25rem;
   border-radius: 999px;
   border: 1px solid rgb(255 255 255 / 25%);
-  background: rgb(0 0 0 / 35%);
+  background: rgb(255 255 255 / 12%);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 .se-diagram-overlay__close:hover {
-  background: rgb(0 0 0 / 55%);
+  background: rgb(255 255 255 / 22%);
+  box-shadow: 0 0 20px var(--se-glow);
 }
 
-/* --- Motion --------------------------------------------------------------- */
+/* --- Fallbacks and motion ------------------------------------------------- */
+
+/* Without backdrop-filter a 55%-opaque pane is just washed-out text on top of
+   whatever is behind it. Fall back to solid surfaces in that case. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --se-glass: var(--se-surface);
+    --se-glass-strong: var(--se-surface);
+  }
+  .dark {
+    --se-glass: var(--se-surface-sunken);
+    --se-glass-strong: var(--se-surface-sunken);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .se-btn,
   .hextra-card,
-  .hextra-code-block[data-lang]::after {
+  .nav-container::after,
+  .nav-container > .nav-container-blur,
+  .hextra-code-block[data-lang]::after,
+  pre.mermaid {
     transition: none;
   }
-  .se-btn:hover {
+  .se-hero::after,
+  .se-hero__eyebrow::before {
+    animation: none;
+  }
+  .se-btn:hover,
+  .hextra-card:hover {
     transform: none;
   }
 }
