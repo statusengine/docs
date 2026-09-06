@@ -16,4 +16,4 @@ RUN npm install -g playwright@1.63.0 \
  && npm cache clean --force
 
 WORKDIR /shots
-COPY shoot.js .
+COPY shoot.js test-lightbox.js ./
