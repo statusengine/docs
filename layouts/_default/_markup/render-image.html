@@ -1,0 +1,64 @@
+{{/*
+  Copy of themes/hextra/layouts/_default/_markup/render-image.html with one
+  addition: an image that lives under assets/ is run through Hugo's image
+  pipeline instead of being linked verbatim.
+
+  The migrated Statusengine 3 screenshots are up to 3104px wide and ~800 KB
+  each, which is several times what the ~672px content column can show. They
+  are kept at full size in assets/images/v3/ so the originals stay untouched,
+  and downscaled to WebP here.
+
+  Images still under static/ (the logo, the two mascots) fall through to the
+  theme's original behaviour unchanged.
+
+  Keep in sync when bumping the theme.
+*/}}
+{{- $alt := .PlainText | safeHTML -}}
+{{- $lazyLoading := .Page.Site.Params.enableImageLazyLoading | default true -}}
+{{- $dest := .Destination -}}
+
+{{- $isLocal := not (urls.Parse $dest).Scheme -}}
+{{- $isPage := and (eq .Page.Kind "page") (not .Page.BundleType) -}}
+{{- $startsWithSlash := hasPrefix $dest "/" -}}
+{{- $startsWithRelative := hasPrefix $dest "../" -}}
+
+{{/* Widest the content column ever needs, at 2x for high-density screens. */}}
+{{- $maxWidth := 1400 -}}
+{{- $width := "" -}}
+{{- $height := "" -}}
+{{- $processed := false -}}
+
+{{- if and $dest $isLocal -}}
+  {{- with resources.Get (strings.TrimPrefix "/" $dest) -}}
+    {{- if ne .MediaType.SubType "svg" -}}
+      {{/* Resize to its own width when it is already small enough: that is a
+           no-op geometrically but still re-encodes to WebP. */}}
+      {{- $target := cond (gt .Width $maxWidth) $maxWidth .Width -}}
+      {{- with .Resize (printf "%dx webp q82" $target) -}}
+        {{- $dest = .RelPermalink -}}
+        {{- $width = .Width -}}
+        {{- $height = .Height -}}
+        {{- $processed = true -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- if not $processed -}}
+    {{- if $startsWithSlash -}}
+      {{/* Images under static directory */}}
+      {{- $dest = (relURL (strings.TrimPrefix "/" $dest)) -}}
+    {{- else if and $isPage (not $startsWithRelative) -}}
+      {{/* Images that are sibling to the individual page file */}}
+      {{ $dest = (printf "../%s" $dest) }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- with .Title -}}
+  <figure>
+    <img src="{{ $dest | safeURL }}" title="{{ . }}" alt="{{ $alt }}"{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} {{ if $lazyLoading }}loading="lazy" decoding="async"{{ end }} />
+    <figcaption>{{ . }}</figcaption>
+  </figure>
+{{- else -}}
+  <img src="{{ $dest | safeURL }}" alt="{{ $alt }}"{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} {{ if $lazyLoading }}loading="lazy" decoding="async"{{ end }} />
+{{- end -}}

@@ -20,13 +20,12 @@ running an existing installation.
 Statusengine UI is a lightweight, responsive web interface you can use to make
 your monitoring data visible.
 
-![Statusengine UI on a desktop browser](/images/v3/screenshots/macbook/overview.png)
-
-![Service details with plugin output and graphs](/images/v3/screenshots/macbook/service-details.png)
-
-![The overview on a tablet](/images/v3/screenshots/ipad/overview.png)
-
-![Current issues on a phone](/images/v3/screenshots/iphone/overview-issue.png)
+{{< cards >}}
+  {{< card image="/images/v3/screenshots/macbook/overview.png" title="Desktop" subtitle="The host and service overview in a desktop browser" >}}
+  {{< card image="/images/v3/screenshots/macbook/service-details.png" title="Service details" subtitle="Check results, plugin output and performance graphs" >}}
+  {{< card image="/images/v3/screenshots/ipad/overview.png" title="Tablet" subtitle="The same overview on a tablet" >}}
+  {{< card image="/images/v3/screenshots/iphone/overview-issue.png" title="Phone" subtitle="Current issues on a phone" >}}
+{{< /cards >}}
 
 [Visit the Statusengine UI demo](https://demo.statusengine.org)
 
