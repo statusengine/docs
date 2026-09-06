@@ -45,6 +45,9 @@ const PAGES = [
   { name: "v3-lightbox", url: "/v3/worker/#get-metrics", w: 1440, h: 950, click: "a.se-zoom" },
   { name: "v3-lightbox-mobile", url: "/v3/worker/#get-metrics", w: 390, h: 844, click: "a.se-zoom" },
   { name: "v3-lightbox-zoom", url: "/v3/worker/#get-metrics", w: 390, h: 844, click: "a.se-zoom", click2: ".se-lightbox__img" },
+  { name: "tutorials", url: "/tutorials/", w: 1440, h: 950 },
+  { name: "tut-naemon", url: "/tutorials/install-naemon/", w: 1440, h: 950 },
+  { name: "tut-eclipse", url: "/tutorials/setup-naemon-development-environment/#configure-eclipse", w: 1440, h: 950 },
 ];
 
 /* The two characters on their own, at 2x, to check proportions. */

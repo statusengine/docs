@@ -76,6 +76,14 @@ menu:
 params:
   description: "Scale your Nagios or Naemon monitoring horizontally with a C++ event broker and a Go worker."
 
+  # Versions the tutorials pin, in one place. Referenced from the pages as
+  # {{< param naemonVersion >}} — Hugo expands shortcodes before Goldmark, so
+  # this also works inside fenced code blocks. Bumping a release is a one-line
+  # change here rather than a hunt through the prose.
+  naemonVersion: "1.5.2"
+  ubuntuVersion: "26.04"
+  ubuntuCodename: "Resolute Raccoon"
+
   navbar:
     displayTitle: true
     displayLogo: true
