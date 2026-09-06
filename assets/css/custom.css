@@ -879,6 +879,158 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Lightbox
+
+   render-image.html wraps every processed image in a link to a larger
+   rendition; se-lightbox.js opens that link as an overlay instead of
+   navigating. Everything here is presentation for that overlay — with the
+   stylesheet but without the script, the link still works.
+   --------------------------------------------------------------------------- */
+
+.se-zoom {
+  display: block;
+  cursor: zoom-in;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  /* The anchor is the focus target, so it has to show focus itself. */
+  outline-offset: 3px;
+}
+.se-zoom img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+  border: 1px solid var(--se-glass-edge);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.se-zoom:hover img,
+.se-zoom:focus-visible img {
+  border-color: color-mix(in srgb, var(--se-brand) 40%, transparent);
+  box-shadow: 0 14px 34px -20px var(--se-glow);
+}
+.se-zoom:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--se-brand) 60%, transparent);
+}
+
+/* Freeze the page behind the overlay. */
+.se-lightbox-open {
+  overflow: hidden;
+}
+
+.se-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background-color: rgb(12 9 8 / 82%);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.se-lightbox.is-open {
+  opacity: 1;
+}
+
+.se-lightbox__scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+.se-lightbox__figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  align-items: center;
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  cursor: default;
+}
+
+.se-lightbox__img {
+  display: block;
+  /* max-width is set per image by the script, so a small screenshot is never
+     blown up past the pixels it actually has. */
+  max-height: calc(100vh - 9rem);
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  box-shadow: 0 30px 70px -30px rgb(0 0 0 / 70%);
+  background-color: var(--se-surface);
+}
+/* Only offer the zoom cursor when zooming would actually change something —
+   the script adds can-zoom once it has measured the laid-out image. */
+.se-lightbox.can-zoom .se-lightbox__img {
+  cursor: zoom-in;
+}
+.se-lightbox.is-zoomed .se-lightbox__scroll {
+  overflow: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.se-lightbox.is-zoomed .se-lightbox__figure {
+  margin: auto;
+}
+.se-lightbox.is-zoomed .se-lightbox__img {
+  width: auto;
+  max-height: none;
+  cursor: zoom-out;
+}
+
+.se-lightbox__caption {
+  max-width: 46rem;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.se-lightbox__close {
+  /* Safe as absolute because the scrolling happens in .se-lightbox__scroll,
+     not on the overlay — see the note in se-lightbox.js. */
+  position: absolute;
+  top: clamp(0.5rem, 2vw, 1.25rem);
+  inset-inline-end: clamp(0.5rem, 2vw, 1.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 999px;
+  /* Dark, not a white tint: the button sits above the picture, and most of
+     these screenshots are light — a white-on-white button disappears. */
+  background-color: rgb(16 12 11 / 62%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.se-lightbox__close:hover,
+.se-lightbox__close:focus-visible {
+  background-color: color-mix(in srgb, var(--se-brand) 70%, transparent);
+  border-color: color-mix(in srgb, var(--se-brand) 90%, transparent);
+}
+.se-lightbox__close:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .se-btn,
   .hextra-card,
@@ -895,5 +1047,10 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
   .se-btn:hover,
   .hextra-card:hover {
     transform: none;
+  }
+  .se-zoom img,
+  .se-lightbox,
+  .se-lightbox__close {
+    transition: none;
   }
 }

@@ -1,15 +1,20 @@
 {{/*
-  Copy of themes/hextra/layouts/_default/_markup/render-image.html with one
-  addition: an image that lives under assets/ is run through Hugo's image
-  pipeline instead of being linked verbatim.
+  Copy of themes/hextra/layouts/_default/_markup/render-image.html with two
+  additions:
 
-  The migrated Statusengine 3 screenshots are up to 3104px wide and ~800 KB
-  each, which is several times what the ~672px content column can show. They
-  are kept at full size in assets/images/v3/ so the originals stay untouched,
-  and downscaled to WebP here.
+  1. An image that lives under assets/ is run through Hugo's image pipeline
+     instead of being linked verbatim. The migrated Statusengine 3 screenshots
+     are up to 3104px wide and ~800 KB each, which is several times what the
+     ~672px content column can show. They are kept at full size in
+     assets/images/ so the originals stay untouched, and downscaled here.
+
+  2. Processed images are wrapped in a link to a larger rendition, which
+     se-lightbox.js turns into an overlay. The link is the point: without
+     JavaScript it still opens the big image, so the feature degrades to
+     something useful rather than to nothing.
 
   Images still under static/ (the logo, the two mascots) fall through to the
-  theme's original behaviour unchanged.
+  theme's original behaviour unchanged, and are not made clickable.
 
   Keep in sync when bumping the theme.
 */}}
@@ -24,21 +29,33 @@
 
 {{/* Widest the content column ever needs, at 2x for high-density screens. */}}
 {{- $maxWidth := 1400 -}}
+{{/* What the lightbox shows. Beyond this the file grows faster than the
+     detail a reader can actually use on screen. */}}
+{{- $lightboxWidth := 2400 -}}
+
 {{- $width := "" -}}
 {{- $height := "" -}}
+{{- $full := "" -}}
+{{- $fullWidth := "" -}}
 {{- $processed := false -}}
 
 {{- if and $dest $isLocal -}}
   {{- with resources.Get (strings.TrimPrefix "/" $dest) -}}
     {{- if ne .MediaType.SubType "svg" -}}
-      {{/* Resize to its own width when it is already small enough: that is a
-           no-op geometrically but still re-encodes to WebP. */}}
-      {{- $target := cond (gt .Width $maxWidth) $maxWidth .Width -}}
+      {{- $native := .Width -}}
+      {{/* Resizing to its own width is a no-op geometrically but still
+           re-encodes to WebP, so every branch ends up in the same format. */}}
+      {{- $target := cond (gt $native $maxWidth) $maxWidth $native -}}
       {{- with .Resize (printf "%dx webp q82" $target) -}}
         {{- $dest = .RelPermalink -}}
         {{- $width = .Width -}}
         {{- $height = .Height -}}
         {{- $processed = true -}}
+      {{- end -}}
+      {{- $big := cond (gt $native $lightboxWidth) $lightboxWidth $native -}}
+      {{- with .Resize (printf "%dx webp q85" $big) -}}
+        {{- $full = .RelPermalink -}}
+        {{- $fullWidth = .Width -}}
       {{- end -}}
     {{- end -}}
   {{- end -}}
@@ -54,11 +71,29 @@
   {{- end -}}
 {{- end -}}
 
+{{- define "partials/se-img" -}}
+  <img src="{{ .dest | safeURL }}" alt="{{ .alt }}"
+    {{- with .title }} title="{{ . }}"{{ end -}}
+    {{- with .width }} width="{{ . }}"{{ end -}}
+    {{- with .height }} height="{{ . }}"{{ end -}}
+    {{- if .lazy }} loading="lazy" decoding="async"{{ end }} />
+{{- end -}}
+
+{{- $img := dict "dest" $dest "alt" $alt "title" .Title "width" $width "height" $height "lazy" $lazyLoading -}}
+
 {{- with .Title -}}
   <figure>
-    <img src="{{ $dest | safeURL }}" title="{{ . }}" alt="{{ $alt }}"{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} {{ if $lazyLoading }}loading="lazy" decoding="async"{{ end }} />
+    {{- if $full -}}
+      <a href="{{ $full | safeURL }}" class="se-zoom" data-lightbox data-caption="{{ . }}" data-full-width="{{ $fullWidth }}" aria-label="View larger: {{ . }}">{{ partial "se-img" $img }}</a>
+    {{- else -}}
+      {{- partial "se-img" $img -}}
+    {{- end -}}
     <figcaption>{{ . }}</figcaption>
   </figure>
 {{- else -}}
-  <img src="{{ $dest | safeURL }}" alt="{{ $alt }}"{{ with $width }} width="{{ . }}"{{ end }}{{ with $height }} height="{{ . }}"{{ end }} {{ if $lazyLoading }}loading="lazy" decoding="async"{{ end }} />
+  {{- if $full -}}
+    <a href="{{ $full | safeURL }}" class="se-zoom" data-lightbox data-caption="{{ $alt }}" data-full-width="{{ $fullWidth }}" aria-label="View larger: {{ $alt }}">{{ partial "se-img" $img }}</a>
+  {{- else -}}
+    {{- partial "se-img" $img -}}
+  {{- end -}}
 {{- end -}}

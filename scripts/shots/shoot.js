@@ -42,6 +42,9 @@ const PAGES = [
   { name: "v3-ui", url: "/v3/ui/", w: 1440, h: 950 },
   { name: "v3-worker-tabs", url: "/v3/worker/#installation", w: 1440, h: 950 },
   { name: "v3-ui-tabs", url: "/v3/ui/#nginx-example-config", w: 1440, h: 950 },
+  { name: "v3-lightbox", url: "/v3/worker/#get-metrics", w: 1440, h: 950, click: "a.se-zoom" },
+  { name: "v3-lightbox-mobile", url: "/v3/worker/#get-metrics", w: 390, h: 844, click: "a.se-zoom" },
+  { name: "v3-lightbox-zoom", url: "/v3/worker/#get-metrics", w: 390, h: 844, click: "a.se-zoom", click2: ".se-lightbox__img" },
 ];
 
 /* The two characters on their own, at 2x, to check proportions. */
@@ -97,6 +100,15 @@ const server = http.createServer((req, res) => {
       await page.goto(base + shot.url, { waitUntil: "networkidle" });
       /* Mermaid renders after load, and the fonts need a beat to swap in. */
       await page.waitForTimeout(shot.settle || 1200);
+      /* Some states only exist after an interaction — the lightbox, say. */
+      if (shot.click) {
+        await page.locator(shot.click).first().click();
+        await page.waitForTimeout(600);
+      }
+      if (shot.click2) {
+        await page.locator(shot.click2).first().click();
+        await page.waitForTimeout(400);
+      }
       const file = `${OUT}/${scheme}-${shot.name}.png`;
       await page.screenshot({ path: file, fullPage: !!shot.full });
       written.push(file);

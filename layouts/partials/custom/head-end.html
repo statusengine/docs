@@ -18,3 +18,14 @@
 {{- else -}}
   <script defer src="{{ $glass.RelPermalink }}"></script>
 {{- end -}}
+
+
+{{/* Click-to-enlarge for screenshots. Also optional: render-image.html emits a
+     plain link to the larger rendition, which works on its own. */}}
+{{- $lightbox := resources.Get "js/se-lightbox.js" -}}
+{{- if hugo.IsProduction -}}
+  {{- $lightbox = $lightbox | minify | fingerprint -}}
+  <script defer src="{{ $lightbox.RelPermalink }}" integrity="{{ $lightbox.Data.Integrity }}"></script>
+{{- else -}}
+  <script defer src="{{ $lightbox.RelPermalink }}"></script>
+{{- end -}}
