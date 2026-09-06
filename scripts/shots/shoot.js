@@ -37,6 +37,11 @@ const PAGES = [
   { name: "home-mobile", url: "/", w: 390, h: 844 },
   { name: "broker", url: "/docs/broker/", w: 1440, h: 950 },
   { name: "worker", url: "/docs/worker/", w: 1440, h: 950 },
+  { name: "v3", url: "/v3/", w: 1440, h: 950 },
+  { name: "v3-worker", url: "/v3/worker/", w: 1440, h: 950 },
+  { name: "v3-ui", url: "/v3/ui/", w: 1440, h: 950 },
+  { name: "v3-worker-tabs", url: "/v3/worker/#installation", w: 1440, h: 950 },
+  { name: "v3-ui-tabs", url: "/v3/ui/#nginx-example-config", w: 1440, h: 950 },
 ];
 
 /* The two characters on their own, at 2x, to check proportions. */

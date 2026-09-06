@@ -3,6 +3,8 @@ title: "Broker Module"
 description: "The C++ event broker module for Naemon and Nagios Core: building it with Meson, loading it into the core, and configuring its queues."
 date: 2026-08-24
 weight: 10
+aliases:
+  - /broker/
 ---
 
 <div class="se-intro">

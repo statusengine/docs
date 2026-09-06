@@ -54,12 +54,15 @@ menu:
     - name: "Tutorials"
       pageRef: "/tutorials"
       weight: 2
-    - name: "Search"
+    - name: "Statusengine 3"
+      pageRef: "/v3"
       weight: 3
+    - name: "Search"
+      weight: 4
       params:
         type: search
     - name: "GitHub"
-      weight: 4
+      weight: 5
       url: "https://github.com/statusengine"
       params:
         icon: github

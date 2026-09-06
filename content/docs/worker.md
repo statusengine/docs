@@ -3,6 +3,10 @@ title: "Worker"
 description: "The Go worker: consuming Gearman or RabbitMQ, bulk-inserting into MySQL, routing performance data to Graphite, and running under systemd."
 date: 2026-08-24
 weight: 20
+# Old Spress site served the 3.x worker here. Point it at the current docs;
+# the 3.x page is reachable from the callout below and from /v3/.
+aliases:
+  - /worker/
 ---
 
 <div class="se-intro">
@@ -26,6 +30,7 @@ weight: 20
 This is **not** the PHP worker. Configuration, database backends and command-line
 tools are all different. If you are coming from Statusengine 3.x, treat this as a
 new component rather than an upgrade — the old `config.yml` will not carry over.
+The 3.x worker is documented at [Statusengine 3 › Worker (PHP)](../../v3/worker/).
 {{< /callout >}}
 
 ## What it does

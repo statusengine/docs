@@ -62,8 +62,18 @@ for want in toml cpp yaml bash; do
 done
 
 note "Pages built"
-for p in index.html docs/index.html docs/broker/index.html docs/worker/index.html tutorials/index.html; do
+for p in index.html docs/index.html docs/broker/index.html docs/worker/index.html tutorials/index.html \
+         v3/index.html v3/worker/index.html v3/ui/index.html; do
   [ -f "public/$p" ] && ok "$p" || bad "$p missing"
+done
+
+note "Old statusengine.org URLs still resolve"
+for p in worker ui broker getting_started; do
+  if [ -f "public/$p/index.html" ] && grep -qE 'http-equiv="?refresh"?' "public/$p/index.html"; then
+    ok "/$p/ redirects"
+  else
+    bad "/$p/ has no alias"
+  fi
 done
 
 note "Unwritten sections still marked"

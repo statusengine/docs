@@ -12,8 +12,11 @@ everything you need standing before those components have anything to talk to.
 
 {{< callout type="info" >}}
 No tutorials have been written for the new site yet. They are being rewritten
-against current distributions rather than carried over — the guides on the old
-site target Ubuntu 20.04 and CentOS 8 at the latest.
+against current distributions rather than carried over — the 29 guides from the
+Statusengine 3 site target Ubuntu 20.04 and CentOS 8 at the latest, and several
+of them cover backends the Go worker no longer supports. They remain in the
+[statusengine/docs](https://github.com/statusengine/docs/tree/master/src/content/tutorials)
+repository as Markdown.
 {{< /callout >}}
 
 ## Planned

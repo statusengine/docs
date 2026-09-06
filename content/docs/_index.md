@@ -3,6 +3,8 @@ title: "Documentation"
 description: "How the Statusengine broker module, the queue and the Go worker fit together, and in which order to install them."
 date: 2026-08-24
 weight: 1
+aliases:
+  - /getting_started/
 ---
 
 Statusengine decouples a Nagios or Naemon core from its database by putting a
