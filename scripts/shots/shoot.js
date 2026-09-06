@@ -51,6 +51,7 @@ const PAGES = [
 const ART = [
   { name: "art-gopher", url: "/images/gopher-worker.svg", w: 420, h: 520 },
   { name: "art-hexagon", url: "/images/cpp-broker.svg", w: 420, h: 520 },
+  { name: "art-elephant", url: "/images/php-elephant.svg", w: 420, h: 520 },
 ];
 
 function resolveFile(urlPath) {

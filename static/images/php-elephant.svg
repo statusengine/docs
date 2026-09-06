@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 290" width="240" height="290"
+     role="img" aria-labelledby="phpTitle phpDesc">
+  <title id="phpTitle">The Statusengine 3 PHP worker elephant</title>
+  <desc id="phpDesc">A purple elephant with a warning beacon on its head that is switched off.</desc>
+
+  <!-- An original character, not a redrawing of Vincent Pontier's elePHPant:
+       php.net states no licence for that design. The purple is PHP's brand
+       colour (#777BB4), which is a colour rather than a design. Built from the
+       same parts as the gopher and the C++ hexagon — same outline tone, same
+       eyes — so the three read as one family. -->
+
+  <defs>
+    <linearGradient id="sePhpBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A9ADD8"/>
+      <stop offset="1" stop-color="#777BB4"/>
+    </linearGradient>
+    <!-- The gopher's beacon gradient. Same part, same colour — only the
+         light, the cones and the animation are missing. -->
+    <linearGradient id="sePhpDome" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#8c2f24"/>
+      <stop offset="1" stop-color="#c9503d"/>
+    </linearGradient>
+  </defs>
+
+  <g fill="none" stroke="#1F3A45" stroke-width="4"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Behind the body: ears and tail. -->
+    <ellipse cx="44" cy="120" rx="32" ry="38" fill="url(#sePhpBody)"/>
+    <ellipse cx="196" cy="120" rx="32" ry="38" fill="url(#sePhpBody)"/>
+    <ellipse cx="40" cy="124" rx="17" ry="22" fill="#5F6499" stroke="none"/>
+    <ellipse cx="200" cy="124" rx="17" ry="22" fill="#5F6499" stroke="none"/>
+    <ellipse cx="198" cy="236" rx="7" ry="12" fill="url(#sePhpBody)"
+             transform="rotate(-40 198 236)"/>
+
+    <!-- Body. -->
+    <path fill="url(#sePhpBody)" d="M120 62
+      C172 62 208 104 208 156
+      L208 194
+      C208 230 172 254 120 254
+      C68 254 32 230 32 194
+      L32 156
+      C32 104 68 62 120 62 Z"/>
+    <ellipse cx="120" cy="208" rx="56" ry="40" fill="#DDDFF0" stroke="none" opacity=".5"/>
+
+    <!-- Feet. -->
+    <ellipse cx="88" cy="258" rx="24" ry="14" fill="url(#sePhpBody)"/>
+    <ellipse cx="152" cy="258" rx="24" ry="14" fill="url(#sePhpBody)"/>
+
+    <!-- Tusks, behind the trunk so it overlaps their inner edge. -->
+    <path fill="#FFFFFF" stroke-width="3" d="M100 164
+      C91 172 85 184 83 198
+      C94 193 103 182 110 171 Z"/>
+    <path fill="#FFFFFF" stroke-width="3" d="M140 164
+      C149 172 155 184 157 198
+      C146 193 137 182 130 171 Z"/>
+
+    <!-- Trunk. A closed outline of a curled trunk crosses itself at the tip
+         and reads as a coil, so it is a tube instead: one wide dark stroke
+         with a narrower body-coloured one on top, which gives a clean outline
+         and a rounded tip for free. It starts up between the eyes, where a
+         trunk actually begins. -->
+    <path stroke="#1F3A45" stroke-width="34"
+          d="M120 104 C121 152 116 190 120 210 C123 224 139 226 142 213"/>
+    <path stroke="url(#sePhpBody)" stroke-width="26"
+          d="M120 104 C121 152 116 190 120 210 C123 224 139 226 142 213"/>
+
+    <!-- Eyes. Same treatment as the gopher: the overlap of white discs on the
+         head outline is what ties the three characters together. -->
+    <circle cx="78" cy="116" r="30" fill="#FFFFFF"/>
+    <circle cx="162" cy="116" r="30" fill="#FFFFFF"/>
+    <circle cx="88" cy="122" r="12.5" fill="#1F3A45" stroke="none"/>
+    <circle cx="152" cy="122" r="12.5" fill="#1F3A45" stroke="none"/>
+    <circle cx="83" cy="116" r="4.5" fill="#FFFFFF" stroke="none"/>
+    <circle cx="147" cy="116" r="4.5" fill="#FFFFFF" stroke="none"/>
+
+    <!-- Beacon, unlit. The gopher wears the same one with the light on: this
+         worker did the same job and has been switched off. Deliberately no
+         glow, no light cones and no animation.
+
+         It stays red rather than going grey: at the ~170px the mascot is
+         actually shown at, a grey dome stops reading as a beacon at all and
+         turns into a little hat. Red keeps it recognisably the same part, and
+         the missing light is then a quiet detail instead of a puzzle. -->
+    <rect x="103" y="44" width="34" height="13" rx="5" fill="#2A2320"/>
+    <path d="M100 45 A20 20 0 0 1 140 45 Z" fill="url(#sePhpDome)"/>
+    <ellipse cx="110" cy="34" rx="4" ry="7" fill="#FFFFFF" stroke="none" opacity=".4"
+             transform="rotate(-20 110 34)"/>
+  </g>
+</svg>

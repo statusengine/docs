@@ -14,10 +14,20 @@ installation.
 
 ## Overview
 
-Statusengine Worker is a PHP application that consumes the events provided by the
-[Statusengine Broker Module](../../docs/broker/). All status data is stored in a
-database — CrateDB, MySQL or Redis. In addition, the worker parses and processes
-performance data to store it in a time series database such as Graphite.
+<div class="se-intro">
+  <p>
+    Statusengine Worker is a PHP application that consumes the events provided
+    by the <a href="../../docs/broker/">Statusengine Broker Module</a>. All
+    status data is stored in a database — CrateDB, MySQL or Redis. In addition,
+    the worker parses and processes performance data to store it in a time
+    series database such as Graphite.
+  </p>
+
+  <figure class="se-mascot">
+    <img src="/images/php-elephant.svg" width="240" height="290"
+         alt="A purple elephant wearing a warning beacon that is switched off." />
+  </figure>
+</div>
 
 ## Scale out to Multiple Nodes
 
