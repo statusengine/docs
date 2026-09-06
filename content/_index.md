@@ -9,7 +9,7 @@ toc: false
 <div class="se-hero">
   <span class="se-hero__eyebrow">Nagios &amp; Naemon, without the database bottleneck</span>
 
-  <h1 class="se-hero__title">Scale your monitoring <em>horizontally</em></h1>
+  <h1 class="se-hero__title">Scale your monitoring <em><span class="se-hero__glow" aria-hidden="true">horizontally</span>horizontally</em></h1>
 
   <p class="se-hero__lead">
     Statusengine takes every status change out of your monitoring core the moment

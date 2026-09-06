@@ -62,6 +62,12 @@
   --se-brand: #b03b2d;
   --se-brand-bright: #c9503d;
   --se-brand-deep: #8c2f24;
+  --se-title-glow: #d1553f;
+  /* On white a glow can only darken, so it has to stay a wide, faint wash;
+     a tight halo just reads as blurry type. On dark it is real emission
+     and can be tighter and stronger. */
+  --se-title-glow-blur: 30px;
+  --se-title-glow-alpha: 0.32;
 
   --se-ink: #16110f;
   --se-muted: #6b625f;
@@ -139,6 +145,9 @@
   --se-glow: rgb(224 133 115 / 34%);
   --se-glow-soft: rgb(201 80 61 / 20%);
   --se-glow-faint: rgb(201 80 61 / 9%);
+  --se-title-glow: #e08573;
+  --se-title-glow-blur: 22px;
+  --se-title-glow-alpha: 0.6;
 
   --se-gradient-hero: radial-gradient(
       1100px 480px at 12% -12%,
@@ -428,16 +437,22 @@ body.se-scrolled .nav-container::after {
   color: transparent;
 }
 /* background-clip:text cannot take a text-shadow, so the glow is a blurred
-   copy of the word sitting behind it. */
-.se-hero__title em::after {
-  content: "";
+   duplicate of the word sitting behind it. Blurring a rectangle instead —
+   the obvious shortcut — keeps the box's shape and pools light in the gaps
+   between letters, which reads as a smudge rather than a glow.
+
+   Out of flow, so it adds no width, and aria-hidden in the markup so the
+   heading is not announced twice. */
+.se-hero__glow {
   position: absolute;
-  inset: 12% -6%;
-  background: var(--se-gradient-text);
-  filter: blur(28px);
-  opacity: 0.35;
+  top: 0;
+  inset-inline-start: 0;
   z-index: -1;
+  color: var(--se-title-glow);
+  filter: blur(var(--se-title-glow-blur));
+  opacity: var(--se-title-glow-alpha);
   pointer-events: none;
+  user-select: none;
 }
 
 .se-hero__lead {
