@@ -170,7 +170,9 @@ node of a cluster.
 
 {{< callout type="warning" >}}
 **Section not written yet.** It will list the Prometheus metrics served on
-`:9105` and which of them actually indicate trouble.
+`:9105` and which of them actually indicate trouble. Until then, the
+[Worker API reference](../api/) documents `/metrics` in full, including which
+series to alert on.
 {{< /callout >}}
 
 ## WebSocket event stream
@@ -178,7 +180,9 @@ node of a cluster.
 {{< callout type="warning" >}}
 **Section not written yet.** It will cover `/ws`, topic subscriptions, the frame
 format, and why an empty `api_keys` list generates a random key instead of
-disabling authentication.
+disabling authentication. All of that is already in the
+[Worker API reference](../api/), which renders the worker's own OpenAPI
+document.
 {{< /callout >}}
 
 ## Development tooling

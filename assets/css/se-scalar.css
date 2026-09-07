@@ -1,0 +1,121 @@
+/* ---------------------------------------------------------------------------
+   Scalar API reference, dressed as part of this site.
+
+   Loaded only on pages that use the {{< openapi >}} shortcode (see
+   layouts/partials/custom/head-end.html), because none of it applies anywhere
+   else and the renderer it styles is 3.6 MB of vendored JavaScript.
+
+   Scalar declares its palette on `.light-mode` / `.dark-mode`, which it puts
+   on <body> itself, and it injects that stylesheet at runtime — after ours.
+   Equal specificity would therefore lose, so every override below is written
+   as `body.light-mode` / `body.dark-mode` to outrank it by one element.
+   --------------------------------------------------------------------------- */
+
+body.light-mode,
+body.dark-mode {
+  --scalar-font: var(--se-font-sans);
+  --scalar-font-code: var(--se-font-mono);
+
+  /* The brand colour carries links, active states and the search hit ring
+     inside the reference exactly as it does in the rest of the page. */
+  --scalar-color-accent: var(--se-brand);
+  --scalar-background-accent: var(--se-glow-faint);
+
+  --scalar-background-1: var(--se-surface);
+  --scalar-background-2: var(--se-surface-sunken);
+  --scalar-color-1: var(--se-ink);
+  --scalar-color-2: var(--se-muted);
+  --scalar-border-color: var(--se-hairline);
+}
+
+body.dark-mode {
+  /* #b03b2d on a near-black panel sits at roughly 3:1 against the surrounding
+     text; the brighter tint is the same one the site's own links switch to. */
+  --scalar-color-accent: var(--se-brand-bright);
+  --scalar-background-3: #272322;
+}
+
+/* --- The container -------------------------------------------------------- */
+
+/* Scalar lays out its own page: a header block, then one operation after
+   another. It expects to own the width it is given, and it brings its own
+   vertical rhythm, so the article's prose spacing is kept off it. */
+.se-scalar {
+  margin: 2rem 0 0;
+}
+
+.se-scalar .scalar-app {
+  /* The renderer paints its own background; letting the page's ambient wash
+     show through instead keeps it from reading as a pasted-in white slab. */
+  background-color: transparent;
+}
+
+/* Without its sidebar the reference is a single column that would otherwise
+   run the full width of a `wide` page. Long descriptions — and this document
+   is mostly long descriptions — get unreadable past about 90 characters. */
+.se-scalar .scalar-api-reference {
+  --scalar-full-height: auto;
+}
+
+/* The document leans on wide markdown tables — the topic list, the metric
+   reference — and Scalar lays those out with `table-layout: fixed`, which
+   divides the width evenly and then breaks a token like
+   `statusngin_contactnotificationmethod` across three lines. Turning the table
+   into a block gives it a real horizontal scrollbar instead, so the columns
+   can take the width they need. */
+/* `div.markdown` rather than `.markdown`: Scalar's own rule is
+   `.scalar-app .markdown table`, same specificity as the obvious selector
+   here and injected after this file, so the obvious selector loses. */
+.se-scalar div.markdown table {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  table-layout: auto;
+}
+
+/* Identifiers stay on one line; the prose around them still wraps, and the
+   table scrolls inside itself rather than pushing the page sideways. */
+.se-scalar div.markdown table code {
+  white-space: nowrap;
+}
+
+/* Model headings carry both the schema name and the queue it belongs to —
+   "ContactNotificationMethodEvent (statusngin_contactnotificationmethod)" is a
+   single 68-character line. Scalar asks for break-word, but the flex items it
+   sits in default to min-width:auto and refuse to shrink below their content,
+   so on a phone the heading pushes the whole page sideways instead. */
+.se-scalar .collapsible-section-trigger,
+.se-scalar .collapsible-section-header,
+.se-scalar .section-header-label,
+.se-scalar .schema-type {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* --- No-JavaScript and load-failure fallback ------------------------------ */
+
+.se-scalar__fallback {
+  border: 1px solid var(--se-hairline);
+  border-radius: 0.75rem;
+  background: var(--se-surface-sunken);
+  padding: 1rem 1.25rem;
+}
+
+/* The reference is a JavaScript application; there is nothing to progressively
+   enhance. Say so, rather than leaving an empty page. */
+.se-scalar:empty::after {
+  content: "Loading the API reference…";
+  display: block;
+  color: var(--se-muted);
+  font-size: 0.9375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .se-scalar *,
+  .se-scalar *::before,
+  .se-scalar *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

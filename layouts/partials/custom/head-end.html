@@ -29,3 +29,25 @@
 {{- else -}}
   <script defer src="{{ $lightbox.RelPermalink }}"></script>
 {{- end -}}
+
+
+{{/* The API reference, on the pages that carry one. Both files are useless
+     anywhere else and the renderer alone is 3.6 MB, so neither is part of the
+     site-wide bundle. See assets/vendor/scalar/UPSTREAM.md. */}}
+{{- if .HasShortcode "openapi" -}}
+  {{- $scalarCSS := resources.Get "css/se-scalar.css" -}}
+  {{- $scalarInit := resources.Get "js/se-scalar.js" -}}
+  {{- $scalar := resources.Get "vendor/scalar/standalone.js" -}}
+  {{- if hugo.IsProduction -}}
+    {{- $scalarCSS = $scalarCSS | minify | fingerprint -}}
+    {{- $scalarInit = $scalarInit | minify | fingerprint -}}
+    {{- $scalar = $scalar | fingerprint -}}
+    <link rel="stylesheet" href="{{ $scalarCSS.RelPermalink }}" integrity="{{ $scalarCSS.Data.Integrity }}" />
+    <script defer src="{{ $scalar.RelPermalink }}" integrity="{{ $scalar.Data.Integrity }}"></script>
+    <script defer src="{{ $scalarInit.RelPermalink }}" integrity="{{ $scalarInit.Data.Integrity }}"></script>
+  {{- else -}}
+    <link rel="stylesheet" href="{{ $scalarCSS.RelPermalink }}" />
+    <script defer src="{{ $scalar.RelPermalink }}"></script>
+    <script defer src="{{ $scalarInit.RelPermalink }}"></script>
+  {{- end -}}
+{{- end -}}

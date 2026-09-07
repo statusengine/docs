@@ -1,0 +1,33 @@
+{{- /*
+  Renders an OpenAPI document as an interactive reference.
+
+      {{< openapi spec="/api/statusengine-worker.yaml" >}}
+
+  Only the container is emitted here. The stylesheet and the 3.6 MB vendored
+  renderer are pulled in by layouts/partials/custom/head-end.html, which asks
+  the page whether it uses this shortcode — a <script> in the middle of an
+  article would block the parser, and the browser can start fetching from the
+  head while the rest of the page is still arriving.
+
+  spec    URL of the document to render. Must be on this origin.
+  layout  Scalar's own "modern" (default) or "classic".
+*/ -}}
+{{- $spec := .Get "spec" | default "/api/statusengine-worker.yaml" -}}
+{{- $layout := .Get "layout" | default "modern" -}}
+
+{{- if hasPrefix $spec "http" -}}
+  {{- errorf "%s: openapi shortcode was given the off-origin spec %q; mirror it into static/api/ instead (see scripts/fetch-openapi.sh)" .Position $spec -}}
+{{- end -}}
+
+{{/* The attributes are namespaced on purpose. Scalar's bundle still supports
+     its own deprecated HTML API and, on load, runs
+     document.querySelector("[data-spec]") — a plain data-spec here is read as
+     an *inline* document, and the renderer dies on "Invalid YAML object"
+     trying to parse the URL as YAML. data-spec-url and data-proxy-url are
+     spoken for in the same way. */}}
+<div
+  class="se-scalar"
+  data-se-scalar
+  data-se-spec="{{ $spec | relURL }}"
+  data-se-layout="{{ $layout }}"
+></div>

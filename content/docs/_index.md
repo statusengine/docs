@@ -15,6 +15,13 @@ message queue between them. Two components do the work:
   {{< card link="worker/" title="Worker" subtitle="Go daemon. Consumes the queue, writes MySQL, forwards performance data to Graphite." >}}
 {{< /cards >}}
 
+The worker also exposes an HTTP surface of its own — a live event stream, an
+endpoint for external commands and Prometheus metrics:
+
+{{< cards >}}
+  {{< card link="api/" title="Worker API" subtitle="The worker's OpenAPI document: /ws, /commands and /metrics, with schemas and examples." >}}
+{{< /cards >}}
+
 ## Which order to install in
 
 Install the worker's database first, then the worker, then the broker module.

@@ -13,13 +13,33 @@ bad()  { printf '  \033[31mFAIL\033[0m %s\n' "$1"; fail=1; }
 note "No externally loaded subresources (CLAUDE.md: keine CDNs)"
 # Only attributes that make the browser fetch something count. Plain <a href>
 # links to GitHub are fine: they cost a request only when someone clicks.
+#
+# public/vendor/ is excluded and checked separately below: the Scalar bundle
+# carries Scalar's own font URLs as an inert string, so a plain grep over it
+# reports a subresource that the page never actually requests.
 hits=$(grep -rhoE '(src|srcset)="https?://[^"]+|<link[^>]+href="https?://[^"]+|@import[^;]*https?://[^;"]+|url\(https?://[^)]+' \
-        public --include='*.html' --include='*.css' --include='*.js' 2>/dev/null \
+        public --exclude-dir=vendor --include='*.html' --include='*.css' --include='*.js' 2>/dev/null \
       | grep -oE 'https?://[a-zA-Z0-9.-]+' | sort -u)
 if [ -z "$hits" ]; then
   ok "no external src=, <link href=, @import or url()"
 else
   bad "external subresources found:"; printf '       %s\n' $hits
+fi
+
+note "Vendored Scalar bundle carries nothing new"
+# standalone.js contains @font-face rules for fonts.scalar.com as a string. They
+# are injected only when withDefaultFonts is left on, and assets/js/se-scalar.js
+# turns it off — `make test-api` drives a browser and proves no request leaves
+# the origin. All this can add is an early warning that an upgrade introduced a
+# second one, which that runtime test would then have to be re-read against.
+inert=$(grep -rhoE 'url\(https?://[^)]+|src=\\?"https?://[^"\\]+' public/vendor 2>/dev/null \
+      | grep -oE 'https?://[a-zA-Z0-9.-]+' | sort -u)
+if [ "$inert" = "https://fonts.scalar.com" ]; then
+  ok "only the known-inert fonts.scalar.com font-face string"
+elif [ -z "$inert" ]; then
+  ok "no subresource URLs at all"
+else
+  bad "unexpected subresource hosts in the vendored bundle:"; printf '       %s\n' $inert
 fi
 
 note "Known tracker and CDN hosts absent entirely"
@@ -66,9 +86,31 @@ for p in index.html docs/index.html docs/broker/index.html docs/worker/index.htm
          tutorials/install-naemon/index.html tutorials/php-composer/index.html \
          tutorials/gearman-to-many-files/index.html \
          tutorials/setup-naemon-development-environment/index.html \
-         v3/index.html v3/worker/index.html v3/ui/index.html; do
+         v3/index.html v3/worker/index.html v3/ui/index.html \
+         docs/api/index.html; do
   [ -f "public/$p" ] && ok "$p" || bad "$p missing"
 done
+
+note "The worker's OpenAPI document is mirrored on this origin"
+spec=public/api/statusengine-worker.yaml
+if [ -f "$spec" ] && head -1 "$spec" | grep -q '^openapi:'; then
+  ok "$spec ($(grep -c '' "$spec") lines)"
+else
+  bad "$spec missing or not an OpenAPI document — run ./scripts/fetch-openapi.sh"
+fi
+# The renderer is loaded per page, not site-wide: it is larger than everything
+# else the site ships put together.
+if grep -q 'vendor/scalar/standalone' public/docs/api/index.html 2>/dev/null; then
+  ok "the API page loads the vendored renderer"
+else
+  bad "public/docs/api/index.html does not reference the Scalar bundle"
+fi
+leaked=$(grep -rl 'vendor/scalar/standalone' public --include='index.html' 2>/dev/null | grep -v '^public/docs/api/index.html$' || true)
+if [ -z "$leaked" ]; then
+  ok "and no other page does"
+else
+  bad "the 3.6 MB renderer is also loaded by:"; printf '       %s\n' $leaked
+fi
 
 note "Old statusengine.org URLs still resolve"
 for p in worker ui broker getting_started tutorials/install-naemon-focal tutorials/install-naemon-centos8; do

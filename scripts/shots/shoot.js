@@ -22,7 +22,9 @@ const TYPES = {
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json",
+  ".yaml": "application/yaml; charset=utf-8",
   ".svg": "image/svg+xml",
+  ".webp": "image/webp",
   ".woff2": "font/woff2",
   ".png": "image/png",
   ".webmanifest": "application/manifest+json",
@@ -48,6 +50,11 @@ const PAGES = [
   { name: "tutorials", url: "/tutorials/", w: 1440, h: 950 },
   { name: "tut-naemon", url: "/tutorials/install-naemon/", w: 1440, h: 950 },
   { name: "tut-eclipse", url: "/tutorials/setup-naemon-development-environment/#configure-eclipse", w: 1440, h: 950 },
+  /* Scalar parses 76 KB of YAML before it paints; the default settle is not
+     enough and an empty container would look like a styling bug. */
+  { name: "api", url: "/docs/api/", w: 1440, h: 950, settle: 4000 },
+  { name: "api-deep", url: "/docs/api/#description/authentication-ws-only", w: 1440, h: 950, settle: 4000 },
+  { name: "api-mobile", url: "/docs/api/", w: 390, h: 844, settle: 4000 },
 ];
 
 /* The two characters on their own, at 2x, to check proportions. */
