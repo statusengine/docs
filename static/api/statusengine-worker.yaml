@@ -112,7 +112,7 @@ info:
     | `statusngin_contactnotificationmethod` | [`ContactNotificationMethodEvent`](#/components/schemas/ContactNotificationMethodEvent) | One message per contact actually notified; only published once that delivery has completed (`type` `605`, `NEBTYPE_CONTACTNOTIFICATIONMETHOD_END`). |
     | `statusngin_acknowledgements` | [`AcknowledgementEvent`](#/components/schemas/AcknowledgementEvent) | One message per acknowledgement set on a host or service. |
     | `statusngin_downtimes` | [`DowntimeEvent`](#/components/schemas/DowntimeEvent) | Covers a downtime's **entire** lifecycle (add/start/stop/delete) on one topic - see the schema description for how to tell those apart, including the `attr` field for a cancelled vs. naturally-expired downtime. |
-    | `statusngin_core_restart` | [`CoreRestartEvent`](#/components/schemas/CoreRestartEvent) | Fires once when the monitoring core (Naemon/Nagios/Icinga) restarts or reloads its configuration. |
+    | `statusngin_core_restart` | [`CoreRestartEvent`](#/components/schemas/CoreRestartEvent) | Fires once when the monitoring core (Naemon/Nagios) restarts or reloads its configuration. |
   contact:
     name: Statusengine
     url: https://github.com/statusengine/worker
@@ -282,7 +282,7 @@ components:
     Envelope:
       type: object
       description: |
-        The common header Naemon/Nagios/Icinga's event broker module
+        The common header Naemon/Nagios's event broker module
         attaches to most queue messages. Individual topic schemas embed
         the subset of these fields they actually forward to WebSocket
         clients (field names/casing may differ slightly per topic - see
