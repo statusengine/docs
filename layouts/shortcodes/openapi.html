@@ -11,9 +11,13 @@
 
   spec    URL of the document to render. Must be on this origin.
   layout  Scalar's own "modern" (default) or "classic".
+  slug    Prefix of every anchor Scalar generates, e.g. #api/models/Envelope.
+          Left unset, Scalar numbers the document and the anchors come out as
+          "api-1/...", which changes the moment a page renders two documents.
 */ -}}
 {{- $spec := .Get "spec" | default "/api/statusengine-worker.yaml" -}}
 {{- $layout := .Get "layout" | default "modern" -}}
+{{- $slug := .Get "slug" | default "api" -}}
 
 {{- if hasPrefix $spec "http" -}}
   {{- errorf "%s: openapi shortcode was given the off-origin spec %q; mirror it into static/api/ instead (see scripts/fetch-openapi.sh)" .Position $spec -}}
@@ -30,4 +34,5 @@
   data-se-scalar
   data-se-spec="{{ $spec | relURL }}"
   data-se-layout="{{ $layout }}"
+  data-se-slug="{{ $slug }}"
 ></div>

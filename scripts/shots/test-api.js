@@ -171,6 +171,41 @@ function check(name, ok, detail) {
   const toolbar = await page.locator(".api-reference-toolbar").count();
   check("Scalar's developer toolbar stays off", toolbar === 0);
 
+  /* The document links its topic table at the payload schemas with JSON
+     pointers, which Scalar does not resolve — every one of those links used to
+     go nowhere. se-scalar.js repoints them at the Models section. */
+  const links = await page.evaluate(() => ({
+    pointers: document.querySelectorAll('a[href^="#/components/schemas/"]').length,
+    repointed: document.querySelectorAll('a[href^="#api/models/"]').length,
+    targets: document.querySelectorAll('[id^="api/models/"]').length,
+  }));
+  check("no schema link is left as an unresolvable JSON pointer", links.pointers === 0, `${links.pointers} still pointing at #/components/schemas/`);
+  check("the topic table links at the Models section", links.repointed === 12, `${links.repointed} repointed links`);
+  check("every model has an anchor to land on", links.targets >= 12, `${links.targets} model anchors`);
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  await page.locator('a[href="#api/models/HostStatusEvent"]').first().click();
+  await page.waitForTimeout(2200);
+  const landed = await page.evaluate(() => {
+    const el = document.getElementById("api/models/HostStatusEvent");
+    if (!el) return null;
+    return {
+      top: Math.round(el.getBoundingClientRect().top),
+      expanded: el.getAttribute("aria-expanded"),
+      navbar: parseFloat(getComputedStyle(document.documentElement).fontSize) * 4,
+    };
+  });
+  /* Landing at 0 would put the heading under the sticky navbar, and landing
+     hundreds of pixels off is the drift from Scalar re-rendering the section
+     list after the jump. */
+  check(
+    "the schema link lands on its schema, clear of the navbar",
+    !!landed && landed.top > landed.navbar && landed.top < landed.navbar + 40,
+    landed ? `heading at ${landed.top}px, navbar is ${landed.navbar}px` : "target missing"
+  );
+  check("and opens it", !!landed && landed.expanded === "true", landed ? `aria-expanded=${landed.expanded}` : "");
+
   check("the OpenAPI document was fetched from this origin", served.includes(SPEC), served.filter((p) => p.includes("api")).join(", ") || "never requested");
   check("no request left this origin", offOrigin.length === 0, offOrigin.join(", "));
 

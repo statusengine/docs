@@ -53,9 +53,12 @@
 
   syncStore();
 
+  var slug = mount.dataset.seSlug || "api";
+
   window.Scalar.createApiReference(mount, {
     url: mount.dataset.seSpec,
     layout: mount.dataset.seLayout || "modern",
+    slug: slug,
 
     withDefaultFonts: false,
     proxyUrl: "",
@@ -92,6 +95,123 @@
     defaultOpenAllTags: true,
     orderRequiredPropertiesFirst: true,
   });
+
+  /* The document links its topic table at the payload schemas as JSON
+     pointers — [`HostStatusEvent`](#/components/schemas/HostStatusEvent).
+     That is the renderer-neutral way to write them and no renderer resolves
+     it; Scalar puts those schemas in the Models section at the foot of the
+     page, under ids of the form `<slug>/models/<Name>`. Repointing the links
+     here rather than editing the YAML keeps static/api/ a byte-for-byte
+     mirror of the worker repository, which is where the document is
+     maintained. */
+  var POINTER = "#/components/schemas/";
+  var MODELS = "#" + slug + "/models/";
+
+  var anchorFor = function (href) {
+    var name;
+    if (href.indexOf(POINTER) === 0) name = href.slice(POINTER.length);
+    else if (href.indexOf(MODELS) === 0) name = href.slice(MODELS.length);
+    else return null;
+    /* A pointer into a schema's innards, say .../Envelope/properties/type,
+       has no anchor of its own. Leave it alone rather than guess. */
+    if (!name || name.indexOf("/") !== -1) return null;
+    return document.getElementById(slug + "/models/" + name);
+  };
+
+  var repointSchemaLinks = function () {
+    var links = mount.querySelectorAll('a[href^="' + POINTER + '"]');
+    var remaining = 0;
+    Array.prototype.forEach.call(links, function (a) {
+      var target = anchorFor(a.getAttribute("href"));
+      if (target) a.setAttribute("href", "#" + target.id);
+      else remaining++;
+    });
+    return { seen: links.length, remaining: remaining };
+  };
+
+  /* A jump into the Models section has to survive two things Scalar does on
+     its own. It renders each schema's body only while that schema is in view
+     and drops it again afterwards, so the page height swings by thousands of
+     pixels for a moment after the jump — aim once and the reader ends up
+     somewhere in the middle of the section list. And the re-render that
+     follows replaces the node the jump aimed at, so a held reference goes
+     stale and anything set on it is lost.
+
+     Hence: for a short window, re-aim every frame at the *id*, and keep
+     asking the target to open until it stays open. Both stop the instant the
+     reader scrolls for themselves. */
+  var SETTLE_MS = 1500;
+  var REVEAL_EVERY = 10;
+
+  var settleOn = function (id) {
+    var deadline = Date.now() + SETTLE_MS;
+    var frame = 0;
+    var live = true;
+
+    var stop = function () {
+      live = false;
+      window.removeEventListener("wheel", stop);
+      window.removeEventListener("touchstart", stop);
+      window.removeEventListener("keydown", stop);
+    };
+    window.addEventListener("wheel", stop, { passive: true });
+    window.addEventListener("touchstart", stop, { passive: true });
+    window.addEventListener("keydown", stop);
+
+    var step = function () {
+      if (!live) return;
+      if (Date.now() > deadline) return stop();
+
+      var target = document.getElementById(id);
+      if (target) {
+        /* Every model renders collapsed, and someone who followed a link
+           named "HostStatusEvent" wants the schema, not a closed row with
+           that name on it. Opening only adds content below the row, so the
+           reader's view does not jump. */
+        if (
+          frame % REVEAL_EVERY === 0 &&
+          target.getAttribute("aria-expanded") === "false"
+        ) {
+          target.click();
+        }
+        /* Idempotent once the layout is quiet, and "auto" rather than the
+           document's scroll-behavior — an animation restarted every frame
+           never arrives. scroll-margin-top in se-scalar.css is what keeps
+           this clear of the sticky navbar. */
+        target.scrollIntoView({ block: "start", behavior: "auto" });
+      }
+
+      frame++;
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+
+  mount.addEventListener("click", function (e) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var target = anchorFor(a.getAttribute("href"));
+    if (!target) return;
+    /* The hash is set rather than pushed, so back and forward keep working
+       the way they would have; settleOn then corrects the landing. */
+    e.preventDefault();
+    window.location.hash = target.id;
+    settleOn(target.id);
+  });
+
+  /* The reference mounts asynchronously, so wait for the markup instead of
+     guessing a delay. One clean pass — every link repointed, none left over —
+     ends the watch. A shared link that names a schema is honoured here too:
+     the browser's own jump happened long before this markup existed. */
+  var linkWatcher = new MutationObserver(function () {
+    var pass = repointSchemaLinks();
+    if (pass.seen === 0 || pass.remaining > 0) return;
+    linkWatcher.disconnect();
+    var landing = anchorFor(window.location.hash);
+    if (landing) settleOn(landing.id);
+  });
+  linkWatcher.observe(mount, { childList: true, subtree: true });
 
   /* Scalar writes `light-mode`/`dark-mode` onto document.body. Its own toggle
      is hidden, so the only thing that should decide those classes is the

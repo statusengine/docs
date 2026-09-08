@@ -16,6 +16,9 @@ external commands and puts them back on the queue for the broker module, and
 `/metrics` exposes its Prometheus instrumentation. Both of the first two are
 authenticated and bind to loopback unless you tell them otherwise.
 
+The payload schema behind every event topic is at the foot of this page, under
+**Models** — the topic table in the document links straight to each one.
+
 {{< callout type="info" >}}
 The document below is the worker's own `docs/openapi.yaml`, mirrored here
 unchanged — the worker repository is the source of truth. Fetch it from

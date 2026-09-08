@@ -93,6 +93,13 @@ body.dark-mode {
   overflow-wrap: anywhere;
 }
 
+/* Jumping to a schema must not park it under the sticky navbar. Scalar gives
+   some of its own headings a scroll margin and the model sections none. */
+.se-scalar [id*="/models/"],
+.se-scalar [id*="/description/"] {
+  scroll-margin-top: calc(var(--navbar-height, 4rem) + 1rem);
+}
+
 /* --- No-JavaScript and load-failure fallback ------------------------------ */
 
 .se-scalar__fallback {
