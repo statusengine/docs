@@ -52,6 +52,8 @@ const PAGES = [
   { name: "tut-eclipse", url: "/tutorials/setup-naemon-development-environment/#configure-eclipse", w: 1440, h: 950 },
   /* Scalar parses 76 KB of YAML before it paints; the default settle is not
      enough and an empty container would look like a styling bug. */
+  { name: "migration", url: "/docs/migrating-from-3/", w: 1440, h: 950 },
+  { name: "migration-sql", url: "/docs/migrating-from-3/#4-convert-the-database-to-a-current-collation", w: 1440, h: 950 },
   { name: "api", url: "/docs/api/", w: 1440, h: 950, settle: 4000 },
   { name: "api-deep", url: "/docs/api/#description/authentication-ws-only", w: 1440, h: 950, settle: 4000 },
   { name: "api-mobile", url: "/docs/api/", w: 390, h: 844, settle: 4000 },

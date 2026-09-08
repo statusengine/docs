@@ -87,7 +87,7 @@ for p in index.html docs/index.html docs/broker/index.html docs/worker/index.htm
          tutorials/gearman-to-many-files/index.html \
          tutorials/setup-naemon-development-environment/index.html \
          v3/index.html v3/worker/index.html v3/ui/index.html \
-         docs/api/index.html; do
+         docs/api/index.html docs/migrating-from-3/index.html; do
   [ -f "public/$p" ] && ok "$p" || bad "$p missing"
 done
 

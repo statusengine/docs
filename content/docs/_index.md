@@ -28,6 +28,14 @@ Install the worker's database first, then the worker, then the broker module.
 That way the queue already has a consumer when the monitoring core starts
 publishing, and nothing piles up on the queue server while you finish the setup.
 
+Already running Statusengine 3? It is an in-place upgrade — the queues and
+almost all of the tables are the same — but version 4 dropped several backends,
+so start here rather than with the installation:
+
+{{< cards >}}
+  {{< card link="migrating-from-3/" title="Migrating from Statusengine 3" subtitle="What version 4 removed, retiring the PHP worker's service and cronjob, the schema changes, and moving the database off utf8_general_ci." >}}
+{{< /cards >}}
+
 ## Choosing a queue
 
 The broker and the worker both speak Gearman and RabbitMQ, and both are
