@@ -364,6 +364,18 @@ body.se-scrolled .nav-container::after {
   overflow-wrap: anywhere;
 }
 
+/* Table cells are the exception, and they are the reason this rule needs to be
+   narrow. A cell's min-content width is what the browser sizes the column from,
+   and `anywhere` drops it to one character — so a column of keys like
+   age_host_statehistory gets almost no width and every one of them breaks
+   mid-word. Tables already handle their own overflow: Hextra gives them
+   overflow-x: auto, so one that does not fit scrolls instead of shredding its
+   contents. */
+.content td code,
+.content th code {
+  overflow-wrap: normal;
+}
+
 /* --- Table of contents ----------------------------------------------------- */
 
 /* The entry for the heading currently under the reading line, set by

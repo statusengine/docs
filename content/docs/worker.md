@@ -222,12 +222,16 @@ age_perfdata: 0          # perfdata_route: graphite — let Graphite handle it
 
 ### Deleting without hurting
 
-Rows go in batches, each its own transaction:
+Rows go in batches, each its own transaction, and two settings shape that.
 
-| | |
-|---|---|
-| `cleanup_batch_size` | Rows per `DELETE`, `5000` by default. Smaller holds locks for shorter, keeps the undo log small and produces binlog events a replica can digest — at the cost of more round-trips. |
-| `cleanup_batch_pause` | A duration between two batches of the same table, `0s` by default. No pause deletes as fast as the database allows, which is right for a nightly run on an idle system. Set `50ms` or so if the cleanup competes with live check results. |
+**`cleanup_batch_size`** is the number of rows per `DELETE`, `5000` by default.
+Smaller batches hold locks for shorter, keep the undo log small and produce
+binlog events a replica can digest — at the cost of more round-trips.
+
+**`cleanup_batch_pause`** is a duration between two batches of the same table,
+`0s` by default. No pause deletes as fast as the database allows, which is the
+right setting for a nightly run on an idle system; set `50ms` or so if the
+cleanup has to share the database with live check results.
 
 The tool stops cleanly between batches on `SIGTERM`, so it never has to be
 killed mid-statement. The unit allows it 300 seconds to do that, which matters
