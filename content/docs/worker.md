@@ -161,20 +161,144 @@ the sum of three bounded waits.
 
 ## Data retention
 
+Nothing in the worker deletes anything. A monitoring core producing a few
+thousand checks a minute fills `statusengine_hostchecks` and
+`statusengine_servicechecks` faster than anything else in the schema, and
+trimming them is the job of a second binary, `statusengine-db-cleanup`.
+
+It reads the **same configuration file** as the worker — each binary ignores the
+other's keys — so retention is configured next to everything else:
+
+```bash
+statusengine-db-cleanup -config /etc/statusengine/config.yml
+```
+
+`make install-systemd` ships a timer for it:
+
+```bash
+systemctl enable --now statusengine-db-cleanup.timer
+```
+
+Daily, with `Persistent=true` so a missed run is caught up rather than skipped —
+retention that quietly stops running is noticed when the disk fills — and
+`RandomizedDelaySec=1h` to keep it off the top of the hour.
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will document `db_cleanup`, the `age_*` keys with
-their defaults, batching, and the caveat that the timer belongs on exactly one
-node of a cluster.
+**In a cluster, run it on exactly one node.** The randomised delay spreads the
+load within a host, not across them. Several nodes deleting from the same tables
+at the same time is the realistic source of the lock contention that
+[`statusengine_db_batch_retries_total`](#monitoring-the-worker) counts. If you
+must run it on more than one, give each a clearly different `OnCalendar`.
 {{< /callout >}}
+
+### How long to keep what
+
+Every value is a number of **days**, and every key is optional — omit one and
+its default below applies. The key names are the ones the PHP worker used, so an
+existing `config.yml` can be carried over value for value, including its
+convention:
+
+**`0` disables cleanup of that table entirely.** Only an explicit `0` switches a
+table off; a missing key falls back to the default.
+
+| Key | Default | Cleans |
+|---|---|---|
+| `age_hostchecks`<br>`age_servicechecks` | 5 | `statusengine_hostchecks`, `statusengine_servicechecks`. By far the largest tables — these two are why the cleanup exists. |
+| `age_host_statehistory`<br>`age_service_statehistory` | 365 | The state history. Kept far longer than checks because availability reports are computed from it. |
+| `age_host_acknowledgements`<br>`age_service_acknowledgements` | 60 | The acknowledgement tables. |
+| `age_host_notifications`<br>`age_service_notifications` | 60 | One row per notified contact. |
+| `age_host_notifications_log`<br>`age_service_notifications_log` | 60 | One row per notification event. |
+| `age_host_downtimes`<br>`age_service_downtimes` | 60 | The `*_downtimehistory` tables — **not** currently scheduled downtimes, which are never touched, despite what the legacy key name suggests. |
+| `age_logentries` | 5 | `statusengine_logentries`. |
+| `age_perfdata` | 90 | `statusengine_perfdata`. Only relevant while `perfdata_route` writes to MySQL; with Graphite, Graphite's own retention applies instead. |
+
+```yaml
+age_hostchecks: 5
+age_servicechecks: 5
+age_host_statehistory: 365
+age_service_statehistory: 365
+age_perfdata: 0          # perfdata_route: graphite — let Graphite handle it
+```
+
+### Deleting without hurting
+
+Rows go in batches, each its own transaction:
+
+| | |
+|---|---|
+| `cleanup_batch_size` | Rows per `DELETE`, `5000` by default. Smaller holds locks for shorter, keeps the undo log small and produces binlog events a replica can digest — at the cost of more round-trips. |
+| `cleanup_batch_pause` | A duration between two batches of the same table, `0s` by default. No pause deletes as fast as the database allows, which is right for a nightly run on an idle system. Set `50ms` or so if the cleanup competes with live check results. |
+
+The tool stops cleanly between batches on `SIGTERM`, so it never has to be
+killed mid-statement. The unit allows it 300 seconds to do that, which matters
+for the first run against a database that has never been cleaned — that one can
+take a while, and it is the run most likely to be interrupted.
 
 ## Monitoring the worker
 
-{{< callout type="warning" >}}
-**Section not written yet.** It will list the Prometheus metrics served on
-`:9105` and which of them actually indicate trouble. Until then, the
-[Worker API reference](../api/) documents `/metrics` in full, including which
-series to alert on.
-{{< /callout >}}
+The worker exports 30 Prometheus series on its own port, `metrics_listen_addr`,
+`:9105` by default. That server has **no authentication of its own** — it is
+meant to be reached by a trusted scraper, which means keeping the port off any
+public network rather than putting a key on it.
+
+Every series exists from the first scrape, before anything has happened, so an
+alerting rule never has to cope with a metric that is missing until the first
+event arrives. The one deliberate exception is `statusengine_queue_connected`,
+which appears once a consumer has actually connected: a pre-created `0` would
+claim an outage for every queue during startup.
+
+The [Worker API reference](../api/) documents all 30 with the reasoning behind
+each. These are the ones worth an alert:
+
+**`statusengine_db_available` is `0`.** Bulk inserts are not reaching MySQL.
+Nothing is lost while this is zero — the batch is held and the backlog waits at
+the broker — but nothing is draining either, so the catch-up afterwards takes as
+long as the outage did.
+
+**`statusengine_queue_connected` is `0`** for a `queue_name`. That consumer has
+lost its connection. This is the only series that separates *stopped* from
+*idle*: both leave `messages_received_total` flat and `jobs_in_flight` at zero.
+On RabbitMQ one connection carries every queue, so all of them move together; on
+Gearman each queue has its own and they move independently.
+
+**`statusengine_graphite_metrics_dropped_total` is rising.** Every increment is a
+metric that now exists nowhere. Graphite fails differently from MySQL on
+purpose: an unreachable Carbon is dropped rather than retried, because retrying
+would stall the database path or grow the buffer without bound.
+
+**`statusengine_queue_downtime_updates_unmatched_total` is rising.** A downtime's
+START or STOP found no row to update, so the ADD that should have created it
+never arrived and the event is lost — silently, because MySQL reports the UPDATE
+as successful. Expect a few right after a fresh installation and none afterwards.
+
+**`statusengine_db_batch_retries_total` is climbing steadily.** Bulk inserts
+re-run after a deadlock or a lock wait timeout. The occasional one is harmless;
+a steady climb means another writer is contending for the same rows, in practice
+[`db_cleanup`](#data-retention) running against a busy table.
+
+`statusengine_websocket_messages_dropped_total` looks alarming and usually is
+not: it counts events a client was too slow to accept. That is a problem with
+that client, not with the worker, and the pipeline is deliberately unaffected —
+see [When a client cannot keep up](#when-a-client-cannot-keep-up).
+
+### Is it keeping up?
+
+Three series answer that together, and none of them is an alert on its own.
+
+`statusengine_queue_jobs_in_flight` sitting at the consumer's concurrency cap
+for a queue — 8 per queue on Gearman, 100 on RabbitMQ, both configurable — means
+the broker is feeding that queue faster than the pipeline drains it. That is
+working as designed: the surplus waits at the broker instead of accumulating in
+this process. Read it per queue. One queue at its cap while the others idle is
+normal during a backlog and does not mean the others are blocked.
+
+`statusengine_queue_handler_duration_seconds` shows where that time goes. A
+handler blocks in the bulk-insert buffer once it is full, so this is where MySQL
+backpressure becomes visible from the ingestion side.
+
+`statusengine_db_batch_size_at_flush` pinned at the configured batch size means
+flushes are triggered by the batch filling up rather than by the 250 ms ticker —
+the same saturation, seen from the database side.
 
 ## WebSocket event stream
 
@@ -229,7 +353,7 @@ an endpoint whose security depends on the browser, and this one does not.
 A topic is a queue name. Subscribe at connect time:
 
 ```text
-wss://host/ws?topics=statusngin_hoststatus,statusngin_servicestatus
+ws://host/ws?topics=statusngin_hoststatus,statusngin_servicestatus
 ```
 
 or change it later by sending a control frame at any time:
@@ -329,7 +453,7 @@ so a rejection names the actual problem rather than surfacing as a truncated
 read — but the number that matters in practice is much smaller: the broker
 applies a bulk inside the monitoring core's event loop and cannot be interrupted
 part-way through one, so
-[keep a bulk to about 50](../broker/#bulk-messages-here-too).
+**[keep a bulk to about 50](../broker/#bulk-messages-here-too)**.
 
 {{< callout type="info" >}}
 A `raw` string needs no `[timestamp]` prefix here. The worker prepends the

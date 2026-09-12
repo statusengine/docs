@@ -338,6 +338,24 @@ body.se-scrolled .nav-container::after {
   box-shadow: 0 0 8px var(--se-glow);
 }
 
+/* --- Long identifiers in prose --------------------------------------------- */
+
+/* A metric like statusengine_queue_downtime_updates_unmatched_total is one
+   unbreakable word of about 430px. In a 342px content column on a phone it does
+   not wrap, it pushes the whole page sideways.
+
+   `anywhere` rather than `break-word`: only `anywhere` also shrinks the
+   element's min-content width, which is what stops the *parent* from
+   overflowing — `break-word` would wrap the text and leave the page just as
+   wide. Breaking an identifier mid-word is not pretty, and it beats a document
+   that scrolls horizontally.
+
+   `:not(pre) > code` keeps this away from fenced code blocks, which scroll
+   inside themselves on purpose. */
+.content :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
 /* --- Table of contents ----------------------------------------------------- */
 
 /* The entry for the heading currently under the reading line, set by
