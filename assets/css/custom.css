@@ -169,12 +169,20 @@
    blurred pane look grey, so the page itself carries two very faint brand
    washes. background-image composites over whatever background-color the
    theme sets, so this does not fight Hextra's light/dark switch. */
-/* The hero's full-bleed wash and its drifting blob deliberately reach past
-   the content column. Overflow to the right of the page is scrollable
-   overflow, so without this the landing page grows a horizontal scrollbar.
-   `clip` rather than `hidden`: hidden would turn the body into a scroll
-   container and break the sticky navbar, and it cannot be limited to one
-   axis — clip can, and leaves vertical scrolling to the viewport. */
+/* The hero's full-bleed wash reaches 50vw past both edges of its column on
+   purpose. That is scrollable overflow, so without this the landing page can
+   be dragged sideways — measured at 612px on a 1440px viewport.
+
+   `clip` rather than `hidden`: hidden would turn the element into a scroll
+   container and break the sticky navbar, and it cannot be limited to one axis
+   — clip can, and leaves vertical scrolling alone.
+
+   It has to be on `html` as well, and that is the part that is easy to get
+   wrong. When `html` is `overflow: visible`, the *body's* overflow propagates
+   to the viewport and body itself is then treated as visible — so `body` alone
+   clips nothing at all, which is exactly what was happening here. Giving
+   `html` its own value stops the propagation and makes the clip real. */
+html,
 body {
   overflow-x: clip;
 }
