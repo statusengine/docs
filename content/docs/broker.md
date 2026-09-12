@@ -201,6 +201,8 @@ Publishing a queue the worker does not consume is not an error — the messages
 simply accumulate on the queue server until something drains them, which on a
 busy installation is a slow way to run out of memory.
 
+A full configuration example for the broker module can be found here: [statusengine.toml](https://github.com/statusengine/broker/blob/master/statusengine.toml)
+
 ## Configuration
 
 {{< callout type="warning" >}}
@@ -211,10 +213,93 @@ table taken from `src/Configuration.h`.
 
 ## Queue identifier reference
 
+An identifier is the left-hand side of a `Identifier = "queue name"` line inside
+a `[[Gearman]]` or `[[Rabbitmq]]` section. The name on the right is yours to
+choose; the names below are the ones the shipped `statusengine.toml` suggests,
+and the Go worker expects those exact names. An identifier you do not write down
+publishes nothing — see [the callout above](#loading-the-module).
+
+### Outbound: core to queue
+
+Twenty-three identifiers, in the order `src/Queue.h` declares them. The
+[Go worker](../worker/) has a consumer for twelve of them — the twelve in
+[the configuration above](#a-configuration-matched-to-the-go-worker). The other
+eleven are published for whatever else you point at the queue.
+
+| Identifier<br>suggested queue name | What it carries |
+|---|---|
+| **`HostStatus`**<br>`statusngin_hoststatus` | The full current status of one host, on every status update the core reports — not only on a state change. |
+| **`HostCheck`**<br>`statusngin_hostchecks` | One completed host check with plugin output, perfdata and timings. Published on `NEBTYPE_HOSTCHECK_PROCESSED`, so a check appears once, finished. |
+| **`ServiceStatus`**<br>`statusngin_servicestatus` | The same as `HostStatus`, for one service. |
+| **`ServiceCheck`**<br>`statusngin_servicechecks` | The same as `HostCheck`, for one service. |
+| **`ServicePerfData`**<br>`statusngin_service_perfdata` | A reduced service check: host name, service description, `perf_data` and `start_time`, nothing else. Only for services with `process_performance_data` enabled. |
+| **`StateChange`**<br>`statusngin_statechanges` | Host **and** service state changes on one queue; `statechange_type` tells them apart. |
+| **`LogData`**<br>`statusngin_logentries` | Raw log lines — the same text the core writes to its own log file. |
+| **`AcknowledgementData`**<br>`statusngin_acknowledgements` | One message per acknowledgement set on a host or service. |
+| **`FlappingData`**<br>`statusngin_flappings` | Flapping start and stop events. |
+| **`DowntimeData`**<br>`statusngin_downtimes` | A downtime's entire lifecycle — add, start, stop, delete — on one queue, distinguished by `type` and `attr`. |
+| **`ContactNotificationMethodData`**<br>`statusngin_contactnotificationmethod` | One message per contact actually notified, once that delivery has completed. |
+| **`RestartData`**<br>`statusngin_core_restart` | Fires once, on `NEBTYPE_PROCESS_START`, when the core starts or reloads its configuration. |
+| **`SystemCommandData`**<br>`statusngin_systemcommands` | Commands the core ran itself, such as event handlers and notification commands, with `return_code`, output and timings. |
+| **`CommentData`**<br>`statusngin_comments` | Comments added to or deleted from a host or service. |
+| **`ExternalCommandData`**<br>`statusngin_externalcommands` | Every external command the core accepts — including the ones this module submits through `WorkerCommand`, which reach the core the same way. |
+| **`NotificationData`**<br>`statusngin_notifications` | The notification as a whole, start and end, with how many contacts it reached. |
+| **`ProgramStatusData`**<br>`statusngin_programmstatus` | Core-wide status: whether checks and notifications are enabled, when the command file was last read, and so on. |
+| **`ContactStatusData`**<br>`statusngin_contactstatus` | Per-contact status, such as when that contact was last notified. |
+| **`ContactNotificationData`**<br>`statusngin_contactnotificationdata` | One notification to one contact, before it is broken down into delivery methods. |
+| **`EventHandlerData`**<br>`statusngin_eventhandler` | Event handler executions, global and per object. |
+| **`ProcessData`**<br>`statusngin_processdata` | Every core process event — start, event loop start and end, shutdown. `RestartData` is the one useful slice of this. |
+| **`OCSP`**<br>`statusngin_ocsp` | The same payload as `ServiceCheck`, for forwarding service check results to another Statusengine node's `WorkerOCSP`. |
+| **`OCHP`**<br>`statusngin_ochp` | The same payload as `HostCheck`, for forwarding host check results to another node's `WorkerOCHP`. |
+
+`statusngin_programmstatus` is spelled with two `m` in the shipped
+configuration. It is only a suggestion like every other name here, but changing
+it means changing it on both sides.
+
+### Inbound: queue to core
+
+Three identifiers work the other way round. The module consumes them inside the
+core's event loop and applies what it finds, which is what makes the queue
+two-way — and what the `[Worker]` section's time budget exists to bound.
+
+| Identifier | Suggested queue name | What it accepts |
+|---|---|---|
+| `WorkerCommand` | `statusngin_cmd` | `{"Command": …, "Data": …}` with one of four commands: `check_result` submits a passive result, `schedule_check` reschedules a host or service, `delete_downtime` removes one, and `raw` hands an external command string to the core verbatim. |
+| `WorkerOCSP` | `statusngin_ocsp` | `{"servicecheck": …}` — a service check result produced by another node's `OCSP` queue, submitted to this core as a passive result. |
+| `WorkerOCHP` | `statusngin_ochp` | `{"hostcheck": …}` — the same for host checks, from another node's `OCHP`. |
+
+### Bulk messages
+
+Any outbound identifier named in `[Bulk] Queues` is batched: instead of one
+message per event, the module collects events and publishes
+`{"messages": [ … ], "format": "none"}`. The setting is global — it applies to
+every `[[Gearman]]` and `[[Rabbitmq]]` connection — and a batch is flushed when
+it reaches `Maximum` messages (200) or after `FlushInterval` seconds (10),
+whichever comes first.
+
+Bulking is what keeps a busy core from producing one queue job per check. It
+costs a little latency, bounded by `FlushInterval`, and the shipped default
+covers the queues where the volume actually is:
+
+```toml
+[Bulk]
+Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck",
+          "ServicePerfData", "StateChange", "OCHP", "OCSP", "LogData"]
+```
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will list all 23 outbound queue identifiers with
-the NEB callback behind each, plus the three inbound worker queues
-(`WorkerCommand`, `WorkerOCHP`, `WorkerOCSP`).
+The module will bulk **any** identifier you put in that list, but the Go worker
+only understands a bulk payload on eight of them: the seven in
+[the worker-matched configuration above](#a-configuration-matched-to-the-go-worker)
+plus `NotificationData`.
+
+`AcknowledgementData`, `DowntimeData`, `ContactNotificationMethodData` and
+`RestartData` are decoded as single messages. Adding one of those to
+`[Bulk] Queues` produces a payload the worker cannot read, and the events are
+lost with a decode error rather than a warning about the configuration.
+
+The inbound queues are unaffected: the module's own consumer unwraps a
+`messages` array on all three.
 {{< /callout >}}
 
 ## JSON message format
@@ -232,10 +317,3 @@ per-event nested objects, and the bulk format
 four commands: `check_result`, `schedule_check`, `delete_downtime` and `raw`.
 {{< /callout >}}
 
-## Debugging
-
-{{< callout type="warning" >}}
-**Section not written yet.** It will cover raising `[Log] Level` to `Info`,
-reading the `Statusengine: ` lines in the core's log, and inspecting queue depth
-with `gearadmin --status` or the RabbitMQ management UI.
-{{< /callout >}}

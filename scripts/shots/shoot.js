@@ -39,6 +39,7 @@ const PAGES = [
   { name: "home-mobile", url: "/", w: 390, h: 844 },
   { name: "broker", url: "/docs/broker/", w: 1440, h: 950 },
   { name: "worker", url: "/docs/worker/", w: 1440, h: 950 },
+  { name: "broker-queues", url: "/docs/broker/#outbound-core-to-queue", w: 1440, h: 950 },
   { name: "v3", url: "/v3/", w: 1440, h: 950 },
   { name: "v3-worker", url: "/v3/worker/", w: 1440, h: 950 },
   { name: "v3-ui", url: "/v3/ui/", w: 1440, h: 950 },
