@@ -42,6 +42,7 @@ shots: build ## Build, then screenshot the site (light and dark) into .shots/
 test-ui: build ## Build, then drive the browser over behaviour the build cannot see
 	BUILDX_BUILDER=default $(COMPOSE) build shots
 	$(COMPOSE) run --rm shots node test-lightbox.js
+	$(COMPOSE) run --rm shots node test-scrollspy.js
 
 # The API reference's privacy properties are configuration inside a 3.6 MB
 # vendored bundle, so only a running browser can prove them. Everything the

@@ -31,6 +31,18 @@
 {{- end -}}
 
 
+{{/* Highlights the heading being read in the table of contents. Optional in
+     the same way as the two above: without it the TOC is still a list of
+     working links. */}}
+{{- $spy := resources.Get "js/se-scrollspy.js" -}}
+{{- if hugo.IsProduction -}}
+  {{- $spy = $spy | minify | fingerprint -}}
+  <script defer src="{{ $spy.RelPermalink }}" integrity="{{ $spy.Data.Integrity }}"></script>
+{{- else -}}
+  <script defer src="{{ $spy.RelPermalink }}"></script>
+{{- end -}}
+
+
 {{/* The API reference, on the pages that carry one. Both files are useless
      anywhere else and the renderer alone is 3.6 MB, so neither is part of the
      site-wide bundle. See assets/vendor/scalar/UPSTREAM.md. */}}

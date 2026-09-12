@@ -338,6 +338,24 @@ body.se-scrolled .nav-container::after {
   box-shadow: 0 0 8px var(--se-glow);
 }
 
+/* --- Table of contents ----------------------------------------------------- */
+
+/* The entry for the heading currently under the reading line, set by
+   assets/js/se-scrollspy.js. Hextra colours these links with utility classes,
+   so the selectors below carry one extra class to outrank them — `.hextra-toc a`
+   plus `.se-toc-active` beats `.hx-text-gray-500`, and the same again inside
+   `.dark`. */
+.hextra-toc a.se-toc-active {
+  color: var(--se-brand);
+  transition: color 0.15s ease;
+}
+
+.dark .hextra-toc a.se-toc-active {
+  /* #b03b2d on the dark ground is too close to the body text to read as a
+     highlight; this is the tint the site's links switch to as well. */
+  color: var(--se-brand-bright);
+}
+
 /* --- Landing page --------------------------------------------------------- */
 
 .se-hero {
@@ -1058,6 +1076,10 @@ pre.mermaid[data-se-expandable="1"]:hover::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hextra-toc a.se-toc-active {
+    transition: none;
+  }
+
   .se-btn,
   .hextra-card,
   .nav-container::after,

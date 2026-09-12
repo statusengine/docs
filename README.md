@@ -15,7 +15,7 @@ installed Hugo: Hextra needs the *extended* edition, and the container in
 make dev      # live server on http://localhost:1313
 make build    # production build into public/
 make check    # build, then verify no external hosts and working highlighting
-make test-ui  # build, then drive a browser over the lightbox
+make test-ui  # build, then drive a browser over the lightbox and the scroll spy
 make test-api # build, then drive a browser over the API reference
 make shots    # build, then screenshot every page in light and dark
 make clean    # remove public/ and resources/
