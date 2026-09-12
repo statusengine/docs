@@ -164,13 +164,21 @@ the sum of three bounded waits.
 Nothing in the worker deletes anything. A monitoring core producing a few
 thousand checks a minute fills `statusengine_hostchecks` and
 `statusengine_servicechecks` faster than anything else in the schema, and
-trimming them is the job of a second binary, `statusengine-db-cleanup`.
+trimming them is the job of a second binary.
+
+It goes by two names, which is worth knowing before you go looking for it:
+`make build` produces it as `bin/db_cleanup`, and `make install` puts it in
+`/usr/local/bin` as **`statusengine-db-cleanup`** — the name used below and in
+the systemd unit.
 
 It reads the **same configuration file** as the worker — each binary ignores the
 other's keys — so retention is configured next to everything else:
 
 ```bash
 statusengine-db-cleanup -config /etc/statusengine/config.yml
+
+# straight out of a build tree, before installing:
+./bin/db_cleanup -config /etc/statusengine/config.yml
 ```
 
 `make install-systemd` ships a timer for it:
@@ -278,7 +286,7 @@ as successful. Expect a few right after a fresh installation and none afterwards
 **`statusengine_db_batch_retries_total` is climbing steadily.** Bulk inserts
 re-run after a deadlock or a lock wait timeout. The occasional one is harmless;
 a steady climb means another writer is contending for the same rows, in practice
-[`db_cleanup`](#data-retention) running against a busy table.
+[`statusengine-db-cleanup`](#data-retention) running against a busy table.
 
 `statusengine_websocket_messages_dropped_total` looks alarming and usually is
 not: it counts events a client was too slow to accept. That is a problem with
