@@ -74,7 +74,7 @@ menu:
       weight: 1
 
 params:
-  description: "Scale your Nagios or Naemon monitoring horizontally with a C++ event broker and a Go worker."
+  description: "Every Naemon or Nagios event, stored and streamed — a C++ event broker module and a Go worker."
 
   # Versions the tutorials pin, in one place. Referenced from the pages as
   # {{< param naemonVersion >}} — Hugo expands shortcodes before Goldmark, so

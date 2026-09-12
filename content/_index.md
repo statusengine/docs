@@ -1,21 +1,25 @@
 ---
 title: "Statusengine"
-description: "Scale Nagios and Naemon horizontally: a C++ event broker publishes status data to Gearman or RabbitMQ, and a Go worker writes it to MySQL and Graphite."
+description: "Every Naemon or Nagios event, stored and streamed: a C++ broker module publishes status data to Gearman or RabbitMQ, and a Go worker writes it to MySQL, forwards performance data to Graphite and streams it live over WebSocket."
 date: 2026-08-24
 layout: hextra-home
 toc: false
 ---
 
 <div class="se-hero">
-  <span class="se-hero__eyebrow">Nagios &amp; Naemon, without the database bottleneck</span>
+  <span class="se-hero__eyebrow">Naemon &amp; Nagios, event by event</span>
 
-  <h1 class="se-hero__title">Scale your monitoring <em><span class="se-hero__glow" aria-hidden="true">horizontally</span>horizontally</em></h1>
+  <!-- The glow is an absolutely positioned duplicate inside the emphasis
+       element, so the emphasised part has to be one word that never wraps: at
+       the mobile clamp floor that is roughly twelve characters. See
+       .se-hero__glow in assets/css/custom.css. -->
+  <h1 class="se-hero__title">Every monitoring event, stored and <em><span class="se-hero__glow" aria-hidden="true">streamed</span>streamed</em></h1>
 
   <p class="se-hero__lead">
-    Statusengine takes every status change out of your monitoring core the moment
-    it happens, hands it to a message queue, and lets a separate worker deal with
-    the database. A C++ event broker feeds the queue, a Go worker drains it — so a
-    slow disk or a busy MySQL never stalls a check again.
+    Statusengine takes every event out of your monitoring core the moment it
+    happens and hands it to a message queue. A Go worker drains that queue:
+    history and current state into MySQL, performance data into Graphite, and a
+    live WebSocket stream for anything that wants the events as they arrive.
   </p>
 
   <div class="se-hero__actions">
