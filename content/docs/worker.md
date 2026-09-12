@@ -46,21 +46,22 @@ The 3.x worker is documented at [Statusengine 3 › Worker (PHP)](../../v3/worke
 
 ## Requirements
 
-| | |
-|---|---|
-| Go | 1.26.5 (only to build; the result is a static binary) |
-| Database | MySQL 8.0+ — the only supported database |
-| Queue | Gearman **or** RabbitMQ, matching whatever the broker publishes to |
-| Performance data | Graphite (Carbon plaintext), optional |
+| Component        | Requirement                                                        |
+|------------------|--------------------------------------------------------------------|
+| Go               | 1.26.5 (only to build; the result is a static binary)              |
+| Database         | MySQL 8.0+ or MariaDB 10.5+                                        |
+| Queue            | Gearman **or** RabbitMQ, matching whatever the broker publishes to |
+| Performance data | Graphite (Carbon plaintext), optional                              |
 
 There is no PostgreSQL, CrateDB or Elasticsearch backend, and no Redis
-dependency. If a guide tells you otherwise, it is describing the old PHP worker.
+dependency. If a guide tells you otherwise, it is describing the old [PHP worker](../../v3/worker/).
 
 ## Build and install
 
 ```bash
-git clone https://github.com/statusengine/worker
-cd worker
+git clone https://github.com/statusengine/statusengine-worker
+cd statusengine-worker
+
 make build
 ```
 
@@ -177,12 +178,185 @@ series to alert on.
 
 ## WebSocket event stream
 
+Everything the worker writes to MySQL it also broadcasts live on `/ws`. Nothing
+is stored for a client that is not connected — this is a stream, not a backlog —
+which makes it the right tool for a dashboard, a chat notifier or anything that
+wants to react to a state change now, and the wrong one for anything that must
+not miss an event.
+
+The server listens on `listen_addr`, `127.0.0.1:8080` by default. The full
+protocol, with a captured example for every event topic, is in the
+[Worker API reference](../api/); what follows is what you
+need to run it.
+
+### Authentication is always on
+
+There is no setting that turns it off. Leave `api_keys` empty and the worker
+generates a 256-bit key for that run and logs it:
+
+```console
+WARN websocket: no API key configured, generated a random one for this run
+     api_key=8f3c…  hint="set -api-keys/STATUSENGINE_API_KEYS (or api_keys in the config file) for a stable key"
+```
+
+That is a safety net, not a setup: the key changes on every restart, so any
+client that reconnects on its own needs a configured one.
+
+```yaml
+api_keys:
+  - "a-long-random-string"
+```
+
+A client presents it as `Authorization: Bearer <key>` or `X-Api-Key: <key>`.
+There is a third way, `?api_key=<key>` in the URL, and it exists only because a
+browser's `WebSocket` constructor cannot set headers — a key in a URL ends up in
+proxy logs and browser history, so use a header everywhere else.
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will cover `/ws`, topic subscriptions, the frame
-format, and why an empty `api_keys` list generates a random key instead of
-disabling authentication. All of that is already in the
-[Worker API reference](../api/), which renders the worker's own OpenAPI
-document.
+The key matters even on loopback. A WebSocket handshake is not subject to the
+same-origin policy and triggers no CORS preflight, so an unauthenticated `/ws`
+on **any** address a browser can reach — `127.0.0.1` included — can be opened by
+any web page the operator happens to visit, which then receives the entire event
+stream. Binding to loopback narrows who can reach the port; the key is what
+makes reaching it useless.
+
+The handshake's `Origin` header is deliberately not checked: that would defend
+an endpoint whose security depends on the browser, and this one does not.
+{{< /callout >}}
+
+### Topics
+
+A topic is a queue name. Subscribe at connect time:
+
+```text
+wss://host/ws?topics=statusngin_hoststatus,statusngin_servicestatus
+```
+
+or change it later by sending a control frame at any time:
+
+```json
+{"subscribe": ["statusngin_logentries"]}
+{"unsubscribe": ["statusngin_hoststatus"]}
+```
+
+**Subscribing to nothing means subscribing to everything.** A client that
+connects without `?topics=` receives every topic the worker consumes, which on a
+large installation is a great deal of traffic — name what you want.
+
+### Frame format
+
+One frame per **job**, not per event:
+
+```json
+{"topic": "statusngin_hoststatus", "payload": [ … ]}
+```
+
+`payload` is always an array, even for the four queues the broker never bulks —
+those send an array of one — so a client never has to branch on the shape. The
+array is one bulk message as the broker sent it, so a frame typically carries a
+hundred events rather than one.
+
+### When a client cannot keep up
+
+The hub never blocks the pipeline to wait for a slow reader. It buffers 1024
+frames inbound and 256 frames per client, and when a buffer is full the frame is
+**dropped for that client** — the database write and every other client are
+unaffected. Drops are counted per client, reported when it disconnects, and
+exported as Prometheus counters.
+
+A client that drops is a client that is too slow, or a link that is too thin.
+Subscribing to fewer topics is usually the fix; reading the socket in a loop that
+does no work of its own is the other.
+
+## The /commands API
+
+The queue runs both ways. `/commands` takes Naemon external commands over HTTP,
+publishes them to the `statusngin_cmd` queue, and the
+[broker module applies them to the running core](../broker/#submitting-data-to-the-core) —
+which is how a dashboard acknowledges a problem or forces a check without a
+shell on the monitoring host.
+
+### It is off unless you switch it on
+
+Unlike `/ws`, an unconfigured key here means the endpoint is **not served at
+all**:
+
+```console
+INFO command: endpoint disabled, no API key configured
+     hint="set -command-api-keys/STATUSENGINE_API_COMMAND_KEYS to enable /commands"
+```
+
+Enabling it takes one key, and it is deliberately a different list from
+`api_keys`:
+
+```yaml
+command_api_keys:
+  - "another-long-random-string"
+command_listen_addr: 127.0.0.1:8081
+```
+
+An `api_keys` entry grants *reading* the event stream. A `command_api_keys`
+entry grants *controlling the monitoring core*. Those are not the same
+privilege, so they are not the same key — and the endpoint gets its own port, so
+exposing the stream on the network does not also expose the write endpoint.
+
+### Sending commands
+
+The body is the broker's own envelope, unchanged — the same JSON a client would
+publish to Gearman or RabbitMQ directly, so the four commands and their fields
+are the ones documented under
+[Submitting data to the core](../broker/#submitting-data-to-the-core):
+`check_result`, `schedule_check`, `delete_downtime` and `raw`.
+
+```bash
+curl -X POST http://127.0.0.1:8081/commands \
+  -H "Authorization: Bearer another-long-random-string" \
+  -H "Content-Type: application/json" \
+  -d '{"Command": "raw", "Data": "SCHEDULE_FORCED_SVC_CHECK;localhost;PING;1700000000"}'
+```
+
+A bulk sends many at once and may mix types freely:
+
+```json
+{"messages": [
+  {"Command": "check_result", "Data": {"host_name": "localhost", "output": "OK"}},
+  {"Command": "raw", "Data": "ENABLE_HOST_FLAP_DETECTION;localhost"}
+]}
+```
+
+One request carries at most 1000 commands and 8 MiB of body. Both limits exist
+so a rejection names the actual problem rather than surfacing as a truncated
+read — but the number that matters in practice is much smaller: the broker
+applies a bulk inside the monitoring core's event loop and cannot be interrupted
+part-way through one, so
+[keep a bulk to about 50](../broker/#bulk-messages-here-too).
+
+{{< callout type="info" >}}
+A `raw` string needs no `[timestamp]` prefix here. The worker prepends the
+current time when the string does not already start with one, and leaves a
+timestamp you supplied alone. Publishing to `statusngin_cmd` directly is the
+case where you have to write it yourself.
+{{< /callout >}}
+
+### What it refuses
+
+Five external commands are rejected even with a valid key:
+
+| Denied | |
+|---|---|
+| `SHUTDOWN_PROGRAM`, `SHUTDOWN_PROCESS` | Two spellings Naemon registers against the same handler. Denying only the familiar one would be a filter that looks right and stops nothing. |
+| `RESTART_PROGRAM`, `RESTART_PROCESS` | The same, for restart. |
+| `PROCESS_FILE` | Reads a file and runs every line in it as an external command. Without this entry the rest of the list would be decoration: put `SHUTDOWN_PROGRAM` in a file and have Naemon read it. |
+
+Notably absent are `CHANGE_*_CHECK_COMMAND` and `CHANGE_*_EVENT_HANDLER`, the
+obvious route to running arbitrary code. Naemon disables those internally, so
+there is nothing left to deny.
+
+{{< callout type="warning" >}}
+This is a denylist, so it protects against an accident, not against intent. A
+caller holding a valid key can still `DISABLE_NOTIFICATIONS` for every host you
+have. The real control is which keys exist and who holds them — treat a
+`command_api_keys` entry as root on the monitoring core.
 {{< /callout >}}
 
 ## Development tooling
