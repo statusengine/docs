@@ -30,5 +30,5 @@ The remaining guides from the old site were not carried over. Most of them
 target Ubuntu 20.04 or CentOS 8 at the latest, and several cover backends the
 [Go worker](../docs/worker/) no longer supports — CrateDB, Elasticsearch and
 Redis. They remain in the
-[statusengine/docs](https://github.com/statusengine/docs/tree/master/src/content/tutorials)
+[statusengine/docs ↗](https://github.com/statusengine/docs/tree/master/src/content/tutorials)
 repository as Markdown.

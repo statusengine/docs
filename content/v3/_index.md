@@ -43,7 +43,7 @@ offers is deliberately narrower:
 ## Statusengine 2
 
 The documentation for the 2.x series has been retired. It remains available in
-the [statusengine/docs](https://github.com/statusengine/docs) repository on
+the [statusengine/docs ↗](https://github.com/statusengine/docs) repository on
 GitHub for anyone who needs to build it themselves.
 
 ## Screenshots

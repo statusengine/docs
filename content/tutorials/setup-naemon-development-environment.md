@@ -20,7 +20,7 @@ Run everything as your own user, not as `root`.
 
 ## Install Eclipse
 
-Download [Eclipse IDE for C/C++ Developers](https://www.eclipse.org/downloads/packages/),
+Download [Eclipse IDE for C/C++ Developers ↗](https://www.eclipse.org/downloads/packages/),
 then install a JRE:
 
 ```bash
@@ -225,7 +225,7 @@ On the **Arguments** tab, pass
 ![Valgrind profile arguments](/images/tutorials/eclipse/25_valgrid_profile_args.png)
 
 On the **Valgrind Options** tab, pick a tool —
-[Valgrind offers several](https://www.eclipse.org/linuxtools/projectPages/valgrind/);
+[Valgrind offers several ↗](https://www.eclipse.org/linuxtools/projectPages/valgrind/);
 *Massif* is the one used here.
 
 ![Valgrind options](/images/tutorials/eclipse/26_valgrid_options_profile.png)

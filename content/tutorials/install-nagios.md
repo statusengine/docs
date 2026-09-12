@@ -45,7 +45,7 @@ it and aborts on `Cannot continue without unzip!`.
 
 {{< callout type="info" >}}
 This guide pins Nagios Core {{< param nagiosVersion >}}. Check whether
-[a newer version is available](https://github.com/NagiosEnterprises/nagioscore/releases)
+[a newer version is available ↗](https://github.com/NagiosEnterprises/nagioscore/releases)
 before you start.
 {{< /callout >}}
 
@@ -129,8 +129,7 @@ daemon then drops to the `nagios_user` from `nagios.cfg` on its own, so the
 process you end up with runs as `nagios` either way.
 
 `PIDFile=` points at that same lock file. Without it systemd has to guess which
-of the forked processes is the main one — Nagios starts one worker per CPU core,
-so there are plenty to guess wrong about.
+of the forked processes is the main one.
 {{< /callout >}}
 
 ```bash

@@ -27,7 +27,7 @@ your monitoring data visible.
   {{< card image="/images/v3/screenshots/iphone/overview-issue.png" title="Phone" subtitle="Current issues on a phone" >}}
 {{< /cards >}}
 
-[Visit the Statusengine UI demo](https://demo.statusengine.org)
+[Visit the Statusengine UI demo ↗](https://demo.statusengine.org)
 
 ## Features
 
@@ -134,12 +134,12 @@ composer install
 
 ## Configuration
 
-The [Statusengine UI config file](https://github.com/statusengine/interface/blob/master/etc/config.yml.example)
+The [Statusengine UI config file ↗](https://github.com/statusengine/interface/blob/master/etc/config.yml.example)
 has a lot of options you may not need, so this is stripped down to the basics
 you have to change.
 
 Statusengine UI can also be configured through
-[environment variables](https://github.com/statusengine/interface/blob/master/docs/Env.md),
+[environment variables ↗](https://github.com/statusengine/interface/blob/master/docs/Env.md),
 which is handy inside Docker.
 
 If you are going to use CrateDB you can ignore all MySQL settings, and vice
@@ -189,7 +189,7 @@ apt-get install ssl-cert
 {{< callout type="warning" >}}
 **Fair warning.** There is no telling how secure this certificate really is. Do
 not use it in production — it is only here to make clear how things work. Use
-[Let's Encrypt](https://letsencrypt.org/) to get free TLS certificates.
+[Let's Encrypt ↗](https://letsencrypt.org/) to get free TLS certificates.
 {{< /callout >}}
   {{< /tab >}}
 
@@ -467,7 +467,7 @@ php -S 0.0.0.0:80 -t /usr/share/statusengine-ui/public
 ```
 
 Before you do, take a look at the
-[PHP manual on the built-in web server](https://php.net/manual/en/features.commandline.webserver.php).
+[PHP manual on the built-in web server ↗](https://php.net/manual/en/features.commandline.webserver.php).
 
 ## Manage users
 
