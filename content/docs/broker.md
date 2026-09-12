@@ -63,10 +63,10 @@ because the module never asks the core for it.
 
 ## Supported monitoring cores
 
-| Core | Build | Notes |
-|---|---|---|
-| Naemon | default | Needs `naemon` in `PKG_CONFIG_PATH`. Only the include directory is used — the module does not link against `libnaemon`. |
-| Nagios Core | `-Dnagios=true` | Needs `-Dnagios_include_dir=` pointing at the Nagios headers. |
+| Core        | Build           | Notes                                                                                                                   |
+|-------------|-----------------|-------------------------------------------------------------------------------------------------------------------------|
+| Naemon      | default         | Needs `naemon` in `PKG_CONFIG_PATH`. Only the include directory is used — the module does not link against `libnaemon`. |
+| Nagios Core | `-Dnagios=true` | Needs `-Dnagios_include_dir=` pointing at the Nagios headers.                                                           |
 
 Either way you need the **headers** of a compiled core, so build and install
 [Naemon]({{< relref "/tutorials/install-naemon" >}}) or [Nagios]({{< relref "/tutorials/install-nagios" >}}) before building the broker.
@@ -132,12 +132,13 @@ to install it next to your core instead.
 
 ### Build options
 
-| Option | Default | Effect |
-|---|---|---|
-| `-Dgearman=false` | `true` | Build without Gearman support |
-| `-Drabbitmq=false` | `true` | Build without RabbitMQ support |
-| `-Dnagios=true` | `false` | Build against Nagios Core instead of Naemon |
+| Option                  | Default   | Effect                                                    |
+|-------------------------|-----------|-----------------------------------------------------------|
+| `-Dgearman=false`       | `true`    | Build without Gearman support                             |
+| `-Drabbitmq=false`      | `true`    | Build without RabbitMQ support                            |
+| `-Dnagios=true`         | `false`   | Build against Nagios Core instead of Naemon               |
 | `-Dnagios_include_dir=` | *(empty)* | Path to the Nagios headers, required with `-Dnagios=true` |
+
 
 Disabling a transport you do not use drops its client library from the
 dependency list, which is worth doing if you are packaging the module.
@@ -202,14 +203,6 @@ simply accumulate on the queue server until something drains them, which on a
 busy installation is a slow way to run out of memory.
 
 A full configuration example for the broker module can be found here: [statusengine.toml](https://github.com/statusengine/broker/blob/master/statusengine.toml)
-
-## Configuration
-
-{{< callout type="warning" >}}
-**Section not written yet.** It will document `[[Gearman]]`, `[[Rabbitmq]]`,
-`[Bulk]`, `[Scheduler]`, `[Log]` and `[Worker]`, each with a complete parameter
-table taken from `src/Configuration.h`.
-{{< /callout >}}
 
 ## Queue identifier reference
 
@@ -492,16 +485,17 @@ Submits a passive check result. `Data` is a check result object; a
 }
 ```
 
-| Field | |
-|---|---|
-| `host_name` | **Required.** Without it the message is dropped with a warning. |
-| `service_description` | Present makes it a service check, absent a host check. |
-| `output` | **Required** in practice: a result with neither `output` nor `long_output` is dropped. |
-| `long_output`, `perf_data` | Optional. |
-| `return_code` | The plugin exit code — `0`, `1`, `2`, `3`. |
-| `check_type` | `0` active, `1` passive. |
-| `start_time`, `end_time` | Unix timestamps, seconds. |
-| `early_timeout`, `latency`, `exited_ok` | Optional, and what you would expect a check runner to report. |
+| Field                                   |                                                                                        |
+|-----------------------------------------|----------------------------------------------------------------------------------------|
+| `host_name`                             | **Required.** Without it the message is dropped with a warning.                        |
+| `service_description`                   | Present makes it a service check, absent a host check.                                 |
+| `output`                                | **Required** in practice: a result with neither `output` nor `long_output` is dropped. |
+| `long_output`, `perf_data`              | Optional.                                                                              |
+| `return_code`                           | The plugin exit code — `0`, `1`, `2`, `3`.                                             |
+| `check_type`                            | `0` active, `1` passive.                                                               |
+| `start_time`, `end_time`                | Unix timestamps, seconds.                                                              |
+| `early_timeout`, `latency`, `exited_ok` | Optional, and what you would expect a check runner to report.                          |
+
 
 The three output fields are joined back into the single string the core wants
 before the result is submitted: `output|perf_data` on the first line, then
@@ -562,7 +556,7 @@ available without the module needing to know about it.
 ```
 
 {{< callout type="warning" >}}
-**Publishing to the queue yourself? The leading `[unixtimestamp] ` is not
+**Publishing to the queue yourself? The leading `[unixtimestamp]` is not
 optional.** The core parses these lines exactly as it parses its command file,
 and that format starts with the time the command was issued, in square brackets,
 followed by a space. Nothing on this side adds it for you — the module hands the
