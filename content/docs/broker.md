@@ -302,13 +302,154 @@ The inbound queues are unaffected: the module's own consumer unwraps a
 `messages` array on all three.
 {{< /callout >}}
 
-## JSON message format
+## OCSP and OCHP
+
+Naemon and Nagios can run a command after every check — `ocsp_command` and
+`ochp_command`, the *obsessive compulsive* service and host processors. They
+work, and they fork a process for every single check result, which is the one
+thing a busy core cannot afford.
+
+The `OCSP` and `OCHP` queues replace that with a copy on a queue. Name them in
+any `[[Gearman]]` or `[[Rabbitmq]]` section and every processed check is
+published a second time:
+
+```toml
+OCSP = "statusngin_ocsp"
+OCHP = "statusngin_ochp"
+```
+
+Nothing is forked, nothing runs inside the core's event loop, and whatever reads
+the queue can be on a different machine. The payload is the same object
+`ServiceCheck` and `HostCheck` publish — the separate queue exists so a second
+consumer can have its own copy, at its own pace, without competing with the
+worker for the check queues.
+
+Two things to point at it:
+
+- **Another Statusengine node.** Its `WorkerOCSP` and `WorkerOCHP` queues take
+  exactly this payload and submit it to that core as a passive check result —
+  see [Inbound: queue to core](#inbound-queue-to-core). This is how check
+  execution is distributed across nodes.
+- **Anything you write yourself**, for everything else that wants a copy of
+  every check result as it happens.
+
+### Reading the queue
+
+Useful far beyond writing a consumer: this is how you look at what the module is
+actually publishing, and how you empty a queue that has run away.
+
+```bash
+apt-get install gearman-tools jq
+```
+
+One job, pretty-printed, then exit:
+
+```bash
+gearman -w -c 1 -f statusngin_ocsp | jq .
+```
 
 {{< callout type="warning" >}}
-**Section not written yet.** It will document the common event envelope, the
-per-event nested objects, and the bulk format
-`{"messages": [...], "format": "none"}`.
+This is a consumer, not a viewer. The job it prints is **taken off the queue**
+and is gone — fine when you are looking at what the module produces, and the
+point when you are clearing a backlog, but do not run it against a queue that
+something else is supposed to process.
+
+Drop `-c 1` and it keeps going until you interrupt it, which is the short way to
+drain a queue completely:
+
+```bash
+gearman -w -f statusngin_ocsp > /dev/null
+```
 {{< /callout >}}
+
+Add `-h` and `-p` for a job server that is not on `localhost:4730`. If the tool
+cannot reach one at all it prints nothing and waits rather than reporting an
+error, so silence here means the connection, not an empty queue — `gearadmin
+--status` says which.
+
+{{< details title="What one message looks like" closed="true" >}}
+`OCSP` and `OCHP` are in the shipped `[Bulk] Queues` list, so what arrives is a
+[bulk envelope](#bulk-messages) holding up to `Maximum` check results. Every
+field the module sends is shown here; `hostcheck` messages carry the same set
+without `service_description`.
+
+```json
+{
+  "messages": [
+    {
+      "type": 701,
+      "flags": 0,
+      "attr": 0,
+      "timestamp": 1614507120,
+      "timestamp_usec": 41434,
+      "servicecheck": {
+        "host_name": "linksys-srw224p",
+        "service_description": "PING",
+        "command_line": "$USER1$/check_ping -H $HOSTADDRESS$ -w $ARG1$ -c $ARG2$ -p 5",
+        "command_name": "check_ping!200.0,20%!600.0,60%",
+        "output": "PING CRITICAL - Packet loss = 100%",
+        "long_output": "",
+        "perf_data": "rta=600.000000ms;200.000000;600.000000;0.000000 pl=100%;20;60;0",
+        "check_type": 0,
+        "current_attempt": 3,
+        "max_attempts": 3,
+        "state_type": 1,
+        "state": 2,
+        "timeout": 60,
+        "start_time": 1614507110,
+        "end_time": 1614507120,
+        "early_timeout": 0,
+        "execution_time": 10.004374,
+        "latency": 0.03640900179743767,
+        "return_code": 2
+      }
+    }
+  ],
+  "format": "none"
+}
+```
+
+`type` is the NEB event type: `701` is `NEBTYPE_SERVICECHECK_PROCESSED`, and a
+host check carries `801`, `NEBTYPE_HOSTCHECK_PROCESSED`. Only processed checks
+are published, so the initiate events — `700` and `800` — never appear here.
+{{< /details >}}
+
+{{< details title="A consumer in PHP" closed="true" >}}
+The same queue read with the `gearman` PECL extension, printing each service
+check to stdout. Exit with <kbd>Ctrl</kbd>+<kbd>C</kbd>.
+
+```php
+<?php
+
+class StatusengineOcspProcessor {
+    private \GearmanWorker $GearmanWorker;
+
+    public function __construct() {
+        $this->GearmanWorker = new \GearmanWorker();
+        $this->GearmanWorker->addServer('127.0.0.1', 4730);
+
+        // Consume statusngin_ocsp and hand each job to handleOcsp() below.
+        $this->GearmanWorker->addFunction('statusngin_ocsp', [$this, 'handleOcsp']);
+    }
+
+    public function loop(): void {
+        while (true) {
+            $this->GearmanWorker->work();
+        }
+    }
+
+    public function handleOcsp(\GearmanJob $job): void {
+        print_r(json_decode($job->workload()));
+    }
+}
+
+(new StatusengineOcspProcessor())->loop();
+```
+
+The extension comes from `apt-get install php-gearman`. Bindings for other
+languages are listed in the
+[Gearman documentation](http://gearman.org/download/#official-client-libraries).
+{{< /details >}}
 
 ## Submitting data to the core
 
