@@ -24,7 +24,7 @@ toc: false
 
   <div class="se-hero__actions">
     <a class="se-btn se-btn--primary" href="docs/">Read the documentation</a>
-    <a class="se-btn se-btn--ghost" href="https://github.com/statusengine" target="_blank" rel="noreferrer">Source on GitHub ↗</a>
+    <a class="se-btn se-btn--ghost" href="https://github.com/statusengine" target="_blank" rel="noreferrer">Source on GitHub<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
   </div>
 </div>
 

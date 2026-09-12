@@ -45,7 +45,7 @@ it and aborts on `Cannot continue without unzip!`.
 
 {{< callout type="info" >}}
 This guide pins Nagios Core {{< param nagiosVersion >}}. Check whether
-[a newer version is available ↗](https://github.com/NagiosEnterprises/nagioscore/releases)
+[a newer version is available](https://github.com/NagiosEnterprises/nagioscore/releases)
 before you start.
 {{< /callout >}}
 

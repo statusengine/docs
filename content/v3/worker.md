@@ -173,7 +173,7 @@ once into the SQL console.
 {{< /callout >}}
 
 CrateDB users have to manage the database schema manually, because of
-[crate/crate-dbal#92 ↗](https://github.com/crate/crate-dbal/issues/92). With
+[crate/crate-dbal#92](https://github.com/crate/crate-dbal/issues/92). With
 CrateDB you do not have to create a separate database or user for Statusengine.
 
 ### MySQL
@@ -205,12 +205,12 @@ Redis server. Read more in the [In-memory](#in-memory) section.
 
 ## Configuration
 
-The [Statusengine Worker config file ↗](https://github.com/statusengine/worker/blob/master/etc/config.yml.example)
+The [Statusengine Worker config file](https://github.com/statusengine/worker/blob/master/etc/config.yml.example)
 has a lot of options you may not need, so this is stripped down to the basics
 you have to change.
 
 The worker can also be configured through
-[environment variables ↗](https://github.com/statusengine/worker/blob/master/docs/Env.md),
+[environment variables](https://github.com/statusengine/worker/blob/master/docs/Env.md),
 which is handy inside Docker.
 
 If you are going to use CrateDB you can ignore all MySQL settings, and vice
@@ -459,7 +459,7 @@ If you installed Statusengine through `git`, the update is done quickly.
    ```
 
    CrateDB users — check
-   [`/opt/statusengine/worker/lib` ↗](https://github.com/statusengine/worker/tree/master/lib)
+   [`/opt/statusengine/worker/lib`](https://github.com/statusengine/worker/tree/master/lib)
    for database update files. Their names look like
    `crateDB_3.1.0_TO_3.2.0.sql`. Execute every SQL file in the right order. The
    current schema version is stored in the table `statusengine_dbversion`.

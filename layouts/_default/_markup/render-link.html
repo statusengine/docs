@@ -1,0 +1,36 @@
+{{- /*
+  Project override of themes/hextra/layouts/_default/_markup/render-link.html.
+
+  Upstream opens anything whose destination starts with "http" in a new tab.
+  This version does the same, and adds the ↗ that marks a link as leaving the
+  site — automatically, so no one has to remember it and no link can be missed.
+
+  Three differences from upstream:
+
+    * "External" means a different host, not merely an absolute URL. A link
+      written as https://statusengine.org/docs/ points back at this site and is
+      treated as internal; demo.statusengine.org is a different host and is not.
+    * rel="noreferrer" rather than "noopener". It implies noopener and also
+      stops the Referer header from telling the other site where the reader
+      came from, which is the same reason this site hosts its own fonts.
+    * The marker is aria-hidden: a screen reader announcing "north east arrow"
+      after every external link is noise, and target="_blank" is what actually
+      matters there.
+
+  Raw <a> elements written directly in content or in a partial are not markdown
+  and never reach this hook — the footer and the hero button carry the same
+  span by hand. Same for the menu entries in hugo.yaml.
+*/ -}}
+{{- $dest := .Destination -}}
+{{- $external := false -}}
+{{- if or (hasPrefix $dest "http://") (hasPrefix $dest "https://") -}}
+  {{- $external = ne (urls.Parse $dest).Host (urls.Parse site.BaseURL).Host -}}
+{{- end -}}
+{{- $text := .Text -}}
+{{- /* An image wrapped in a link has nothing to hang the marker off. */ -}}
+{{- $markable := not (strings.Contains (printf "%s" $text) "<img") -}}
+<a href="{{ $dest | safeURL }}"{{ with .Title }} title="{{ . }}"{{ end }}
+  {{- if $external }} target="_blank" rel="noreferrer"{{ end }}>
+  {{- $text | safeHTML -}}
+  {{- if and $external $markable }}<span class="se-external" aria-hidden="true">&nbsp;↗</span>{{ end -}}
+</a>

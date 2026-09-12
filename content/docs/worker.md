@@ -21,7 +21,7 @@ aliases:
          alt="A Go gopher wearing a red warning beacon on its head." />
     <figcaption>
       Based on the Go gopher by Renée French,
-      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0 ↗</a>.
+      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>.
     </figcaption>
   </figure>
 </div>

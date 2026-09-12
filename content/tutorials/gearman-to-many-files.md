@@ -6,7 +6,7 @@ weight: 20
 ---
 
 If you monitor large environments you may be using
-[Mod-Gearman ↗](https://mod-gearman.org/) to spread check execution across
+[Mod-Gearman](https://mod-gearman.org/) to spread check execution across
 multiple worker nodes.
 
 Past roughly 450 connected workers, the Gearman Job Server can start eating

@@ -35,7 +35,7 @@ apt-get install build-essential automake gperf help2man libtool libglib2.0-dev
 
 {{< callout type="info" >}}
 This guide pins Naemon {{< param naemonVersion >}}. Check whether
-[a newer version is available ↗](https://github.com/naemon/naemon-core/releases)
+[a newer version is available](https://github.com/naemon/naemon-core/releases)
 before you start.
 {{< /callout >}}
 
@@ -78,7 +78,7 @@ apt-get install gearman-job-server
 {{< /callout >}}
 
 Put the following in `/etc/systemd/system/naemon.service`. It is the
-[unit shipped with Naemon ↗](https://github.com/naemon/naemon-core/blob/master/daemon-systemd.in)
+[unit shipped with Naemon](https://github.com/naemon/naemon-core/blob/master/daemon-systemd.in)
 with a few adjustments.
 
 ```ini

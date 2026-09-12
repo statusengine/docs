@@ -470,6 +470,24 @@ body.se-scrolled .nav-container::after {
   margin-top: 2rem;
 }
 
+/* --- External-link marker -------------------------------------------------- */
+
+/* Emitted by layouts/_default/_markup/render-link.html for every markdown link
+   that leaves the site, and written by hand into the few raw <a> elements the
+   render hook never sees (the footer, the hero button). The non-breaking space
+   lives inside the span so the arrow can never wrap onto a line of its own. */
+.se-external {
+  font-size: 0.85em;
+  color: var(--se-muted);
+  /* The glyph sits on the baseline and reads as if it were falling over
+     without a nudge. */
+  vertical-align: 0.06em;
+}
+
+a:hover .se-external {
+  color: inherit;
+}
+
 /* --- Mascot --------------------------------------------------------------- */
 
 /* Flex rather than a float: the callout that follows this intro is a block
