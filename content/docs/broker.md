@@ -453,8 +453,152 @@ languages are listed in the
 
 ## Submitting data to the core
 
+Everything so far has been one way. `WorkerCommand` is the way back: the module
+consumes it and applies what it finds to the running core, which is what lets
+the [worker's `/commands` endpoint](../api/) reach Naemon at all.
+`WorkerOCSP` and `WorkerOCHP` — [described above](#inbound-queue-to-core) — take
+one fixed payload each; this queue takes four different commands.
+
+Every message is an object with a `Command` and a `Data`:
+
+```json
+{"Command": "check_result", "Data": { … }}
+```
+
+An unknown `Command`, or a message missing either key, is logged and dropped.
+
+### check_result
+
+Submits a passive check result. `Data` is a check result object; a
+`service_description` is what makes it a service check rather than a host check.
+
+```json
+{
+  "Command": "check_result",
+  "Data": {
+    "host_name": "localhost",
+    "service_description": "PING",
+    "output": "PING OK - Packet loss = 0%, RTA = 0.05 ms",
+    "long_output": "",
+    "perf_data": "rta=0.055000ms;100.000000;500.000000;0.000000 pl=0%;20;60;0",
+    "return_code": 0,
+    "check_type": 1,
+    "start_time": 1614507125,
+    "end_time": 1614507129,
+    "early_timeout": 0,
+    "latency": 0.037,
+    "exited_ok": 1
+  }
+}
+```
+
+| Field | |
+|---|---|
+| `host_name` | **Required.** Without it the message is dropped with a warning. |
+| `service_description` | Present makes it a service check, absent a host check. |
+| `output` | **Required** in practice: a result with neither `output` nor `long_output` is dropped. |
+| `long_output`, `perf_data` | Optional. |
+| `return_code` | The plugin exit code — `0`, `1`, `2`, `3`. |
+| `check_type` | `0` active, `1` passive. |
+| `start_time`, `end_time` | Unix timestamps, seconds. |
+| `early_timeout`, `latency`, `exited_ok` | Optional, and what you would expect a check runner to report. |
+
+The three output fields are joined back into the single string the core wants
+before the result is submitted: `output|perf_data` on the first line, then
+`long_output` on the next. You do not build that string yourself — send the
+parts.
+
+### schedule_check
+
+Moves the next check of a host or service to a given time. `schedule_time` is a
+Unix timestamp and the check is scheduled **at** it, not merely no later than it.
+
+```json
+{
+  "Command": "schedule_check",
+  "Data": {
+    "host_name": "localhost",
+    "service_description": "PING",
+    "schedule_time": 1614507200
+  }
+}
+```
+
+`host_name` and a non-zero `schedule_time` are both required. Leaving
+`service_description` out schedules the host check instead. An object the core
+does not know is logged by name and ignored, so a typo in a host name fails
+quietly rather than loudly — look for `Received schedule_check command for
+unknown host` in the core's log.
+
+### delete_downtime
+
+Deletes downtimes matching what you give it. Only `host_name` is required;
+`service_description`, `start_time`, `end_time` and `comment` narrow it further,
+and leaving them all out deletes every downtime on that host.
+
+```json
+{
+  "Command": "delete_downtime",
+  "Data": {
+    "host_name": "localhost",
+    "service_description": "PING",
+    "start_time": 1614507000,
+    "end_time": 1614510600,
+    "comment": "Ansible run"
+  }
+}
+```
+
+### raw
+
+`Data` is not an object here but a **string**, handed to the core's external
+command processor unchanged — the same line you would otherwise echo into
+`naemon.cmd`. That makes every
+[external command](https://www.naemon.io/documentation/developer/externalcommands/schedule_forced_host_check)
+available without the module needing to know about it.
+
+```json
+{"Command": "raw", "Data": "[1614507120] SCHEDULE_FORCED_HOST_CHECK;localhost;1614507120"}
+```
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will document the `WorkerCommand` queue and its
-four commands: `check_result`, `schedule_check`, `delete_downtime` and `raw`.
+**Publishing to the queue yourself? The leading `[unixtimestamp] ` is not
+optional.** The core parses these lines exactly as it parses its command file,
+and that format starts with the time the command was issued, in square brackets,
+followed by a space. Nothing on this side adds it for you — the module hands the
+string over unchanged — so a command without it is not executed.
+
+Going through the [worker's `/commands` endpoint](../api/) instead? Then it is
+optional: the worker prepends the current time when the string does not already
+begin with one, and leaves a timestamp you did supply alone. That is why the
+examples over there have no brackets and the ones here do.
+{{< /callout >}}
+
+### Bulk messages here too
+
+The inbound side accepts the same `messages` envelope as the outbound queues, so
+a client can submit many commands in one job:
+
+```json
+{"messages": [
+  {"Command": "raw", "Data": "[1614507120] SCHEDULE_FORCED_HOST_CHECK;localhost;1614507120"},
+  {"Command": "raw", "Data": "[1614507120] SCHEDULE_FORCED_HOST_CHECK;router;1614507120"}
+]}
+```
+
+{{< callout type="warning" >}}
+**Keep a bulk to about 50 messages.** This module runs inside the monitoring
+core's event loop: while it applies your commands, the core schedules no checks,
+reaps no results and reads no external commands.
+
+`[Worker] MaxRuntimeMilliseconds` (100 by default) bounds how long one run may
+take — but it can only stop *between* messages. A bulk is a single job that has
+already been acknowledged and cannot be abandoned half way, so the real
+guarantee is "the budget, plus one whole message". A bulk of 50 costs the core a
+blip; a bulk of 5000 stalls it for as long as 5000 commands take, whatever the
+budget says.
+
+`MaxWorkerMessagesPerInterval` counts jobs, not the commands inside them, so it
+is no help here either: a 5000-command bulk counts as one.
 {{< /callout >}}
 
