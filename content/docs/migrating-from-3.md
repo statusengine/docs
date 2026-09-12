@@ -11,8 +11,7 @@ where it is — so this is an in-place upgrade rather than a reinstall. What
 changes is everything that used to sit *beside* MySQL.
 
 Read the next section before you touch anything: if your setup depends on one
-of the backends that version 4 removed, that is a decision to make first, not
-a surprise to hit halfway through.
+of the backends that version 4 removed, you have to start over or build your own migration.
 
 ## What Statusengine 4 dropped
 
@@ -27,7 +26,7 @@ Elasticsearch — version 4 cannot read it, and cannot import it.
 |---|---|
 | **CrateDB backend** | MySQL is the only supported database. If CrateDB is your live backend, plan that move first — the tables are not compatible and nothing converts them. |
 | **Elasticsearch backend** | Same: version 4 never writes to Elasticsearch. An existing index keeps whatever it already holds. |
-| **Redis / Valkey** | No longer a dependency at all. Neither the server nor the `php-redis` extension is needed by Statusengine any more. |
+| **Redis / Valkey** | No longer a dependency at all. |
 | **The [In-memory feature](/v3/worker/#in-memory)** | The live-state objects in Redis (`hosts_up`, `services_ok`, `hoststatus_<hostname>` and the rest) are not written by version 4. Anything that read them needs another source. |
 
 For the last one there is a direct replacement: the worker's
@@ -108,64 +107,6 @@ ALTER TABLE `statusengine_service_acknowledgements` ADD COLUMN `end_time` BIGINT
 ```
 
 These are the two smallest tables in the schema; the change takes seconds.
-
-### Two new tables for the notification log
-
-Version 4 splits notifications across two pairs of tables, and one pair is new.
-`statusengine_host_notifications` and `statusengine_service_notifications` keep
-their meaning — one row per contact actually notified, from the
-`statusngin_contactnotificationmethod` queue. The new `_log` tables record the
-notification itself, once, when it has completed: one row per
-`NEBTYPE_NOTIFICATION_END` event off `statusngin_notifications`, carrying how
-many contacts it reached and whether it was an escalation.
-
-```sql
-CREATE TABLE `statusengine_host_notifications_log` (
-  `hostname` varchar(255) NOT NULL,
-  `start_time` bigint(20) NOT NULL,
-  `start_time_usec` int(10) unsigned NOT NULL DEFAULT 0,
-  `end_time` bigint(20) NOT NULL,
-  `state` smallint(6) unsigned DEFAULT 0,
-  `reason_type` smallint(6) unsigned DEFAULT 0,
-  `is_escalated` tinyint(1) NOT NULL DEFAULT 0,
-  `contacts_notified_count` smallint(6) unsigned NOT NULL DEFAULT 0,
-  `output` varchar(1024) DEFAULT NULL,
-  `ack_author` varchar(1024) DEFAULT NULL,
-  `ack_data` varchar(1024) DEFAULT NULL,
-  PRIMARY KEY (`hostname`,`start_time`,`start_time_usec`),
-  KEY `hostname` (`hostname`),
-  KEY `filter` (`start_time`,`end_time`,`reason_type`,`state`)
-) ENGINE=InnoDB;
-
-CREATE TABLE `statusengine_service_notifications_log` (
-  `hostname` varchar(255) NOT NULL,
-  `service_description` varchar(255) NOT NULL,
-  `start_time` bigint(20) NOT NULL,
-  `start_time_usec` int(10) unsigned NOT NULL DEFAULT 0,
-  `end_time` bigint(20) NOT NULL,
-  `state` smallint(6) unsigned DEFAULT 0,
-  `reason_type` smallint(6) unsigned DEFAULT 0,
-  `is_escalated` tinyint(1) NOT NULL DEFAULT 0,
-  `contacts_notified_count` smallint(6) unsigned NOT NULL DEFAULT 0,
-  `output` varchar(1024) DEFAULT NULL,
-  `ack_author` varchar(1024) DEFAULT NULL,
-  `ack_data` varchar(1024) DEFAULT NULL,
-  PRIMARY KEY (`hostname`,`service_description`,`start_time`,`start_time_usec`),
-  KEY `servicename` (`hostname`,`service_description`),
-  KEY `filter` (`start_time`,`end_time`,`reason_type`,`state`)
-) ENGINE=InnoDB;
-```
-
-No `CHARACTER SET` on purpose: they inherit the database default, and step 4
-sets that to something current for every table at once.
-
-{{< callout type="info" >}}
-These two grow like the other history tables. If you partition
-`statusengine_host_notifications` and friends, give these the same treatment —
-`PARTITION BY RANGE (start_time DIV 86400)` is the scheme the rest of the
-schema uses. Partitioning is maintained outside the worker; it never creates or
-drops a partition itself.
-{{< /callout >}}
 
 ## 4. Convert the database to a current collation
 
@@ -265,9 +206,11 @@ done
 echo "Done."
 ```
 
-Run it with the worker stopped — which, at this point in the migration, it is.
-Each `ALTER TABLE ... CONVERT` rewrites the whole table; on years of check
-history that is hours, not minutes. The table filter is `statusengine\_%`, so a
+Run the migration script with the worker stopped!
+
+Each `ALTER TABLE ... CONVERT` rewrites the whole table.
+**This can take several hours**.
+The table filter is `statusengine\_%`, so a
 database shared with another application is left alone.
 
 {{< details title="If an ALTER fails with \"index column size too large\"" closed="true" >}}

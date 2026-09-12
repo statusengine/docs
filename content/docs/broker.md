@@ -21,18 +21,20 @@ aliases:
 </div>
 
 Because a queue sits in between, the monitoring core never waits on a database or
-on disk I/O. Publishing is a local hand-off; everything after that is somebody
-else's problem — the [worker's](../worker/), specifically.
+on disk I/O. Publishing is a local hand-off; everything after that is _somebody
+else's_ problem — the [worker's](../worker/), specifically.
 
 {{< callout type="info" >}}
 Run the Gearman job server on the same node as the monitoring core. Publishing
-then never leaves the loopback interface, which is the whole point of the
-exercise.
+then never leaves the loopback interface, which is much faster than going over the network.
 {{< /callout >}}
 
 ## How it hooks into the core
 
-The module is a NEB (Nagios Event Broker) module. The core loads it, calls
+The module is a NEB ([Naemon Event Broker](https://www.naemon.io/documentation/developer/neb_broker)) module. 
+
+{{< details title="Hooking details" closed="true" >}}
+The core loads it, calls
 `nebmodule_init()`, and from then on invokes `nebmodule_callback()` for every
 event the module registered an interest in:
 
@@ -57,6 +59,7 @@ file.
 A callback is only registered when at least one queue is configured for it. An
 event type you have not named in the configuration costs nothing at runtime,
 because the module never asks the core for it.
+{{< /details >}}
 
 ## Supported monitoring cores
 
@@ -66,7 +69,7 @@ because the module never asks the core for it.
 | Nagios Core | `-Dnagios=true` | Needs `-Dnagios_include_dir=` pointing at the Nagios headers. |
 
 Either way you need the **headers** of a compiled core, so build and install
-Naemon or Nagios before building the broker.
+[Naemon]({{< relref "/tutorials/install-naemon" >}}) or [Nagios]({{< relref "/tutorials/install-nagios" >}}) before building the broker.
 
 ## Building from source
 
