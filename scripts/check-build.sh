@@ -83,7 +83,8 @@ done
 
 note "Pages built"
 for p in index.html docs/index.html docs/broker/index.html docs/worker/index.html tutorials/index.html \
-         tutorials/install-naemon/index.html tutorials/php-composer/index.html \
+         tutorials/install-naemon/index.html tutorials/install-nagios/index.html \
+         tutorials/php-composer/index.html \
          tutorials/gearman-to-many-files/index.html \
          tutorials/setup-naemon-development-environment/index.html \
          v3/index.html v3/worker/index.html v3/ui/index.html \
@@ -113,7 +114,9 @@ else
 fi
 
 note "Old statusengine.org URLs still resolve"
-for p in worker ui broker getting_started tutorials/install-naemon-focal tutorials/install-naemon-centos8; do
+for p in worker ui broker getting_started tutorials/install-naemon-focal \
+         tutorials/install-naemon-centos8 tutorials/install-nagios4-focal \
+         tutorials/install-nagios4-centos8; do
   if [ -f "public/$p/index.html" ] && grep -qE 'http-equiv="?refresh"?' "public/$p/index.html"; then
     ok "/$p/ redirects"
   else

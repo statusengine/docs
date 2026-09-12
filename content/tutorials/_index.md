@@ -18,6 +18,7 @@ to.
 
 {{< cards >}}
   {{< card link="install-naemon/" title="Install Naemon Core on Ubuntu" subtitle="Build Naemon from source on Ubuntu 26.04 LTS, ready for the broker module." >}}
+  {{< card link="install-nagios/" title="Install Nagios Core on Ubuntu" subtitle="The same, for Nagios Core — the other monitoring core the broker module supports." >}}
   {{< card link="gearman-to-many-files/" title="Gearman: Too many open files" subtitle="Raise the file descriptor limit when the job server stalls past a few hundred workers." >}}
   {{< card link="setup-naemon-development-environment/" title="Naemon development environment" subtitle="Build, run and debug Naemon Core inside Eclipse, with Valgrind attached." >}}
   {{< card link="php-composer/" title="Install PHP Composer" subtitle="Only needed for Statusengine 3 — the Go worker has no PHP anywhere in it." >}}

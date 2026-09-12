@@ -49,6 +49,7 @@ const PAGES = [
   { name: "v3-lightbox-zoom", url: "/v3/worker/#get-metrics", w: 390, h: 844, click: "a.se-zoom", click2: ".se-lightbox__img" },
   { name: "tutorials", url: "/tutorials/", w: 1440, h: 950 },
   { name: "tut-naemon", url: "/tutorials/install-naemon/", w: 1440, h: 950 },
+  { name: "tut-nagios", url: "/tutorials/install-nagios/", w: 1440, h: 950 },
   { name: "tut-eclipse", url: "/tutorials/setup-naemon-development-environment/#configure-eclipse", w: 1440, h: 950 },
   /* Scalar parses 76 KB of YAML before it paints; the default settle is not
      enough and an empty container would look like a styling bug. */
