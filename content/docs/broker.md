@@ -11,7 +11,7 @@ aliases:
   <p>
     The Statusengine Broker Module is a small C++ library that gets loaded into
     your Naemon or Nagios Core. It grabs status information as it happens,
-    encodes it as JSON, and publishes it to a Gearman job server or to RabbitMQ.
+    encodes it as JSON and publishes it to a Gearman job server or to RabbitMQ.
   </p>
 
   <figure class="se-mascot">
@@ -22,7 +22,7 @@ aliases:
 
 Because a queue sits in between, the monitoring core never waits on a database or
 on disk I/O. Publishing is a local hand-off; everything after that is _somebody
-else's_ problem — the [worker's](../worker/), specifically.
+else's_ problem. The [worker's](../worker/), specifically.
 
 {{< callout type="info" >}}
 Run the Gearman job server on the same node as the monitoring core. Publishing
@@ -31,9 +31,13 @@ then never leaves the loopback interface, which is much faster than going over t
 
 ## How it hooks into the core
 
-The module is a NEB ([Naemon Event Broker](https://www.naemon.io/documentation/developer/neb_broker)) module. 
+The module is a NEB ([Naemon Event Broker](https://www.naemon.io/documentation/developer/neb_broker)) module,
+which gets loaded by the monitoring core. As a user, you only need to add the
+`broker_module=/path/to/module.so` line into your config.  
 
 {{< details title="Hooking details" closed="true" >}}
+This is mainly for developers who want to understand how the module integrates with the core.
+
 The core loads it, calls
 `nebmodule_init()`, and from then on invokes `nebmodule_callback()` for every
 event the module registered an interest in:
@@ -65,7 +69,7 @@ because the module never asks the core for it.
 
 | Core        | Build           | Notes                                                                                                                   |
 |-------------|-----------------|-------------------------------------------------------------------------------------------------------------------------|
-| Naemon      | default         | Needs `naemon` in `PKG_CONFIG_PATH`. Only the include directory is used — the module does not link against `libnaemon`. |
+| Naemon      | default         | Needs `naemon` in `PKG_CONFIG_PATH`. Only the include directory is used. The module does not link against `libnaemon`. |
 | Nagios Core | `-Dnagios=true` | Needs `-Dnagios_include_dir=` pointing at the Nagios headers.                                                           |
 
 Either way you need the **headers** of a compiled core, so build and install
@@ -75,20 +79,20 @@ Either way you need the **headers** of a compiled core, so build and install
 
 ### Dependencies
 
-{{< tabs items="Ubuntu / Debian,CentOS / RHEL" >}}
+{{< tabs items="Ubuntu / Debian,AlmaLinux / RHEL" >}}
   {{< tab >}}
 ```bash
 apt install git python3-pip gcc g++ cmake build-essential libglib2.0-dev \
-    libgearman-dev uuid-dev libuchardet-dev libjson-c-dev pkg-config \
+    libgearman-dev uuid-dev libuchardet-dev pkg-config \
     libssl-dev librabbitmq-dev
 pip3 install meson ninja
 ```
   {{< /tab >}}
   {{< tab >}}
 ```bash
-yum install git python-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel \
-    libgearman-devel libuchardet-devel json-c-devel openssl-devel glib2-devel
-pip install meson ninja
+dnf install git python3-pip gcc gcc-c++ cmake3 pkgconfig librabbitmq-devel \
+    libgearman-devel libuchardet-devel openssl-devel glib2-devel
+pip3 install meson ninja
 ```
   {{< /tab >}}
 {{< /tabs >}}
@@ -145,29 +149,26 @@ dependency list, which is worth doing if you are packaging the module.
 
 ## Loading the module
 
-Add one line to `naemon.cfg` or `nagios.cfg` — or, on Naemon, drop a file into
-`module-conf.d/`:
+Add one line to `naemon.cfg` or `nagios.cfg`. On Naemon, you can also
+drop a file into `module-conf.d/`:
 
 ```ini
 broker_module=/opt/naemon/lib/libstatusengine.so /path/to/statusengine.toml
 ```
 
 Then restart the core. On success the module logs its startup with the prefix
-`Statusengine: `; if it cannot reach the configured queue, `nebmodule_init()`
+`Statusengine:`. If it cannot reach the configured queue, `nebmodule_init()`
 returns non-zero and the core refuses to start.
 
 {{< callout type="warning" >}}
 Everything is disabled by default. A freshly installed module with an empty
-configuration file loads successfully and does nothing at all — you have to name
+configuration file loads successfully and does nothing at all. You need to name
 each queue you want before any event is published.
 {{< /callout >}}
 
 ### A configuration matched to the Go worker
 
-The `statusengine.toml` shipped with the broker predates the Go worker and does
-not line up with it: it enables `FlappingData`, which the worker has no consumer
-for, and leaves `LogData` and `NotificationData` commented out, which the worker
-does consume. This is the minimal Gearman configuration that publishes exactly
+This is a minimal Gearman configuration that publishes exactly
 the twelve queues the [worker](../worker/) reads and nothing else:
 
 ```toml
@@ -192,13 +193,13 @@ WorkerCommand = "statusngin_cmd"
 
 [Bulk]
 Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck",
-          "ServicePerfData", "StateChange", "LogData"]
+          "ServicePerfData", "StateChange", "LogData", "NotificationData"]
 
 [Log]
 Level = "Warning"
 ```
 
-Publishing a queue the worker does not consume is not an error — the messages
+Publishing a queue the worker does not consume is not an error. The messages
 simply accumulate on the queue server until something drains them, which on a
 busy installation is a slow way to run out of memory.
 
@@ -209,25 +210,25 @@ A full configuration example for the broker module can be found here: [statuseng
 An identifier is the left-hand side of a `Identifier = "queue name"` line inside
 a `[[Gearman]]` or `[[Rabbitmq]]` section. The name on the right is yours to
 choose; the names below are the ones the shipped `statusengine.toml` suggests,
-and the Go worker expects those exact names. An identifier you do not write down
-publishes nothing — see [the callout above](#loading-the-module).
+and **the Go worker expects those exact names**. An identifier you do not write down
+publishes nothing - see [the callout above](#loading-the-module).
 
 ### Outbound: core to queue
 
-Twenty-three identifiers, in the order `src/Queue.h` declares them. The
-[Go worker](../worker/) has a consumer for twelve of them — the twelve in
+23 identifiers, in the order `src/Queue.h` declares them. The
+[Go worker](../worker/) has a consumer for 12 of them. The twelve in
 [the configuration above](#a-configuration-matched-to-the-go-worker). The other
-eleven are published for whatever else you point at the queue.
+11 are not consumed by Statusengine itself.
 
 | Identifier<br>suggested queue name | What it carries |
 |---|---|
-| **`HostStatus`**<br>`statusngin_hoststatus` | The full current status of one host, on every status update the core reports — not only on a state change. |
+| **`HostStatus`**<br>`statusngin_hoststatus` | The full current status of one host, on every status update the core reports - not only on a state change. |
 | **`HostCheck`**<br>`statusngin_hostchecks` | One completed host check with plugin output, perfdata and timings. Published on `NEBTYPE_HOSTCHECK_PROCESSED`, so a check appears once, finished. |
 | **`ServiceStatus`**<br>`statusngin_servicestatus` | The same as `HostStatus`, for one service. |
 | **`ServiceCheck`**<br>`statusngin_servicechecks` | The same as `HostCheck`, for one service. |
 | **`ServicePerfData`**<br>`statusngin_service_perfdata` | A reduced service check: host name, service description, `perf_data` and `start_time`, nothing else. Only for services with `process_performance_data` enabled. |
 | **`StateChange`**<br>`statusngin_statechanges` | Host **and** service state changes on one queue; `statechange_type` tells them apart. |
-| **`LogData`**<br>`statusngin_logentries` | Raw log lines — the same text the core writes to its own log file. |
+| **`LogData`**<br>`statusngin_logentries` | Raw log lines. The same text the core writes to its own log file. |
 | **`AcknowledgementData`**<br>`statusngin_acknowledgements` | One message per acknowledgement set on a host or service. |
 | **`FlappingData`**<br>`statusngin_flappings` | Flapping start and stop events. |
 | **`DowntimeData`**<br>`statusngin_downtimes` | A downtime's entire lifecycle — add, start, stop, delete — on one queue, distinguished by `type` and `attr`. |
@@ -235,7 +236,7 @@ eleven are published for whatever else you point at the queue.
 | **`RestartData`**<br>`statusngin_core_restart` | Fires once, on `NEBTYPE_PROCESS_START`, when the core starts or reloads its configuration. |
 | **`SystemCommandData`**<br>`statusngin_systemcommands` | Commands the core ran itself, such as event handlers and notification commands, with `return_code`, output and timings. |
 | **`CommentData`**<br>`statusngin_comments` | Comments added to or deleted from a host or service. |
-| **`ExternalCommandData`**<br>`statusngin_externalcommands` | Every external command the core accepts — including the ones this module submits through `WorkerCommand`, which reach the core the same way. |
+| **`ExternalCommandData`**<br>`statusngin_externalcommands` | Every external command the core accepts, including the ones this module submits through `WorkerCommand`, which reach the core the same way. |
 | **`NotificationData`**<br>`statusngin_notifications` | The notification as a whole, start and end, with how many contacts it reached. |
 | **`ProgramStatusData`**<br>`statusngin_programmstatus` | Core-wide status: whether checks and notifications are enabled, when the command file was last read, and so on. |
 | **`ContactStatusData`**<br>`statusngin_contactstatus` | Per-contact status, such as when that contact was last notified. |
@@ -258,15 +259,15 @@ two-way — and what the `[Worker]` section's time budget exists to bound.
 | Identifier | Suggested queue name | What it accepts |
 |---|---|---|
 | `WorkerCommand` | `statusngin_cmd` | `{"Command": …, "Data": …}` with one of four commands: `check_result` submits a passive result, `schedule_check` reschedules a host or service, `delete_downtime` removes one, and `raw` hands an external command string to the core verbatim. |
-| `WorkerOCSP` | `statusngin_ocsp` | `{"servicecheck": …}` — a service check result produced by another node's `OCSP` queue, submitted to this core as a passive result. |
-| `WorkerOCHP` | `statusngin_ochp` | `{"hostcheck": …}` — the same for host checks, from another node's `OCHP`. |
+| `WorkerOCSP` | `statusngin_ocsp` | `{"servicecheck": …}` - a service check result produced by another node's `OCSP` queue, submitted to this core as a passive result. |
+| `WorkerOCHP` | `statusngin_ochp` | `{"hostcheck": …}` - the same for host checks, from another node's `OCHP`. |
 
 ### Bulk messages
 
 Any outbound identifier named in `[Bulk] Queues` is batched: instead of one
 message per event, the module collects events and publishes
-`{"messages": [ … ], "format": "none"}`. The setting is global — it applies to
-every `[[Gearman]]` and `[[Rabbitmq]]` connection — and a batch is flushed when
+`{"messages": [ … ], "format": "none"}`. The setting is global. It applies to
+every `[[Gearman]]` and `[[Rabbitmq]]` connection and a batch is flushed when
 it reaches `Maximum` messages (200) or after `FlushInterval` seconds (10),
 whichever comes first.
 
@@ -277,14 +278,14 @@ covers the queues where the volume actually is:
 ```toml
 [Bulk]
 Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck",
-          "ServicePerfData", "StateChange", "OCHP", "OCSP", "LogData"]
+          "ServicePerfData", "StateChange", "LogData", "NotificationData",
+          "OCHP", "OCSP"]
 ```
 
 {{< callout type="warning" >}}
 The module will bulk **any** identifier you put in that list, but the Go worker
-only understands a bulk payload on eight of them: the seven in
-[the worker-matched configuration above](#a-configuration-matched-to-the-go-worker)
-plus `NotificationData`.
+only understands a bulk payload on eight of them: written in
+[the worker-matched configuration above](#a-configuration-matched-to-the-go-worker).
 
 `AcknowledgementData`, `DowntimeData`, `ContactNotificationMethodData` and
 `RestartData` are decoded as single messages. Adding one of those to
@@ -297,7 +298,7 @@ The inbound queues are unaffected: the module's own consumer unwraps a
 
 ## OCSP and OCHP
 
-Naemon and Nagios can run a command after every check — `ocsp_command` and
+Naemon and Nagios can run a command after every check, called `ocsp_command` and
 `ochp_command`, the *obsessive compulsive* service and host processors. They
 work, and they fork a process for every single check result, which is the one
 thing a busy core cannot afford.
@@ -313,7 +314,7 @@ OCHP = "statusngin_ochp"
 
 Nothing is forked, nothing runs inside the core's event loop, and whatever reads
 the queue can be on a different machine. The payload is the same object
-`ServiceCheck` and `HostCheck` publish — the separate queue exists so a second
+`ServiceCheck` and `HostCheck` publish. The separate queue exists so a second
 consumer can have its own copy, at its own pace, without competing with the
 worker for the check queues.
 
@@ -343,7 +344,7 @@ gearman -w -c 1 -f statusngin_ocsp | jq .
 
 {{< callout type="warning" >}}
 This is a consumer, not a viewer. The job it prints is **taken off the queue**
-and is gone — fine when you are looking at what the module produces, and the
+and is gone. This is fine when you are looking at what the module produces, and the
 point when you are clearing a backlog, but do not run it against a queue that
 something else is supposed to process.
 
@@ -357,7 +358,7 @@ gearman -w -f statusngin_ocsp > /dev/null
 
 Add `-h` and `-p` for a job server that is not on `localhost:4730`. If the tool
 cannot reach one at all it prints nothing and waits rather than reporting an
-error, so silence here means the connection, not an empty queue — `gearadmin
+error, so silence here means the connection, not an empty queue. `gearadmin
 --status` says which.
 
 {{< details title="What one message looks like" closed="true" >}}
@@ -402,9 +403,10 @@ without `service_description`.
 }
 ```
 
-`type` is the NEB event type: `701` is `NEBTYPE_SERVICECHECK_PROCESSED`, and a
+`type` is the [NEB event type](https://github.com/naemon/naemon-core/blob/6259292ba9b7780cb0cdc4631a56c0d2eb3eb3ad/src/naemon/broker.h#L42-L133): `701`
+is `NEBTYPE_SERVICECHECK_PROCESSED`, and a
 host check carries `801`, `NEBTYPE_HOSTCHECK_PROCESSED`. Only processed checks
-are published, so the initiate events — `700` and `800` — never appear here.
+are published, so the initiate events - `700` and `800` - never appear here.
 {{< /details >}}
 
 {{< details title="A consumer in PHP" closed="true" >}}
@@ -491,7 +493,7 @@ Submits a passive check result. `Data` is a check result object; a
 | `service_description`                   | Present makes it a service check, absent a host check.                                 |
 | `output`                                | **Required** in practice: a result with neither `output` nor `long_output` is dropped. |
 | `long_output`, `perf_data`              | Optional.                                                                              |
-| `return_code`                           | The plugin exit code — `0`, `1`, `2`, `3`.                                             |
+| `return_code`                           | The plugin exit code (`0`, `1`, `2`, `3`).                                             |
 | `check_type`                            | `0` active, `1` passive.                                                               |
 | `start_time`, `end_time`                | Unix timestamps, seconds.                                                              |
 | `early_timeout`, `latency`, `exited_ok` | Optional, and what you would expect a check runner to report.                          |
@@ -499,8 +501,8 @@ Submits a passive check result. `Data` is a check result object; a
 
 The three output fields are joined back into the single string the core wants
 before the result is submitted: `output|perf_data` on the first line, then
-`long_output` on the next. You do not build that string yourself — send the
-parts.
+`long_output` on the next. **You do not build that string yourself**.
+Use the individual fields instead.
 
 ### schedule_check
 
@@ -521,7 +523,7 @@ Unix timestamp and the check is scheduled **at** it, not merely no later than it
 `host_name` and a non-zero `schedule_time` are both required. Leaving
 `service_description` out schedules the host check instead. An object the core
 does not know is logged by name and ignored, so a typo in a host name fails
-quietly rather than loudly — look for `Received schedule_check command for
+quietly rather than loudly. Look for `Received schedule_check command for
 unknown host` in the core's log.
 
 ### delete_downtime
