@@ -536,6 +536,50 @@ body.se-scrolled .nav-container::after {
   margin-top: 2rem;
 }
 
+/* --- AI content label ------------------------------------------------------ */
+
+/* The footer's disclosure line. Quiet on purpose — same muted colour as the
+   rest of the footer, and sized to the text rather than set as a badge. */
+/* Two classes: .se-footer__links sets flex-wrap: wrap further down the file,
+   and at equal specificity the later rule would win. */
+.se-footer__links.se-footer__ai {
+  /* The mark belongs to the sentence, so the row must not break between them —
+     on a phone the text wraps to two lines and the icon would otherwise sit
+     alone above it. The text block wraps inside the row instead. */
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--se-muted);
+}
+
+/* The two fills are the official variants rather than a recolour: the
+   Commission ships a black file (black disc, white letters) and a white one
+   (white disc, #1d1d1b letters), and these are those two. Nothing else about
+   the artwork changes between themes. */
+.se-ai-mark {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+  /* Aligned to the first line of the sentence, not to the block's centre. */
+  margin-block-start: 0.15em;
+}
+
+.se-ai-mark__disc {
+  fill: #000;
+}
+
+.se-ai-mark__letters {
+  fill: #fff;
+}
+
+.dark .se-ai-mark__disc {
+  fill: #fff;
+}
+
+.dark .se-ai-mark__letters {
+  fill: #1d1d1b;
+}
+
 /* --- External-link marker -------------------------------------------------- */
 
 /* Emitted by layouts/_default/_markup/render-link.html for every markdown link
