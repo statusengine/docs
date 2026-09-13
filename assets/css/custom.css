@@ -370,10 +370,20 @@ body.se-scrolled .nav-container::after {
    age_host_statehistory gets almost no width and every one of them breaks
    mid-word. Tables already handle their own overflow: Hextra gives them
    overflow-x: auto, so one that does not fit scrolls instead of shredding its
-   contents. */
+   contents.
+
+   `nowrap` rather than just restoring `overflow-wrap: normal`, because the
+   default still breaks after a hyphen: `-Dnagios=true` in the broker's build
+   options came out as a lone `-` on one line — a 14px line box — and
+   `Dnagios=true` on the next. Neither white-space nor overflow-wrap governs
+   that break, so the only way to refuse it is to refuse wrapping outright.
+
+   Safe here because these are short: the longest code span in any table with a
+   space in it is 25 characters, and the longest overall has neither a space nor
+   a hyphen, so it never wrapped in the first place. */
 .content td code,
 .content th code {
-  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 /* --- Table of contents ----------------------------------------------------- */
