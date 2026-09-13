@@ -145,8 +145,8 @@ maintained outside the worker.
 ## Performance data
 
 Performance data arrives on its own queue, `statusngin_service_perfdata`, as a
-reduced service check — host name, service description, `perf_data` and a
-timestamp, nothing else — and only for services with `process_performance_data`
+reduced service check: host name, service description, `perf_data` and a
+timestamp. Only for services with `process_performance_data`
 enabled in the monitoring core. **Services only.** There is no host perfdata
 queue, in the broker or here.
 
@@ -157,15 +157,12 @@ label, and routes each of them:
 perfdata_route: mysql        # mysql | graphite | both
 ```
 
-The decision is made once when the handler is built, not per metric, which is
-worth knowing only because it means changing it takes a restart.
-
 ### Into MySQL
 
 `mysql` and `both` write one row per metric into `statusengine_perfdata`:
 host name, service description, label, timestamp, value and unit. It is the
 default, and it is the table
-[`age_perfdata`](#how-long-to-keep-what) trims — 90 days unless you say
+[`age_perfdata`](#how-long-to-keep-what) trims. 90 days unless you say
 otherwise.
 
 ### Into Graphite
@@ -182,15 +179,17 @@ statusengine.web01.HTTP.time
 `graphite_prefix` is `statusengine` by default.
 
 {{< callout type="warning" >}}
-**Every segment is sanitised, and the rule is narrower than it looks.** Only
+**Every segment is sanitised.** Only
 `a-z`, `A-Z`, `0-9`, `-` and `.` survive; everything else becomes `_`. Umlauts
-and every other non-ASCII character included — a service called `Größe` arrives
+and every other non-ASCII character included - a service called `Größe` arrives
 as `Gr__e`.
 
 A literal `^` survives too, which is not a considered decision but an inherited
 one: the legacy PHP worker's character class was `/[^a-zA-Z^0-9\-\.]/`, where
 the second `^` is a literal rather than a negation, and the Go worker
 reproduces that byte for byte so existing metric paths keep resolving.
+
+The `^` behavior may be changed in the future as this was a bug in the original PHP worker.
 {{< /callout >}}
 
 Metrics are buffered and flushed when the batch fills or after 250 ms,
@@ -217,8 +216,8 @@ nowhere.
 
 ## Running as a systemd service
 
-`make install-systemd` copies three units into `/etc/systemd/system` and enables
-nothing — `statusengine-worker.service`, plus the
+`make install-systemd` copies three units into `/etc/systemd/system` but
+**does not enable** anything. `statusengine-worker.service`, plus the
 [`statusengine-db-cleanup`](#data-retention) service and timer.
 
 ```bash
@@ -237,28 +236,28 @@ After=network-online.target mysql.service mariadb.service gearman-job-server.ser
 These are ordering hints, not requirements. The worker survives all three being
 unavailable: it retries MySQL and reconnects to the broker on its own.
 `Requires=` would tie its lifetime to theirs, so a MySQL restart would take the
-worker down with it — precisely the case the retry logic exists to handle.
+worker down with it. The worker has retry logic that exists to handle such scenarios.
 
-### `TimeoutStopSec=90s` — the one setting not to shorten
+### `TimeoutStopSec=90s` - the one setting not to shorten
 
 On `SIGTERM` the worker stops consuming, drains the jobs still in flight and
 flushes its buffers before exiting. The worst case is the sum of three bounded
 waits:
 
-| Budget | Stage |
-|---|---|
-| 30 s | Gearman drain. The connections close in parallel, so it is 30 s in total, not 30 s per queue. |
-| 10 s | Final bulk-insert flush. |
-| 5 s | HTTP server shutdown. |
-| **45 s** | **worst case** |
+| Budget   | Stage                                                                                       |
+|----------|---------------------------------------------------------------------------------------------|
+| 30s      | Gearman drain. The connections close in parallel, so it is 30s in total, not 30s per queue. |
+| 10s      | Final bulk-insert flush.                                                                    |
+| 5s       | HTTP server shutdown.                                                                       |
+| **45s**  | **worst case**                                                                              |
 
-systemd sends `SIGKILL` when `TimeoutStopSec` expires. Set below 45 s it
+systemd sends `SIGKILL` when `TimeoutStopSec` expires. Set below 45s it
 therefore kills the worker *during* the flush, which loses exactly the buffered
 rows the graceful shutdown exists to write — and the job acknowledgements with
 them, so the broker redelivers them and the upserts become the only thing
 between you and duplicate rows.
 
-90 s leaves headroom over that arithmetic. It is written out in the unit rather
+90s leaves headroom over that arithmetic. It is written out in the unit rather
 than left to systemd's default so that raising the drain timeout has an obvious
 place to be reflected.
 
