@@ -510,7 +510,108 @@ have. The real control is which keys exist and who holds them. Treat a
 
 ## Development tooling
 
-{{< callout type="warning" >}}
-**Section not written yet.** It will cover `simulator`, `gearman_publisher`,
-`rabbitmq_publisher`, `db_verifier` and `losstest`.
+`make build` produces five more binaries beside the worker and the cleanup.
+`make install` does **not** install them — they stay in `bin/` and they read
+their fixtures from `.claude/specs/` in the repository, so they run out of a
+source checkout and nowhere else.
+
+{{< callout type="error" >}}
+Four of the five **write rows** into whatever database their DSN names, and
+they replay the same fixture host and service names on every run. Point them at
+a development or staging database. `db_verifier` is the exception: it only ever
+reads.
 {{< /callout >}}
+
+### simulator
+
+Replays the recorded queue payloads through the same Router and bulk inserters
+`cmd/app` wires up, at a rate you choose — so the batching behaviour can be
+watched against a real MySQL rather than reasoned about.
+
+```bash
+./bin/simulator -rate 5000 -duration 15s -mysql-dsn "user:pass@tcp(127.0.0.1:3306)/statusengine-dev"
+```
+
+It hands fixture payloads straight to the handlers and never touches a broker.
+That is a mock only in the sense that Gearman and RabbitMQ are absent — the
+decode, persist and broadcast path is the production one.
+
+| Flag | Effect |
+|---|---|
+| `-rate` | Target queue messages per second across all replayed queues, `5000`. |
+| `-duration` | How long to run, `15s`. `0` runs until interrupted. |
+| `-workers` | Concurrent goroutines calling handlers, `16`. |
+| `-queues` | Comma-separated queue names to replay. Default is all of them. |
+
+### gearman_publisher and rabbitmq_publisher
+
+The same idea from the other side: synthetic events for one queue, published to
+a real broker, so the whole ingestion path runs — broker, consumer, router,
+inserter — with the worker as a separate process. Start the worker against the
+same broker and watch it consume what these publish.
+
+```bash
+./bin/gearman_publisher -queue statusngin_hoststatus -count 1000 -server localhost:4730
+./bin/rabbitmq_publisher -queue statusngin_hoststatus -count 1000 \
+    -server amqp://statusengine:statusengine@127.0.0.1:5672/
+```
+
+Each queue's wire format comes from its recorded payload, used as a template.
+The four queues the broker never bulks get one job per event; everything else is
+cloned into batches and submitted as one `{"messages": […]}` job per batch —
+the shape a real consumer expects.
+
+`-count 1` is the useful special case: a single event never reaches the batch
+threshold, so it can only be written by the 250 ms ticker. If one event lands in
+the database, the ticker works.
+
+### losstest
+
+Proves — or disproves — that a worker stopped under load loses nothing. That is
+the property a graceful shutdown exists to provide, and the one that cannot be
+established by reading the code.
+
+Every event gets its own hostname, `lt-<run-id>-<seq>`, which is also the first
+column of `statusengine_hostchecks`' primary key. Two things follow, and both
+are the point: **a missing sequence number is proof of a lost event**, because
+nothing in the pipeline can collapse two of those rows into one; and a
+redelivered job collides on that key, so MySQL rejects the whole multi-row
+`INSERT` with error 1062 and the batch is dropped, which shows up as a
+contiguous gap. The second is not a measurement artefact either — it is exactly
+what a redelivery would do to production data.
+
+Three commands with an interruption in the middle:
+
+```bash
+./bin/losstest -mode publish -run-id r1 -count 50000
+# start the worker, let it chew through the backlog, SIGTERM it mid-run,
+# then start it again and let it drain the rest
+./bin/losstest -mode verify -run-id r1 -count 50000
+./bin/losstest -mode cleanup -run-id r1
+```
+
+Publishing everything up front rather than trickling it in is deliberate: it
+leaves a backlog at the job server, which is both the realistic restart scenario
+and the one that exercises the interesting window — jobs handed over while the
+consumer is already shutting down.
+
+Read the exit code, not just the output. `verify` exits `1` when anything is
+missing, so it can drive a script.
+
+### db_verifier
+
+A shadow-testing tool from the rewrite. It connects to two databases — one fed
+by the legacy PHP worker, one by this Go worker, both consuming the same event
+stream — and diffs their most recent rows table by table, column by column, to
+show the two pipelines persist identical data.
+
+```bash
+./bin/db_verifier \
+    -dsn-php "user:pass@tcp(127.0.0.1:3306)/statusengine_php" \
+    -dsn-go  "user:pass@tcp(127.0.0.1:3306)/statusengine" \
+    -limit 5000
+```
+
+It never writes to either database, which is what makes it safe to point at a
+live one. `-tables` narrows the comparison; the default covers the status,
+check, history, notification, acknowledgement and downtime tables.
