@@ -108,6 +108,38 @@ ALTER TABLE `statusengine_service_acknowledgements` ADD COLUMN `end_time` BIGINT
 
 These are the two smallest tables in the schema; the change takes seconds.
 
+### `ack_author` widens to 1024
+
+The four notification tables disagree about how long an acknowledgement author
+may be. The PHP schema declares 255 everywhere; databases that have been
+through a later update carry 1024 in the two `_log` tables and 255 in the other
+two. Version 4's schema uses 1024 in all four, so bring an existing database in
+line and the width stops depending on where it came from:
+
+```sql
+ALTER TABLE `statusengine_host_notifications`        MODIFY `ack_author` VARCHAR(1024) DEFAULT NULL;
+ALTER TABLE `statusengine_service_notifications`     MODIFY `ack_author` VARCHAR(1024) DEFAULT NULL;
+ALTER TABLE `statusengine_host_notifications_log`    MODIFY `ack_author` VARCHAR(1024) DEFAULT NULL;
+ALTER TABLE `statusengine_service_notifications_log` MODIFY `ack_author` VARCHAR(1024) DEFAULT NULL;
+```
+
+Run all four even where two of them are already 1024 — re-declaring a column at
+the width it already has is a no-op, and it is one less thing to check.
+
+{{< callout type="info" >}}
+This one does **not** rewrite the tables. Under `utf8mb4` a `VARCHAR(255)`
+already needs a two-byte length prefix — 255 characters is 1020 bytes — and
+`VARCHAR(1024)` uses the same two bytes, so MySQL performs the change in place.
+Measured: `ALGORITHM=INPLACE` is accepted, `ALGORITHM=INSTANT` is not. The
+notification tables can be large; this still takes seconds rather than a
+rebuild.
+
+Widening matters because an over-long value is not truncated. In strict mode it
+is error 1406, and the worker treats that as permanent and drops the entire
+batch it was part of — up to `mysql_batch_size` rows, including unrelated
+events that happened to share it.
+{{< /callout >}}
+
 ## 4. Convert the database to a current collation
 
 Version 3 created its tables as `utf8` with `utf8_general_ci`. That "utf8" is
