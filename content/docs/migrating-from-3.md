@@ -108,6 +108,19 @@ ALTER TABLE `statusengine_service_acknowledgements` ADD COLUMN `end_time` BIGINT
 
 These are the two smallest tables in the schema; the change takes seconds.
 
+{{< callout type="info" >}}
+**The column is ahead of the worker.** The broker publishes `end_time`, but the
+worker does not read it yet — its acknowledgement payload has no such field and
+the column is not in its `INSERT`. Every row will therefore show the `0` the
+default supplies, whether or not the acknowledgement actually expires, until
+worker support lands.
+
+Adding it now rather than later is deliberate: `ADD COLUMN` on a table that has
+grown for years is the expensive kind of change, and doing it while these two
+tables are still small costs nothing. Nothing breaks in the meantime — a column
+the worker does not name in its `INSERT` simply takes its default.
+{{< /callout >}}
+
 ### `ack_author` widens to 1024
 
 The four notification tables disagree about how long an acknowledgement author
