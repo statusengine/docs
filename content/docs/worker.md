@@ -29,7 +29,7 @@ aliases:
 {{< callout type="warning" >}}
 This is **not** the PHP worker. Configuration, database backends and command-line
 tools are all different. If you are coming from Statusengine 3.x, treat this as a
-new component rather than an upgrade — the old `config.yml` will not carry over.
+new component rather than an upgrade. The old `config.yml` will not carry over.
 The 3.x worker is documented at [Statusengine 3 › Worker (PHP)](../../v3/worker/).
 {{< /callout >}}
 
@@ -38,9 +38,9 @@ The 3.x worker is documented at [Statusengine 3 › Worker (PHP)](../../v3/worke
 {{< cards >}}
   {{< card title="Consumes the queue" subtitle="Gearman or RabbitMQ, chosen with a single configuration key. Payloads are decoded and routed by event type." >}}
   {{< card title="Writes MySQL in bulk" subtitle="Events are buffered per table and flushed either when the batch fills up or every 250 ms, whichever comes first." >}}
-  {{< card title="Routes performance data" subtitle="Metrics go to MySQL, to Graphite, or to both — one setting decides." >}}
+  {{< card title="Routes performance data" subtitle="Metrics go to MySQL, to Graphite, or to both." >}}
   {{< card title="Broadcasts live events" subtitle="A WebSocket hub serves every event the worker sees, with topic-based subscriptions and mandatory API-key auth." >}}
-  {{< card title="Exposes Prometheus metrics" subtitle="Queue throughput, flush behaviour, retries and backend availability, on a separate port." >}}
+  {{< card title="Exposes Prometheus metrics" subtitle="Queue throughput, flush behavior, retries and backend availability, on a separate port." >}}
   {{< card title="Accepts external commands" subtitle="An HTTP endpoint publishes commands onto the command queue, which the broker hands back to the monitoring core." >}}
 {{< /cards >}}
 
@@ -53,8 +53,8 @@ The 3.x worker is documented at [Statusengine 3 › Worker (PHP)](../../v3/worke
 | Queue            | Gearman **or** RabbitMQ, matching whatever the broker publishes to |
 | Performance data | Graphite (Carbon plaintext), optional                              |
 
-There is no PostgreSQL, CrateDB or Elasticsearch backend, and no Redis
-dependency. If a guide tells you otherwise, it is describing the old [PHP worker](../../v3/worker/).
+There is no CrateDB, Elasticsearch, or Redis backend.
+If a guide tells you otherwise, it is describing the old [PHP worker](../../v3/worker/).
 
 ## Build and install
 
@@ -99,7 +99,7 @@ sudo systemctl enable --now statusengine-worker
 sudo systemctl enable --now statusengine-db-cleanup.timer
 ```
 
-{{< callout type="warning" >}}
+{{< callout type="error" >}}
 Put API keys in `/etc/statusengine/worker.env`, never in `ExecStart`. Anything on
 a command line is readable by every user on the box through `/proc`.
 
@@ -116,7 +116,7 @@ Every setting can be given four ways, and they resolve in this order:
 explicit CLI flag  >  environment variable  >  config file  >  built-in default
 ```
 
-Every key is optional — omit anything you do not want to override. A minimal
+Every key is optional, omit anything you do not want to override. A minimal
 file that switches the queue backend and points at a real database looks like
 this:
 
@@ -171,8 +171,8 @@ It goes by two names, which is worth knowing before you go looking for it:
 `/usr/local/bin` as **`statusengine-db-cleanup`** — the name used below and in
 the systemd unit.
 
-It reads the **same configuration file** as the worker — each binary ignores the
-other's keys — so retention is configured next to everything else:
+It reads the **same configuration file** as the worker. Each binary ignores the
+other's keys, so retention is configured next to everything else:
 
 ```bash
 statusengine-db-cleanup -config /etc/statusengine/config.yml
@@ -187,12 +187,12 @@ statusengine-db-cleanup -config /etc/statusengine/config.yml
 systemctl enable --now statusengine-db-cleanup.timer
 ```
 
-Daily, with `Persistent=true` so a missed run is caught up rather than skipped —
-retention that quietly stops running is noticed when the disk fills — and
-`RandomizedDelaySec=1h` to keep it off the top of the hour.
+Daily, with `Persistent=true` so a missed run is caught up rather than skipped.
+Retention that quietly stops running is noticed when the disk fills and
+`RandomizedDelaySec=1h` keeps it off the top of the hour.
 
 {{< callout type="warning" >}}
-**In a cluster, run it on exactly one node.** The randomised delay spreads the
+**In a cluster, run it on exactly one node.** The randomized delay spreads the
 load within a host, not across them. Several nodes deleting from the same tables
 at the same time is the realistic source of the lock contention that
 [`statusengine_db_batch_retries_total`](#monitoring-the-worker) counts. If you
@@ -201,7 +201,7 @@ must run it on more than one, give each a clearly different `OnCalendar`.
 
 ### How long to keep what
 
-Every value is a number of **days**, and every key is optional — omit one and
+Every value is a number of **days**, and every key is optional. Omit one and
 its default below applies. The key names are the ones the PHP worker used, so an
 existing `config.yml` can be carried over value for value, including its
 convention:
@@ -211,7 +211,7 @@ table off; a missing key falls back to the default.
 
 | Key | Default | Cleans |
 |---|---|---|
-| `age_hostchecks`<br>`age_servicechecks` | 5 | `statusengine_hostchecks`, `statusengine_servicechecks`. By far the largest tables — these two are why the cleanup exists. |
+| `age_hostchecks`<br>`age_servicechecks` | 5 | `statusengine_hostchecks`, `statusengine_servicechecks`. By far the largest tables |
 | `age_host_statehistory`<br>`age_service_statehistory` | 365 | The state history. Kept far longer than checks because availability reports are computed from it. |
 | `age_host_acknowledgements`<br>`age_service_acknowledgements` | 60 | The acknowledgement tables. |
 | `age_host_notifications`<br>`age_service_notifications` | 60 | One row per notified contact. |
@@ -225,7 +225,7 @@ age_hostchecks: 5
 age_servicechecks: 5
 age_host_statehistory: 365
 age_service_statehistory: 365
-age_perfdata: 0          # perfdata_route: graphite — let Graphite handle it
+age_perfdata: 0          # perfdata_route: graphite - let Graphite handle it
 ```
 
 ### Deleting without hurting
@@ -234,22 +234,34 @@ Rows go in batches, each its own transaction, and two settings shape that.
 
 **`cleanup_batch_size`** is the number of rows per `DELETE`, `5000` by default.
 Smaller batches hold locks for shorter, keep the undo log small and produce
-binlog events a replica can digest — at the cost of more round-trips.
+binlog events a replica can digest - at the cost of more round-trips.
 
 **`cleanup_batch_pause`** is a duration between two batches of the same table,
-`0s` by default. No pause deletes as fast as the database allows, which is the
-right setting for a nightly run on an idle system; set `50ms` or so if the
-cleanup has to share the database with live check results.
+`0s` by default. No pause deletes as fast as the database allows.
+Set `50ms` or so if the cleanup has to share the database with live check results.
 
 The tool stops cleanly between batches on `SIGTERM`, so it never has to be
 killed mid-statement. The unit allows it 300 seconds to do that, which matters
-for the first run against a database that has never been cleaned — that one can
+for the first run against a database that has never been cleaned. That one can
 take a while, and it is the run most likely to be interrupted.
+
+{{< callout type="info" >}}
+It is also worth mentioning that the cleanup process finds rows to delete
+based on a timestamp and LIMIT, which results in a query like:
+
+```sql
+DELETE FROM statusengine_hostchecks
+WHERE start_time < 1788869899
+LIMIT 5000;
+```
+While this is a simple mechanism, it is not the most efficient for very large tables.
+In case you encounter performance issues, consider using partitioning or other strategies to improve deletion performance.
+{{< /callout >}}
 
 ## Monitoring the worker
 
 The worker exports 30 Prometheus series on its own port, `metrics_listen_addr`,
-`:9105` by default. That server has **no authentication of its own** — it is
+`:9105` by default. That server has **no authentication of its own**! It is
 meant to be reached by a trusted scraper, which means keeping the port off any
 public network rather than putting a key on it.
 
@@ -259,13 +271,14 @@ event arrives. The one deliberate exception is `statusengine_queue_connected`,
 which appears once a consumer has actually connected: a pre-created `0` would
 claim an outage for every queue during startup.
 
-The [Worker API reference](../api/) documents all 30 with the reasoning behind
-each. These are the ones worth an alert:
+The [Worker API reference](../api/) documents all metrics with the reasoning
+behind each. These are the ones worth an alert:
 
 **`statusengine_db_available` is `0`.** Bulk inserts are not reaching MySQL.
-Nothing is lost while this is zero — the batch is held and the backlog waits at
-the broker — but nothing is draining either, so the catch-up afterwards takes as
-long as the outage did.
+Nothing is lost while this is zero. The batch is held and the backlog waits at
+the broker (queue), but nothing is draining either, so the catch-up afterwards
+takes as long as it takes. This also means that the queues are filling up
+which could eventually lead to Out of Memory (OOM) conditions if not addressed.
 
 **`statusengine_queue_connected` is `0`** for a `queue_name`. That consumer has
 lost its connection. This is the only series that separates *stopped* from
@@ -274,13 +287,13 @@ On RabbitMQ one connection carries every queue, so all of them move together; on
 Gearman each queue has its own and they move independently.
 
 **`statusengine_graphite_metrics_dropped_total` is rising.** Every increment is a
-metric that now exists nowhere. Graphite fails differently from MySQL on
+metric that is lost. Graphite fails differently from MySQL on
 purpose: an unreachable Carbon is dropped rather than retried, because retrying
 would stall the database path or grow the buffer without bound.
 
 **`statusengine_queue_downtime_updates_unmatched_total` is rising.** A downtime's
 START or STOP found no row to update, so the ADD that should have created it
-never arrived and the event is lost — silently, because MySQL reports the UPDATE
+never arrived and the event is lost - silently, because MySQL reports the UPDATE
 as successful. Expect a few right after a fresh installation and none afterwards.
 
 **`statusengine_db_batch_retries_total` is climbing steadily.** Bulk inserts
@@ -309,16 +322,15 @@ handler blocks in the bulk-insert buffer once it is full, so this is where MySQL
 backpressure becomes visible from the ingestion side.
 
 `statusengine_db_batch_size_at_flush` pinned at the configured batch size means
-flushes are triggered by the batch filling up rather than by the 250 ms ticker —
-the same saturation, seen from the database side.
+flushes are triggered by the batch filling up rather than by the 250 ms ticker.
+This is the same saturation, seen from the database side.
 
 ## WebSocket event stream
 
 Everything the worker writes to MySQL it also broadcasts live on `/ws`. Nothing
-is stored for a client that is not connected — this is a stream, not a backlog —
+is stored for a client that is not connected, this is a stream, not a backlog,
 which makes it the right tool for a dashboard, a chat notifier or anything that
-wants to react to a state change now, and the wrong one for anything that must
-not miss an event.
+wants to react to a state change.
 
 The server listens on `listen_addr`, `127.0.0.1:8080` by default. The full
 protocol, with a captured example for every event topic, is in the
@@ -336,7 +348,7 @@ WARN websocket: no API key configured, generated a random one for this run
 ```
 
 That is a safety net, not a setup: the key changes on every restart, so any
-client that reconnects on its own needs a configured one.
+client that reconnects on its own needs a configured API key.
 
 ```yaml
 api_keys:
@@ -376,8 +388,9 @@ or change it later by sending a control frame at any time:
 ```
 
 **Subscribing to nothing means subscribing to everything.** A client that
-connects without `?topics=` receives every topic the worker consumes, which on a
-large installation is a great deal of traffic — name what you want.
+connects without `?topics=` receives all topics the worker consumes, which on a
+large installation is a great deal of traffic.
+Only subscribe to the topics you actually need is the recommended approach.
 
 ### Frame format
 
@@ -396,7 +409,7 @@ hundred events rather than one.
 
 The hub never blocks the pipeline to wait for a slow reader. It buffers 1024
 frames inbound and 256 frames per client, and when a buffer is full the frame is
-**dropped for that client** — the database write and every other client are
+**dropped for that client**. The database write and every other client are
 unaffected. Drops are counted per client, reported when it disconnects, and
 exported as Prometheus counters.
 
@@ -408,8 +421,8 @@ does no work of its own is the other.
 
 The queue runs both ways. `/commands` takes Naemon external commands over HTTP,
 publishes them to the `statusngin_cmd` queue, and the
-[broker module applies them to the running core](../broker/#submitting-data-to-the-core) —
-which is how a dashboard acknowledges a problem or forces a check without a
+[broker module applies them to the running core](../broker/#submitting-data-to-the-core).
+This way a dashboard could acknowledge a problem or force a check without a
 shell on the monitoring host.
 
 ### It is off unless you switch it on
@@ -433,12 +446,12 @@ command_listen_addr: 127.0.0.1:8081
 
 An `api_keys` entry grants *reading* the event stream. A `command_api_keys`
 entry grants *controlling the monitoring core*. Those are not the same
-privilege, so they are not the same key — and the endpoint gets its own port, so
+privilege, so they are not the same key. Also the endpoint gets its own port, so
 exposing the stream on the network does not also expose the write endpoint.
 
 ### Sending commands
 
-The body is the broker's own envelope, unchanged — the same JSON a client would
+The body is the broker's own envelope, unchanged. The same JSON a client would
 publish to Gearman or RabbitMQ directly, so the four commands and their fields
 are the ones documented under
 [Submitting data to the core](../broker/#submitting-data-to-the-core):
@@ -480,7 +493,7 @@ Five external commands are rejected even with a valid key:
 
 | Denied | |
 |---|---|
-| `SHUTDOWN_PROGRAM`, `SHUTDOWN_PROCESS` | Two spellings Naemon registers against the same handler. Denying only the familiar one would be a filter that looks right and stops nothing. |
+| `SHUTDOWN_PROGRAM`, `SHUTDOWN_PROCESS` | Two spellings Naemon registers against the same handler. |
 | `RESTART_PROGRAM`, `RESTART_PROCESS` | The same, for restart. |
 | `PROCESS_FILE` | Reads a file and runs every line in it as an external command. Without this entry the rest of the list would be decoration: put `SHUTDOWN_PROGRAM` in a file and have Naemon read it. |
 
@@ -491,7 +504,7 @@ there is nothing left to deny.
 {{< callout type="warning" >}}
 This is a denylist, so it protects against an accident, not against intent. A
 caller holding a valid key can still `DISABLE_NOTIFICATIONS` for every host you
-have. The real control is which keys exist and who holds them — treat a
+have. The real control is which keys exist and who holds them. Treat a
 `command_api_keys` entry as root on the monitoring core.
 {{< /callout >}}
 
