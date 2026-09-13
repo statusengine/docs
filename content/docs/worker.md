@@ -144,20 +144,149 @@ maintained outside the worker.
 
 ## Performance data
 
+Performance data arrives on its own queue, `statusngin_service_perfdata`, as a
+reduced service check — host name, service description, `perf_data` and a
+timestamp, nothing else — and only for services with `process_performance_data`
+enabled in the monitoring core. **Services only.** There is no host perfdata
+queue, in the broker or here.
+
+The worker parses that `perf_data` string into individual metrics, one per
+label, and routes each of them:
+
+```yaml
+perfdata_route: mysql        # mysql | graphite | both
+```
+
+The decision is made once when the handler is built, not per metric, which is
+worth knowing only because it means changing it takes a restart.
+
+### Into MySQL
+
+`mysql` and `both` write one row per metric into `statusengine_perfdata`:
+host name, service description, label, timestamp, value and unit. It is the
+default, and it is the table
+[`age_perfdata`](#how-long-to-keep-what) trims — 90 days unless you say
+otherwise.
+
+### Into Graphite
+
+`graphite` and `both` ship metrics to a Carbon plaintext receiver,
+`graphite_addr`, `127.0.0.1:2003` by default. The path of each metric is four
+segments:
+
+```text
+<graphite_prefix>.<hostname>.<service_description>.<label>
+statusengine.web01.HTTP.time
+```
+
+`graphite_prefix` is `statusengine` by default.
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will document `perfdata_route`
-(`mysql` / `graphite` / `both`) and the Graphite metric path
-`<graphite_prefix>.<hostname>.<service_description>.<metric_label>`.
+**Every segment is sanitised, and the rule is narrower than it looks.** Only
+`a-z`, `A-Z`, `0-9`, `-` and `.` survive; everything else becomes `_`. Umlauts
+and every other non-ASCII character included — a service called `Größe` arrives
+as `Gr__e`.
+
+A literal `^` survives too, which is not a considered decision but an inherited
+one: the legacy PHP worker's character class was `/[^a-zA-Z^0-9\-\.]/`, where
+the second `^` is a literal rather than a negation, and the Go worker
+reproduces that byte for byte so existing metric paths keep resolving.
+{{< /callout >}}
+
+Metrics are buffered and flushed when the batch fills or after 250 ms,
+whichever comes first:
+
+| Flag | Effect |
+|---|---|
+| `graphite_batch_size` | Metrics buffered before a write, `100`. Clamped to 1000. |
+| `graphite_prefix` | First path segment, `statusengine`. |
+| `graphite_addr` | Carbon plaintext receiver, `127.0.0.1:2003`. |
+
+{{< callout type="error" >}}
+**Graphite fails differently from MySQL, on purpose.** A failed dial or write
+logs the error and **drops that batch** — it is not retried. Retrying here would
+either block the ingestion pipeline or grow the buffer without bound, so the
+next flush simply re-dials and the metrics in between are gone.
+
+An unreachable MySQL behaves the opposite way: the batch is held and the backlog
+waits at the broker. So a Graphite outage costs data and a MySQL outage costs
+time. [`statusengine_graphite_metrics_dropped_total`](#monitoring-the-worker) is
+the series that counts it, and every increment is a metric that now exists
+nowhere.
 {{< /callout >}}
 
 ## Running as a systemd service
 
-{{< callout type="warning" >}}
-**Section not written yet.** It will cover the three shipped units and why
-`TimeoutStopSec=90s` must not be shortened: on `SIGTERM` the worker stops
-consuming, drains in-flight jobs and flushes its buffers, and the worst case is
-the sum of three bounded waits.
-{{< /callout >}}
+`make install-systemd` copies three units into `/etc/systemd/system` and enables
+nothing — `statusengine-worker.service`, plus the
+[`statusengine-db-cleanup`](#data-retention) service and timer.
+
+```bash
+systemctl enable --now statusengine-worker
+```
+
+The unit is worth reading before you adapt it, because two of its settings look
+like defaults somebody forgot to tighten and are neither.
+
+### `After=`, not `Requires=`
+
+```ini
+After=network-online.target mysql.service mariadb.service gearman-job-server.service
+```
+
+These are ordering hints, not requirements. The worker survives all three being
+unavailable: it retries MySQL and reconnects to the broker on its own.
+`Requires=` would tie its lifetime to theirs, so a MySQL restart would take the
+worker down with it — precisely the case the retry logic exists to handle.
+
+### `TimeoutStopSec=90s` — the one setting not to shorten
+
+On `SIGTERM` the worker stops consuming, drains the jobs still in flight and
+flushes its buffers before exiting. The worst case is the sum of three bounded
+waits:
+
+| Budget | Stage |
+|---|---|
+| 30 s | Gearman drain. The connections close in parallel, so it is 30 s in total, not 30 s per queue. |
+| 10 s | Final bulk-insert flush. |
+| 5 s | HTTP server shutdown. |
+| **45 s** | **worst case** |
+
+systemd sends `SIGKILL` when `TimeoutStopSec` expires. Set below 45 s it
+therefore kills the worker *during* the flush, which loses exactly the buffered
+rows the graceful shutdown exists to write — and the job acknowledgements with
+them, so the broker redelivers them and the upserts become the only thing
+between you and duplicate rows.
+
+90 s leaves headroom over that arithmetic. It is written out in the unit rather
+than left to systemd's default so that raising the drain timeout has an obvious
+place to be reflected.
+
+### API keys come from a file
+
+```ini
+EnvironmentFile=-/etc/statusengine/worker.env
+```
+
+Anything on a command line is readable by every user on the machine through
+`/proc`, so the [API keys](#authentication-is-always-on) belong here instead:
+
+```bash
+STATUSENGINE_API_KEYS=key-one,key-two
+STATUSENGINE_API_COMMAND_KEYS=another-key
+```
+
+The leading `-` makes the file optional — the unit still starts without it.
+
+### The rest
+
+`Restart=always` with `RestartSec=5s`, and a hardening block that is only
+possible because the worker writes nothing to disk at all — logs go to the
+journal — so it runs under `ProtectSystem=strict` with a read-only filesystem.
+
+`LimitNOFILE=65535` covers one connection per queue, the MySQL pool and every
+connected WebSocket client at once. It is far above anything the worker reaches
+and costs nothing to grant.
 
 ## Data retention
 
@@ -518,7 +647,7 @@ source checkout and nowhere else.
 {{< callout type="error" >}}
 Four of the five **write rows** into whatever database their DSN names, and
 they replay the same fixture host and service names on every run. Point them at
-a development or staging database. `db_verifier` is the exception: it only ever
+a **development or staging database**. `db_verifier` is the exception: it only ever
 reads.
 {{< /callout >}}
 
@@ -532,7 +661,7 @@ watched against a real MySQL rather than reasoned about.
 ./bin/simulator -rate 5000 -duration 15s -mysql-dsn "user:pass@tcp(127.0.0.1:3306)/statusengine-dev"
 ```
 
-It hands fixture payloads straight to the handlers and never touches a broker.
+It hands fixture payloads straight to the handlers and never touches a broker (queue).
 That is a mock only in the sense that Gearman and RabbitMQ are absent — the
 decode, persist and broadcast path is the production one.
 
@@ -546,7 +675,7 @@ decode, persist and broadcast path is the production one.
 ### gearman_publisher and rabbitmq_publisher
 
 The same idea from the other side: synthetic events for one queue, published to
-a real broker, so the whole ingestion path runs — broker, consumer, router,
+a real broker (Gearman or RabbitMQ), so the whole ingestion path runs — broker, consumer, router,
 inserter — with the worker as a separate process. Start the worker against the
 same broker and watch it consume what these publish.
 
