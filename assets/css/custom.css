@@ -823,13 +823,22 @@ a:hover .se-external {
   margin-inline: auto;
 }
 
+/* Two explicit rows rather than one wrapping flex line: with a single row the
+   break depended on how long the brand note happened to be, so shortening that
+   sentence rearranged the whole footer. */
 .se-footer {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem 3rem;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 1.5rem;
   padding-block: 2.5rem;
   font-size: 0.875rem;
+}
+.se-footer__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 3rem;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 .se-footer__brand {
   display: flex;

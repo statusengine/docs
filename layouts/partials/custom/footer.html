@@ -1,25 +1,28 @@
 {{- $ctx := .context -}}
 <div class="se-footer">
-  <div>
-    <div class="se-footer__brand">
-      <img src="{{ "images/logo-mark.svg" | relURL }}" width="24" height="24" alt="" />
-      <span>Statusengine</span>
+  <div class="se-footer__row">
+    <div>
+      <div class="se-footer__brand">
+        <img src="{{ "images/logo-mark.svg" | relURL }}" width="24" height="24" alt="" />
+        <span>Statusengine</span>
+      </div>
+      <p class="se-footer__note">
+        Every Naemon and Nagios event, stored in MySQL and streamed live.
+        Free and open source.
+      </p>
     </div>
-    <p class="se-footer__note">
-      Free software for scaling Nagios and Naemon monitoring. Broker module and
-      worker are licensed under the GPL.
-    </p>
+
+    <div class="se-footer__links">
+      <a href="{{ "docs/broker/" | relURL }}">Broker</a>
+      <a href="{{ "docs/worker/" | relURL }}">Worker</a>
+      <a href="{{ "tutorials/" | relURL }}">Tutorials</a>
+      <a href="https://github.com/statusengine" target="_blank" rel="noreferrer">GitHub<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
+      <a href="https://demo.statusengine.org" target="_blank" rel="noreferrer">Demo<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
+    </div>
   </div>
 
-  <div class="se-footer__links">
-    <a href="{{ "docs/broker/" | relURL }}">Broker</a>
-    <a href="{{ "docs/worker/" | relURL }}">Worker</a>
-    <a href="{{ "tutorials/" | relURL }}">Tutorials</a>
-    <a href="https://github.com/statusengine" target="_blank" rel="noreferrer">GitHub<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
-    <a href="https://demo.statusengine.org" target="_blank" rel="noreferrer">Demo<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
-  </div>
-
-  <div class="se-footer__links se-footer__ai">
+  <div class="se-footer__row">
+    <div class="se-footer__links se-footer__ai">
   {{/* The European Commission's basic "AI" label, from the official icon set:
        https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content
        SVG bundle (129546), file "LABEL_AI_black.svg", downloaded 13 September 2026.
@@ -47,8 +50,9 @@
     <span>Drafted with Claude Code, reviewed and maintained by people.</span>
   </div>
 
-  <div class="se-footer__links">
-    <span>© {{ now.Year }} The Statusengine team</span>
-    <a href="https://github.com/imfing/hextra" target="_blank" rel="noreferrer">Built with Hextra<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
+    <div class="se-footer__links">
+      <span>© {{ now.Year }} The Statusengine team</span>
+      <a href="https://github.com/imfing/hextra" target="_blank" rel="noreferrer">Built with Hextra<span class="se-external" aria-hidden="true">&nbsp;↗</span></a>
+    </div>
   </div>
 </div>
