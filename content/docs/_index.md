@@ -24,9 +24,9 @@ endpoint for external commands and Prometheus metrics:
 
 ## Which order to install in
 
-Install the worker's database first, then the worker, then the broker module.
-That way the queue already has a consumer when the monitoring core starts
-publishing, and nothing piles up on the queue server while you finish the setup.
+Install the broker module first. This ensure that your monitoring core starts
+publishing events to the queue. They will pile up while you install and configure
+the Statusengine Worker and database.
 
 Already running Statusengine 3? It is an in-place upgrade — the queues and
 almost all of the tables are the same — but version 4 dropped several backends,
@@ -48,6 +48,5 @@ configured with a single key. Pick one and use it on both sides:
 
 {{< callout type="info" >}}
 Queues buffer in memory in both cases. The broker publishes RabbitMQ messages as
-transient, so a queue server restart drops whatever has not been consumed yet —
-that is deliberate, monitoring state is re-sent on the next check.
+transient, so a queue server restart drops whatever has not been consumed yet.
 {{< /callout >}}
