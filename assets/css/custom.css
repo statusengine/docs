@@ -187,6 +187,27 @@ body {
   overflow-x: clip;
 }
 
+/* The other half of that propagation story, and the reason the mobile menu
+   would not stay put.
+
+   Hextra locks the page behind the open menu by putting overflow: hidden on
+   <body> (see themes/hextra/assets/js/menu.js). That only ever worked because
+   <html> was overflow: visible and the body's overflow propagated to the
+   viewport. The rule above gives <html> an overflow of its own, which stops
+   the propagation — the lock then applied to the body box, which is not the
+   scroll container, and the page kept scrolling. The navbar disappeared off
+   the top with the menu still open, leaving no way to close it except
+   following a link.
+
+   So the lock has to reach <html> too. Limited to the phone layout because
+   above md the class is toggled on but overridden by md:hx-overflow-auto, and
+   the menu is not in play there anyway. */
+@media (max-width: 767px) {
+  html:has(> body.hx-overflow-hidden) {
+    overflow: hidden;
+  }
+}
+
 body {
   background-image: radial-gradient(
       900px 620px at 8% -8%,
