@@ -1,12 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Statusengine">
+  <!-- A rounded triangle carrying a heartbeat, with the pulse's spike and the
+       dot beneath it reading as an exclamation mark. The triangle and the "!"
+       come from the original Statusengine logo; the heartbeat is what the
+       current site was already using. The silhouette does the work: a pulse in
+       a rounded square is what every system-monitor icon looks like.
+
+       The pulse is kept narrow enough that its stroke ends stay clear of the
+       sloping edges, and the spike is centred on x=16 so the dot sits directly
+       under it. -->
   <defs>
     <linearGradient id="se-mark" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#c9503d"/>
       <stop offset="1" stop-color="#8c2f24"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="8" fill="url(#se-mark)"/>
-  <path d="M5.5 18h4.2l2.6-7.2 3.7 11.6 2.4-6 1.7 1.6h6.4"
-        fill="none" stroke="#fff" stroke-width="2.4"
+  <path d="M16 1.6c1.3 0 2.3.7 3 1.9l11.4 20.6c1.3 2.4.1 4.9-2.7 4.9H4.3c-2.8 0-4-2.5-2.7-4.9L13 3.5c.7-1.2 1.7-1.9 3-1.9z"
+        fill="url(#se-mark)"/>
+  <path d="M10.6 18.6h2.6l2.8-5.9 2.2 8 1.5-2.1h1.7"
+        fill="none" stroke="#fff" stroke-width="2.8"
         stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="16" cy="25.2" r="2.05" fill="#fff"/>
 </svg>
