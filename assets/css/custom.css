@@ -199,12 +199,24 @@ body {
    the top with the menu still open, leaving no way to close it except
    following a link.
 
-   So the lock has to reach <html> too. Limited to the phone layout because
-   above md the class is toggled on but overridden by md:hx-overflow-auto, and
-   the menu is not in play there anyway. */
+   So the lock has to move to <html>, and off <body> — which is the second
+   half, and the one that was actually visible on a phone. overflow: hidden
+   makes <body> a scroll container, and a sticky element resolves against its
+   nearest one. With the menu shut the navbar sticks to the viewport and sits
+   at the top of the screen; the moment the menu opened, it started sticking
+   to the top of the body box instead, which is wherever the page happens to
+   be scrolled to. Open the menu 2500px down and the navbar jumped to -2500 —
+   off-screen, taking the close button with it.
+
+   So: <html> takes the lock, <body> goes back to being no scroll container at
+   all. Limited to the phone layout because above md the class is toggled on
+   but overridden by md:hx-overflow-auto, and the menu is not in play there. */
 @media (max-width: 767px) {
   html:has(> body.hx-overflow-hidden) {
     overflow: hidden;
+  }
+  body.hx-overflow-hidden {
+    overflow: visible;
   }
 }
 

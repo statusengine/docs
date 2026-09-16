@@ -48,6 +48,16 @@ function check(name, ok, detail) {
     const page = await ctx.newPage();
     await page.goto(`http://127.0.0.1:${PORT}${url}`, { waitUntil: "networkidle" });
 
+    /* Order matters, and this is the order that broke. Scrolling first leaves
+       the page somewhere down the document, and only then does the menu open
+       on top of it — which is when the navbar used to be yanked off-screen.
+       Opening the menu at the top of the page hides the bug entirely. */
+    await page.mouse.move(195, 600);
+    await page.mouse.wheel(0, 2500);
+    await page.waitForTimeout(350);
+    const deep = await page.evaluate(() => window.scrollY);
+    check(`${url} scrolls down first`, deep > 400, `scrollY=${deep}`);
+
     await page.click(".hamburger-menu");
     await page.waitForTimeout(350);
 
@@ -69,13 +79,14 @@ function check(name, ok, detail) {
       await page.waitForTimeout(300);
     }
     const scrolled = await page.evaluate(() => window.scrollY);
-    check(`${url} does not scroll behind the menu`, scrolled === 0, `scrollY=${scrolled}`);
+    check(`${url} does not scroll behind the menu`, scrolled === deep,
+      `scrollY ${deep} -> ${scrolled}`);
 
     const navTop = await page.evaluate(() => {
       const n = document.querySelector(".nav-container");
       return n ? Math.round(n.getBoundingClientRect().top) : null;
     });
-    check(`${url} keeps the navbar on screen`, navTop !== null && navTop >= -1 && navTop < 80,
+    check(`${url} keeps the navbar on screen`, navTop !== null && Math.abs(navTop) <= 1,
       `top=${navTop}`);
 
     /* And the hamburger is still where a thumb can reach it. */
@@ -105,10 +116,14 @@ function check(name, ok, detail) {
       !document.querySelector(".hamburger-menu svg").classList.contains("open"));
     check(`${url} closes again`, closed);
 
-    await page.mouse.wheel(0, 600);
+    /* Upwards: by now the page may be sitting at the bottom of the document,
+       where scrolling further down proves nothing. */
+    const before = await page.evaluate(() => window.scrollY);
+    await page.mouse.wheel(0, -600);
     await page.waitForTimeout(300);
     const unlocked = await page.evaluate(() => window.scrollY);
-    check(`${url} releases the page afterwards`, unlocked > 0, `scrollY=${unlocked}`);
+    check(`${url} releases the page afterwards`, unlocked < before,
+      `scrollY ${before} -> ${unlocked}`);
 
     await ctx.close();
   }
