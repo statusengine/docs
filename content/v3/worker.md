@@ -159,22 +159,9 @@ composer install
 
 ## Database
 
-At this point you need to decide which database you prefer to use. For large
+At this point you need to decide which database you prefer to use. ~For large
 environments or high availability you should use CrateDB. For smaller systems,
-or to keep things simple, go with MySQL.
-
-### CrateDB
-
-Import the file `/opt/statusengine/worker/lib/crateDB.sql` via the Crate Admin UI.
-
-{{< callout type="error" >}}
-You need to run every SQL query separately. Do **not** paste the whole file at
-once into the SQL console.
-{{< /callout >}}
-
-CrateDB users have to manage the database schema manually, because of
-[crate/crate-dbal#92](https://github.com/crate/crate-dbal/issues/92). With
-CrateDB you do not have to create a separate database or user for Statusengine.
+or to keep things simple,~ go with MySQL.
 
 ### MySQL
 
@@ -197,6 +184,19 @@ Only for versions **before** 3.7: load the schema manually now.
 mysql -u statusengine -p statusengine < /opt/statusengine/worker/lib/mysql.sql
 ```
 {{< /callout >}}
+
+### CrateDB
+
+Import the file `/opt/statusengine/worker/lib/crateDB.sql` via the Crate Admin UI.
+
+{{< callout type="error" >}}
+You need to run every SQL query separately. Do **not** paste the whole file at
+once into the SQL console.
+{{< /callout >}}
+
+CrateDB users have to manage the database schema manually, because of
+[crate/crate-dbal#92](https://github.com/crate/crate-dbal/issues/92). With
+CrateDB you do not have to create a separate database or user for Statusengine.
 
 ### Redis
 

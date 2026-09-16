@@ -65,8 +65,8 @@ cd statusengine-worker
 make build
 ```
 
-`make build` produces every binary in `bin/`, stamped with version information
-through `-ldflags`. A plain `go build` skips that stamping, so the resulting
+`make build` produces every binary in `bin/`, stamped with version information.
+A plain `go build` skips that stamping, so the resulting
 binary reports its version as `dev`:
 
 ```console
@@ -99,6 +99,27 @@ sudo systemctl enable --now statusengine-worker
 sudo systemctl enable --now statusengine-db-cleanup.timer
 ```
 
+## Configuration
+
+Every setting can be given four ways, and they resolve in this order:
+
+```text
+explicit CLI flag  >  environment variable  >  config file  >  built-in default
+```
+
+The easiest way to provide the configuration is via a config file, typically `/etc/statusengine/config.yml`.
+Please copy the [example configuration](https://github.com/statusengine/statusengine-worker/blob/main/config.example.yaml) to `/etc/statusengine/config.yml`.
+
+The default configuration contains all available settings with a description.
+It is a good starting point for new users.
+
+### Configure through environment variables
+
+The Statusengine 4 Worker can also be configured via environment variables. This
+is especially useful when running in a containerized setup. All variables
+start with the `STATUSENGINE_` prefix. A full list of environment variables
+can be found [in the source code](https://github.com/statusengine/statusengine-worker/blob/main/cmd/app/main.go#L315-L336).
+
 {{< callout type="error" >}}
 Put API keys in `/etc/statusengine/worker.env`, never in `ExecStart`. Anything on
 a command line is readable by every user on the box through `/proc`.
@@ -108,38 +129,12 @@ STATUSENGINE_API_KEYS=key-one,key-two
 ```
 {{< /callout >}}
 
-## Configuration
-
-Every setting can be given four ways, and they resolve in this order:
-
-```text
-explicit CLI flag  >  environment variable  >  config file  >  built-in default
-```
-
-Every key is optional, omit anything you do not want to override. A minimal
-file that switches the queue backend and points at a real database looks like
-this:
-
-```yaml
-consumer: gearman
-gearman_addr: 127.0.0.1:4730
-mysql_dsn: "statusengine:secret@tcp(127.0.0.1:3306)/statusengine?parseTime=true"
-perfdata_route: mysql
-```
-
-{{< callout type="warning" >}}
-**Full reference not written yet.** It will document every key from
-`config.example.yaml` with its default, flag and environment variable, grouped
-into queue, MySQL, Graphite and perfdata, WebSocket and API keys, command API,
-and logging.
-{{< /callout >}}
-
 ## Database
 
-The worker never creates a table and never migrates one. Statusengine 3.7 and
-later managed the schema for you; this one does not, so the 22 tables have to
-exist before it starts. They are shipped as a plain SQL file,
-`packaging/mysql_schema.sql` in the worker repository.
+Statusengine 4 does currently **not** manage the database schema automatically.
+The schema must be loaded manually before starting the worker.
+
+A plain SQL file is shipped with the worker: `packaging/mysql_schema.sql`.
 
 ### Create the database and the user
 
@@ -150,12 +145,16 @@ GRANT ALL PRIVILEGES ON `statusengine`.* TO 'statusengine'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-No `COLLATE` on purpose. MySQL and MariaDB do not agree on which modern
+{{< details title="No `COLLATE` on purpose" closed="true" >}}
+MySQL and MariaDB do not agree on which modern
 `utf8mb4` collation exists and the answer changes by version, so naming one here
 is how you end up with a database that refuses to load the schema. Without it
-the server takes its own default, which is always present — `utf8mb4_0900_ai_ci`
+the server takes its own default, which is always present. `utf8mb4_0900_ai_ci`
 on MySQL 8, `utf8mb4_uca1400_ai_ci` on MariaDB 11.4, `utf8mb4_general_ci` on
-MariaDB 10.11. The schema file leaves it out for the same reason.
+MariaDB 10.11.
+{{< /details >}}
+
+
 
 ### Load the schema
 
@@ -166,14 +165,8 @@ mysql -u statusengine -p statusengine < packaging/mysql_schema.sql
 {{< callout type="info" >}}
 The second `statusengine` is the **database name**, not the password. `-p` on
 its own prompts for the password; a value glued to it (`-pstatusengine`) would
-be the password. This trips people up often enough that the old documentation
-warned about it too.
+be the password.
 {{< /callout >}}
-
-Every statement in the file is `CREATE TABLE IF NOT EXISTS`, so loading it is
-safe more than once, and safe against a database that already has some of the
-tables — it adds what is missing and leaves the rest untouched. That also makes
-it the simplest way to pick up tables added by a later version.
 
 ### Point the worker at it
 
@@ -181,17 +174,12 @@ it the simplest way to pick up tables added by a later version.
 mysql_dsn: "statusengine:a-password-of-your-own@tcp(127.0.0.1:3306)/statusengine?parseTime=true"
 ```
 
-The format is [go-sql-driver/mysql ↗](https://github.com/go-sql-driver/mysql#dsn-data-source-name)'s,
+The format is [go-sql-driver/mysql's](https://github.com/go-sql-driver/mysql#dsn-data-source-name),
 not a URL: `user:password@tcp(host:port)/database`. Keep `parseTime=true`.
 
-### If you grant less than everything
-
-`GRANT ALL` on its own database is the usual answer, and the narrower grant has
-one trap in it. The worker issues `SELECT`, `INSERT`, `UPDATE` and `DELETE` —
-and exactly one `TRUNCATE`, to clear the status tables when the monitoring core
-restarts. **`TRUNCATE TABLE` requires the `DROP` privilege**, so a grant
-assembled from the four obvious verbs works perfectly until the first core
-restart:
+{{< details title="If you grant less than all privileges" closed="true" >}}
+The Worker runs `SELECT`, `INSERT`, `UPDATE`, `DELETE` and `TRUNCATE` statements.
+The `DROP` privilege is required to execute a `TRUNCATE TABLE` statement.
 
 ```sql
 GRANT SELECT, INSERT, UPDATE, DELETE, DROP ON `statusengine`.* TO 'statusengine'@'localhost';
@@ -199,37 +187,18 @@ GRANT SELECT, INSERT, UPDATE, DELETE, DROP ON `statusengine`.* TO 'statusengine'
 
 Loading the schema needs `CREATE`, `INDEX` and `ALTER` on top — or do that as
 an administrative user and leave them off the worker's own account.
-
-### What the worker does not manage
-
-Two things in this database are yours to look after.
-
-**Retention.** Nothing is deleted unless you run
-[`statusengine-db-cleanup`](#data-retention). The check tables grow without
-bound otherwise.
-
-**Partitioning.** The history tables take partitioning well — `PARTITION BY
-RANGE (start_time DIV 86400)` is the scheme the schema is written for — and the
-worker neither creates nor drops a partition. If you partition, maintain it from
-outside, and remember that MySQL requires every column of a unique key to be
-part of the partitioning key.
+{{< /details >}}
 
 {{< callout type="warning" >}}
 Coming from Statusengine 3? The tables are almost the same, but not quite, and
-an existing database needs a few changes before this worker writes to it — see
+an existing database needs a few changes before Statusengine 4 can use it. See
 [Migrating from Statusengine 3](../migrating-from-3/#3-bring-the-schema-up-to-date).
 {{< /callout >}}
 
 ## Performance data
 
-Performance data arrives on its own queue, `statusngin_service_perfdata`, as a
-reduced service check: host name, service description, `perf_data` and a
-timestamp. Only for services with `process_performance_data`
-enabled in the monitoring core. **Services only.** There is no host perfdata
-queue, in the broker or here.
-
-The worker parses that `perf_data` string into individual metrics, one per
-label, and routes each of them:
+The Statusengine Worker will handle processing of **service** performance data.
+It supports MySQL and Graphite as backends for storing this data.
 
 ```yaml
 perfdata_route: mysql        # mysql | graphite | both
@@ -237,10 +206,8 @@ perfdata_route: mysql        # mysql | graphite | both
 
 ### Into MySQL
 
-`mysql` and `both` write one row per metric into `statusengine_perfdata`:
-host name, service description, label, timestamp, value and unit. It is the
-default, and it is the table
-[`age_perfdata`](#how-long-to-keep-what) trims. 90 days unless you say
+`mysql` and `both` write one row per metric into `statusengine_perfdata` table.
+The [`age_perfdata`](#how-long-to-keep-what) option trims. 90 days unless you say
 otherwise.
 
 ### Into Graphite
@@ -259,7 +226,7 @@ statusengine.web01.HTTP.time
 {{< callout type="warning" >}}
 **Every segment is sanitised.** Only
 `a-z`, `A-Z`, `0-9`, `-` and `.` survive; everything else becomes `_`. Umlauts
-and every other non-ASCII character included - a service called `Größe` arrives
+and every other non-ASCII character included. For example a service called `Größe` arrives
 as `Gr__e`.
 
 A literal `^` survives too, which is not a considered decision but an inherited
@@ -280,13 +247,13 @@ whichever comes first:
 | `graphite_addr` | Carbon plaintext receiver, `127.0.0.1:2003`. |
 
 {{< callout type="error" >}}
-**Graphite fails differently from MySQL, on purpose.** A failed dial or write
-logs the error and **drops that batch** — it is not retried. Retrying here would
+**Graphite fails differently from MySQL** A failed dial or write
+logs the error and **drops that batch**. It is not retried. Retrying would
 either block the ingestion pipeline or grow the buffer without bound, so the
 next flush simply re-dials and the metrics in between are gone.
 
 An unreachable MySQL behaves the opposite way: the batch is held and the backlog
-waits at the broker. So a Graphite outage costs data and a MySQL outage costs
+waits at the Queue. So a Graphite outage costs data and a MySQL outage costs
 time. [`statusengine_graphite_metrics_dropped_total`](#monitoring-the-worker) is
 the series that counts it, and every increment is a metric that now exists
 nowhere.
@@ -302,21 +269,9 @@ nowhere.
 systemctl enable --now statusengine-worker
 ```
 
-The unit is worth reading before you adapt it, because two of its settings look
-like defaults somebody forgot to tighten and are neither.
+{{< details title="Systemd service configuration explained" closed="true" >}}
 
-### `After=`, not `Requires=`
-
-```ini
-After=network-online.target mysql.service mariadb.service gearman-job-server.service
-```
-
-These are ordering hints, not requirements. The worker survives all three being
-unavailable: it retries MySQL and reconnects to the broker on its own.
-`Requires=` would tie its lifetime to theirs, so a MySQL restart would take the
-worker down with it. The worker has retry logic that exists to handle such scenarios.
-
-### `TimeoutStopSec=90s` - the one setting not to shorten
+**`TimeoutStopSec=90s` - the one setting not to shorten**
 
 On `SIGTERM` the worker stops consuming, drains the jobs still in flight and
 flushes its buffers before exiting. The worst case is the sum of three bounded
@@ -339,7 +294,7 @@ between you and duplicate rows.
 than left to systemd's default so that raising the drain timeout has an obvious
 place to be reflected.
 
-### API keys come from a file
+**API keys come from a file**
 
 ```ini
 EnvironmentFile=-/etc/statusengine/worker.env
@@ -353,17 +308,10 @@ STATUSENGINE_API_KEYS=key-one,key-two
 STATUSENGINE_API_COMMAND_KEYS=another-key
 ```
 
-The leading `-` makes the file optional — the unit still starts without it.
-
-### The rest
-
-`Restart=always` with `RestartSec=5s`, and a hardening block that is only
-possible because the worker writes nothing to disk at all — logs go to the
-journal — so it runs under `ProtectSystem=strict` with a read-only filesystem.
-
 `LimitNOFILE=65535` covers one connection per queue, the MySQL pool and every
 connected WebSocket client at once. It is far above anything the worker reaches
 and costs nothing to grant.
+{{< /details >}}
 
 ## Data retention
 

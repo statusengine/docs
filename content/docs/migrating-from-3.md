@@ -29,16 +29,20 @@ Elasticsearch — version 4 cannot read it, and cannot import it.
 | **Redis / Valkey** | No longer a dependency at all. |
 | **The [In-memory feature](/v3/worker/#in-memory)** | The live-state objects in Redis (`hosts_up`, `services_ok`, `hoststatus_<hostname>` and the rest) are not written by version 4. Anything that read them needs another source. |
 
-For the last one there is a direct replacement: the worker's
-[WebSocket event stream](/docs/api/) carries every event as it happens, which
-is what the Redis objects were usually being polled for. `statusengine_hoststatus`
-and `statusengine_servicestatus` still hold the current state of every host and
-service in MySQL.
+## 1. Ensure your Broker is publishing bulk messages
 
-Performance data goes to MySQL, to Graphite over the Carbon plaintext protocol,
-or to both. No other target exists.
+The Statusengine 4 Worker can only consume bulk messages. Please check your `statusengine.toml`
+file upfront and ensure that your `bulk` settings are looking exactly like this:
 
-## 1. Stop Statusengine 3
+```toml
+[Bulk]
+Queues = ["HostStatus", "HostCheck", "ServiceStatus", "ServiceCheck",
+          "ServicePerfData", "StateChange", "LogData", "NotificationData"]
+```
+
+Restart your monitoring core to apply the changes.
+
+## 2. Stop Statusengine 3
 
 The old worker and the new one consume the same queues. Running both at once
 means each of them gets an arbitrary half of your monitoring data, so stop the
@@ -72,9 +76,14 @@ Leave `/opt/statusengine/worker` itself in place for now. Its
 from, and you may want to look something up before deleting it.
 {{< /callout >}}
 
-## 2. Back up the database
+## 3. Back up the database
 
 Every step below rewrites tables. This is the one thing you cannot skip.
+
+{{< callout type="error" >}}
+A system that has been running for years can have a very large database.
+Please ensure you have enough disk space before proceeding.
+{{< /callout >}}
 
 ```bash
 mysqldump --single-transaction --routines --triggers \
@@ -82,19 +91,17 @@ mysqldump --single-transaction --routines --triggers \
 ```
 
 `--single-transaction` keeps the dump consistent without locking the tables.
-On a system that has been collecting history for years the result can be tens
-of gigabytes; check that there is room before you start. On MariaDB 11 the
-command is `mariadb-dump` — that release dropped the `mysql*` names.
+On MariaDB 11 the command is `mariadb-dump`.
 
-## 3. Bring the schema up to date
+## 4. Bring the schema up to date
 
-Version 4 expects the 3.7 schema plus the changes below. If your database is
+Statusengine 4 expects the latest 3.7 schema plus the changes below. If your database is
 older than 3.7, apply
 [`lib/mysql_update.sql`](https://github.com/statusengine/worker/blob/master/lib/mysql_update.sql)
 from the old worker first — it adds the `*_usec` columns and the primary keys
 that everything here assumes.
 
-### Acknowledgements gain an end time
+### 4.1 Acknowledgements gain an end time
 
 Naemon acknowledgements can expire. The broker module publishes that expiry as
 `end_time` on the acknowledgement message — `0` means "does not expire", which
@@ -121,7 +128,7 @@ tables are still small costs nothing. Nothing breaks in the meantime — a colum
 the worker does not name in its `INSERT` simply takes its default.
 {{< /callout >}}
 
-### `ack_author` widens to 1024
+### 4.2 `ack_author` widens to 1024
 
 The four notification tables disagree about how long an acknowledgement author
 may be. The PHP schema declares 255 everywhere; databases that have been
@@ -153,7 +160,7 @@ batch it was part of — up to `mysql_batch_size` rows, including unrelated
 events that happened to share it.
 {{< /callout >}}
 
-## 4. Convert the database to a current collation
+## 5. Convert the database to a current collation
 
 Version 3 created its tables as `utf8` with `utf8_general_ci`. That "utf8" is
 MySQL's three-byte version, which cannot store anything outside the Basic

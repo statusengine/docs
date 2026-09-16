@@ -34,17 +34,16 @@ offers is deliberately narrower:
 
 | | Statusengine 3 | Statusengine 4 |
 |---|---|---|
-| Worker | PHP 7, Composer, `bin/Console.php` | Single Go binary |
+| Worker | PHP 8, Composer, `bin/Console.php` | Single Go binary |
 | Status database | MySQL, CrateDB or Redis | MySQL |
 | Performance data | MySQL, CrateDB, Elasticsearch 5–7, Graphite | MySQL, Graphite |
-| Configuration | `config.yml` | `config.yaml`, plus environment variables and CLI flags |
+| Configuration | `config.yml` or environment variables | `config.yaml`, plus environment variables and CLI flags |
 | Web interface | Statusengine UI (bundled) | Not part of the project |
 
 ## Statusengine 2
 
-The documentation for the 2.x series has been retired. It remains available in
-the [statusengine/docs](https://github.com/statusengine/docs) repository on
-GitHub for anyone who needs to build it themselves.
+The documentation for Statusengine 2.x has been retired.
+Unfortunately, I do not have the source for it anymore, so I cannot provide a link or archive for it.
 
 ## Screenshots
 
