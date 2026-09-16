@@ -136,10 +136,88 @@ and logging.
 
 ## Database
 
+The worker never creates a table and never migrates one. Statusengine 3.7 and
+later managed the schema for you; this one does not, so the 22 tables have to
+exist before it starts. They are shipped as a plain SQL file,
+`packaging/mysql_schema.sql` in the worker repository.
+
+### Create the database and the user
+
+```sql
+CREATE DATABASE IF NOT EXISTS `statusengine` DEFAULT CHARACTER SET utf8mb4;
+CREATE USER 'statusengine'@'localhost' IDENTIFIED BY 'a-password-of-your-own';
+GRANT ALL PRIVILEGES ON `statusengine`.* TO 'statusengine'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+No `COLLATE` on purpose. MySQL and MariaDB do not agree on which modern
+`utf8mb4` collation exists and the answer changes by version, so naming one here
+is how you end up with a database that refuses to load the schema. Without it
+the server takes its own default, which is always present — `utf8mb4_0900_ai_ci`
+on MySQL 8, `utf8mb4_uca1400_ai_ci` on MariaDB 11.4, `utf8mb4_general_ci` on
+MariaDB 10.11. The schema file leaves it out for the same reason.
+
+### Load the schema
+
+```bash
+mysql -u statusengine -p statusengine < packaging/mysql_schema.sql
+```
+
+{{< callout type="info" >}}
+The second `statusengine` is the **database name**, not the password. `-p` on
+its own prompts for the password; a value glued to it (`-pstatusengine`) would
+be the password. This trips people up often enough that the old documentation
+warned about it too.
+{{< /callout >}}
+
+Every statement in the file is `CREATE TABLE IF NOT EXISTS`, so loading it is
+safe more than once, and safe against a database that already has some of the
+tables — it adds what is missing and leaves the rest untouched. That also makes
+it the simplest way to pick up tables added by a later version.
+
+### Point the worker at it
+
+```yaml
+mysql_dsn: "statusengine:a-password-of-your-own@tcp(127.0.0.1:3306)/statusengine?parseTime=true"
+```
+
+The format is [go-sql-driver/mysql ↗](https://github.com/go-sql-driver/mysql#dsn-data-source-name)'s,
+not a URL: `user:password@tcp(host:port)/database`. Keep `parseTime=true`.
+
+### If you grant less than everything
+
+`GRANT ALL` on its own database is the usual answer, and the narrower grant has
+one trap in it. The worker issues `SELECT`, `INSERT`, `UPDATE` and `DELETE` —
+and exactly one `TRUNCATE`, to clear the status tables when the monitoring core
+restarts. **`TRUNCATE TABLE` requires the `DROP` privilege**, so a grant
+assembled from the four obvious verbs works perfectly until the first core
+restart:
+
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE, DROP ON `statusengine`.* TO 'statusengine'@'localhost';
+```
+
+Loading the schema needs `CREATE`, `INDEX` and `ALTER` on top — or do that as
+an administrative user and leave them off the worker's own account.
+
+### What the worker does not manage
+
+Two things in this database are yours to look after.
+
+**Retention.** Nothing is deleted unless you run
+[`statusengine-db-cleanup`](#data-retention). The check tables grow without
+bound otherwise.
+
+**Partitioning.** The history tables take partitioning well — `PARTITION BY
+RANGE (start_time DIV 86400)` is the scheme the schema is written for — and the
+worker neither creates nor drops a partition. If you partition, maintain it from
+outside, and remember that MySQL requires every column of a unique key to be
+part of the partitioning key.
+
 {{< callout type="warning" >}}
-**Section not written yet.** It will cover the 22 tables of the schema, the
-`utf8mb4` requirement, and the fact that partitioning on the history tables is
-maintained outside the worker.
+Coming from Statusengine 3? The tables are almost the same, but not quite, and
+an existing database needs a few changes before this worker writes to it — see
+[Migrating from Statusengine 3](../migrating-from-3/#3-bring-the-schema-up-to-date).
 {{< /callout >}}
 
 ## Performance data
