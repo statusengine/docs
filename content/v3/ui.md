@@ -13,6 +13,10 @@ AngularJS web interface that reads the database written by the
 [3.x PHP worker](worker/). It is not part of Statusengine 4, and the
 [Go worker](../../docs/worker/) does not serve it. Use this page if you are
 running an existing installation.
+
+For a new installation, the interface to install is the
+[Statusengine Web Interface](../../docs/interface/): a single binary, no PHP,
+and it reads what the Go worker writes.
 {{< /callout >}}
 
 ## Overview

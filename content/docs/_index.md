@@ -15,6 +15,13 @@ message queue between them. Two components do the work:
   {{< card link="worker/" title="Worker" subtitle="Go daemon. Consumes the queue, writes MySQL, forwards performance data to Graphite." >}}
 {{< /cards >}}
 
+Once those two are running, the data is in the database. The web interface is
+what makes it visible, and how an operator acts on it:
+
+{{< cards >}}
+  {{< card link="interface/" title="Web Interface" subtitle="Single binary with the frontend built in. Dashboards, history, performance graphs and external commands." >}}
+{{< /cards >}}
+
 The worker also exposes an HTTP surface of its own — a live event stream, an
 endpoint for external commands and Prometheus metrics:
 
@@ -26,7 +33,8 @@ endpoint for external commands and Prometheus metrics:
 
 Install the broker module first. This ensure that your monitoring core starts
 publishing events to the queue. They will pile up while you install and configure
-the Statusengine Worker and database.
+the Statusengine Worker and database. The web interface comes last: it needs a
+database with data in it before it has anything to show.
 
 Already running Statusengine 3? It is an in-place upgrade — the queues and
 almost all of the tables are the same — but version 4 dropped several backends,
