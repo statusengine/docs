@@ -29,6 +29,9 @@ Statusengine 3 is a different application with its own database expectations and
 its own installation. It is still documented at
 [Statusengine 3 › Statusengine UI](../../v3/ui/), and installations running it
 can keep it. The two do not share configuration, accounts or session state.
+
+They do share a repository: `statusengine/interface` now holds this
+interface, and everything up to the tag `3.8.0` is the old one.
 {{< /callout >}}
 
 {{< cards >}}
@@ -54,13 +57,13 @@ server unless you want one in front for TLS.
 ## Download
 
 Releases are published at
-[github.com/statusengine/statusengine-interface](https://github.com/statusengine/statusengine-interface/releases).
+[github.com/statusengine/interface](https://github.com/statusengine/interface/releases).
 Each one carries an archive per platform and a `SHA256SUMS` file.
 
 ```bash
 VERSION={{< param interfaceVersion >}}
 ARCH=$(uname -m | sed -e 's/x86_64/amd64/' -e 's/aarch64/arm64/')
-BASE=https://github.com/statusengine/statusengine-interface/releases/download/v$VERSION
+BASE=https://github.com/statusengine/interface/releases/download/v$VERSION
 
 wget $BASE/seid_v${VERSION}_linux_${ARCH}.tar.gz
 wget $BASE/SHA256SUMS
