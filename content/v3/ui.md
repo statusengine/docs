@@ -130,27 +130,29 @@ yum install git php-cli php-mysql php-ldap
 
 ```bash
 cd /usr/share/
-git clone -b 3.8.0 https://github.com/statusengine/interface.git statusengine-ui
+git clone -b 3.x-master https://github.com/statusengine/interface.git statusengine-ui
 cd /usr/share/statusengine-ui
 chmod +x bin/*
 composer install
 ```
 
 {{< callout type="warning" >}}
-**Note the `-b 3.8.0`.** That repository now holds the
-[Statusengine Web Interface](../../docs/interface/), which is a different
-application. `3.8.0` is the last release of the PHP and AngularJS interface
-this page describes; cloning the default branch gets you the new one.
+**Note the `-b 3.x-master`.** That repository also holds the
+[Statusengine Web Interface](../../docs/interface/), a different application
+that arrives on `main`. The PHP and AngularJS interface this page describes
+lives on
+[`3.x-master`](https://github.com/statusengine/interface/tree/3.x-master),
+which is where fixes to it would go.
 {{< /callout >}}
 
 ## Configuration
 
-The [Statusengine UI config file](https://github.com/statusengine/interface/blob/3.8.0/etc/config.yml.example)
+The [Statusengine UI config file](https://github.com/statusengine/interface/blob/3.x-master/etc/config.yml.example)
 has a lot of options you may not need, so this is stripped down to the basics
 you have to change.
 
 Statusengine UI can also be configured through
-[environment variables](https://github.com/statusengine/interface/blob/3.8.0/docs/Env.md),
+[environment variables](https://github.com/statusengine/interface/blob/3.x-master/docs/Env.md),
 which is handy inside Docker.
 
 If you are going to use CrateDB you can ignore all MySQL settings, and vice

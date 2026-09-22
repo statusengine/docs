@@ -30,8 +30,9 @@ its own installation. It is still documented at
 [Statusengine 3 › Statusengine UI](../../v3/ui/), and installations running it
 can keep it. The two do not share configuration, accounts or session state.
 
-They do share a repository: `statusengine/interface` now holds this
-interface, and everything up to the tag `3.8.0` is the old one.
+They do share a repository: `statusengine/interface` holds this interface
+on `main`, and the old one on
+[`3.x-master`](https://github.com/statusengine/interface/tree/3.x-master).
 {{< /callout >}}
 
 {{< cards >}}
