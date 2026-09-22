@@ -36,8 +36,8 @@ publishing events to the queue. They will pile up while you install and configur
 the Statusengine Worker and database. The web interface comes last: it needs a
 database with data in it before it has anything to show.
 
-Already running Statusengine 3? It is an in-place upgrade — the queues and
-almost all of the tables are the same — but version 4 dropped several backends,
+Already running Statusengine 3? It is an in-place upgrade. The queues and
+almost all of the tables are the same, but version 4 dropped several backends,
 so start here rather than with the installation:
 
 {{< cards >}}

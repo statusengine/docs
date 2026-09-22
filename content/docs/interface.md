@@ -5,7 +5,8 @@ date: 2026-09-21
 weight: 25
 ---
 
-The Statusengine Web Interface is what people look at. It reads the monitoring
+The Statusengine Web Interface, or `seid` (**S**tatus**e**ngine **I**nterface **D**aemon),
+ is what people look at. It reads the monitoring
 data the [worker](../worker/) writes into MySQL, and sends external commands
 back through the worker so operators can acknowledge a problem, schedule a
 downtime or force a check without touching a command pipe.
@@ -14,6 +15,13 @@ It ships as a single binary with the frontend compiled into it. There is no PHP,
 no web server to configure around it and no build step: download, configure,
 run. Every page works on a phone, which is where most people read it at three in
 the morning.
+
+> [!IMPORTANT]
+> This project is 100% vibe coded. Currently I have no need for the Statusengine
+> Web Interface. I use it primarily as an AI playground.
+> Other then the Statusengine Worker, which is used in production on hundreds of
+> systems. In case you are looking for a human made web interface, take a look
+> at [openITCOCKPIT](https://openitcockpit.io)
 
 {{< callout type="warning" >}}
 **This is not Statusengine UI.** The AngularJS interface that shipped with
@@ -32,13 +40,13 @@ can keep it. The two do not share configuration, accounts or session state.
 
 ## Requirements
 
-| Component | Requirement |
-|---|---|
-| Statusengine Worker | The Go worker of Statusengine 4, writing to MySQL |
-| Database | The same MySQL 8.0+ or MariaDB 10.5+ the worker writes to |
-| Monitoring core | Naemon or Nagios, through the [broker module](../broker/) |
-| Operating system | Linux, `amd64` or `arm64`. The binary is static |
-| Browser | Any current Firefox, Chrome, Edge or Safari |
+| Component           | Requirement                                               |
+|---------------------|-----------------------------------------------------------|
+| Statusengine Worker | The Go worker of Statusengine 4, writing to MySQL         |
+| Database            | The same MySQL 8.0+ or MariaDB 10.5+ the worker writes to |
+| Monitoring core     | Naemon or Nagios, through the [broker module](../broker/) |
+| Operating system    | Linux, `amd64` or `arm64`. The binary is static           |
+| Browser             | Any current Firefox, Chrome, Edge or Safari               |
 
 Nothing else. No PHP, no Composer, no Node.js on the server, no separate web
 server unless you want one in front for TLS.
@@ -193,27 +201,27 @@ worker_events_key: "the other key from the worker's config"
 
 **The server**
 
-| Key | Default | Meaning |
-|---|---|---|
-| `listen_addr` | `127.0.0.1:8090` | Where the HTTP server binds. Loopback on purpose: this process holds a key that can drive the monitoring core |
-| `query_timeout` | `20s` | How long one request may spend in the database |
-| `secure_cookies` | `false` | Turn on when the browser reaches the interface over TLS. Marks the session cookie `Secure` and sends HSTS |
+| Key              | Default          | Meaning                                                                                                       |
+|------------------|------------------|---------------------------------------------------------------------------------------------------------------|
+| `listen_addr`    | `127.0.0.1:8090` | Where the HTTP server binds. Loopback on purpose: this process holds a key that can drive the monitoring core |
+| `query_timeout`  | `20s`            | How long one request may spend in the database                                                                |
+| `secure_cookies` | `false`          | Turn on when the browser reaches the interface over TLS. Marks the session cookie `Secure` and sends HSTS     |
 
 **The database**
 
-| Key | Default | Meaning |
-|---|---|---|
-| `mysql_dsn` | — | Required. `user:password@tcp(host:port)/database?parseTime=true` |
-| `mysql_max_open_conns` | `25` | Pool size |
+| Key                    | Default | Meaning                                                          |
+|------------------------|---------|------------------------------------------------------------------|
+| `mysql_dsn`            | —       | Required. `user:password@tcp(host:port)/database?parseTime=true` |
+| `mysql_max_open_conns` | `25`    | Pool size                                                        |
 
 **The worker**
 
-| Key | Default | Meaning |
-|---|---|---|
-| `worker_command_url` | `http://127.0.0.1:8081/commands` | The worker's command endpoint. Note the plural |
-| `worker_command_key` | empty | Without it, external commands are switched off and the interface says so instead of offering buttons that fail |
-| `worker_events_url` | `ws://127.0.0.1:8080/ws` | The worker's event stream |
-| `worker_events_key` | empty | Without it, the interface polls every 30 seconds instead |
+| Key                  | Default                          | Meaning                                                                                                        |
+|----------------------|----------------------------------|----------------------------------------------------------------------------------------------------------------|
+| `worker_command_url` | `http://127.0.0.1:8081/commands` | The worker's command endpoint. Note the plural                                                                 |
+| `worker_command_key` | empty                            | Without it, external commands are switched off and the interface says so instead of offering buttons that fail |
+| `worker_events_url`  | `ws://127.0.0.1:8080/ws`         | The worker's event stream                                                                                      |
+| `worker_events_key`  | empty                            | Without it, the interface polls every 30 seconds instead                                                       |
 
 The two keys are different keys on different ports. Take them from the worker's
 own configuration:
@@ -242,8 +250,8 @@ working state, not an error.
 
 **Performance data**
 
-| Key | Default | Meaning |
-|---|---|---|
+| Key                | Default | Meaning                                                       |
+|--------------------|---------|---------------------------------------------------------------|
 | `metrics_provider` | `mysql` | Reads `statusengine_perfdata`. `graphite` is not wired up yet |
 
 ## Create the first account
@@ -259,20 +267,20 @@ sudo -u statusengine-interface seid user create \
 
 Omitting `-password` prompts for one, which keeps it out of your shell history.
 
-| Subcommand | What it does |
-|---|---|
-| `seid user create -username x -role admin` | Create an account. Roles: `admin`, `operator`, `guest` |
-| `seid user passwd -username x` | Set a new password, and end that user's sessions |
-| `seid user role -username x -role operator` | Move an account to another role |
-| `seid user list` | List the accounts |
+| Subcommand                                  | What it does                                           |
+|---------------------------------------------|--------------------------------------------------------|
+| `seid user create -username x -role admin`  | Create an account. Roles: `admin`, `operator`, `guest` |
+| `seid user passwd -username x`              | Set a new password, and end that user's sessions       |
+| `seid user role -username x -role operator` | Move an account to another role                        |
+| `seid user list`                            | List the accounts                                      |
 
 What the three roles can do:
 
-| Role | Reads | External commands | Command log | Accounts |
-|---|---|---|---|---|
-| `admin` | everything | all | yes | manages them |
-| `operator` | everything | all | yes | no |
-| `guest` | monitoring data | none | no | no |
+| Role       | Reads           | External commands | Command log | Accounts     |
+|------------|-----------------|-------------------|-------------|--------------|
+| `admin`    | everything      | all               | yes         | manages them |
+| `operator` | everything      | all               | yes         | no           |
+| `guest`    | monitoring data | none              | no          | no           |
 
 Passwords are hashed with argon2id. The session cookie carries a random token
 and the database stores only its SHA-256, so a dump of `sei_sessions` is not a
@@ -388,13 +396,13 @@ demo_command_rate_limit: 10   # per visitor per minute
 demo_max_targets: 25          # objects one command may address
 ```
 
-| Name | Grants |
-|---|---|
-| `acknowledge` | Acknowledging a problem, and removing an acknowledgement |
-| `downtime` | Scheduling a downtime, and cancelling one |
-| `reschedule` | Forcing a check |
-| `submit-result` | Submitting a passive check result |
-| `toggle` | Switching active checks, passive checks, notifications, flap detection or the event handler |
+| Name            | Grants                                                                                      |
+|-----------------|---------------------------------------------------------------------------------------------|
+| `acknowledge`   | Acknowledging a problem, and removing an acknowledgement                                    |
+| `downtime`      | Scheduling a downtime, and cancelling one                                                   |
+| `reschedule`    | Forcing a check                                                                             |
+| `submit-result` | Submitting a passive check result                                                           |
+| `toggle`        | Switching active checks, passive checks, notifications, flap detection or the event handler |
 
 {{< callout type="warning" >}}
 `notify` cannot be granted, whatever you write there. A custom notification
