@@ -106,3 +106,21 @@
 <noscript><p><img referrerpolicy="no-referrer-when-downgrade" alt=""
   src="{{ $m.url }}matomo.php?idsite={{ $m.siteId }}&amp;rec=1" style="border:0" /></p></noscript>
 {{- end -}}
+
+
+{{/* Reassembles the Impressum's contact details, which are in the markup only
+     base64-and-reversed. Emitted only on the pages that carry them, since that
+     is two pages out of thirty. */}}
+{{- if in (slice "/impressum/" "/datenschutz/") .RelPermalink -}}
+  {{/* With scripting off the block can only ever be empty, and an empty block
+       leaves a hole and a dangling "E-Mail:" label above the noscript notice
+       that explains the gap. Hide it and let the notice stand alone. */}}
+  <noscript><style>.se-imprint--js{display:none}</style></noscript>
+  {{- $obf := resources.Get "js/se-obfuscate.js" -}}
+  {{- if hugo.IsProduction -}}
+    {{- $obf = $obf | minify | fingerprint -}}
+    <script defer src="{{ $obf.RelPermalink }}" integrity="{{ $obf.Data.Integrity }}"></script>
+  {{- else -}}
+    <script defer src="{{ $obf.RelPermalink }}"></script>
+  {{- end -}}
+{{- end -}}

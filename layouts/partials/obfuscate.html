@@ -1,0 +1,13 @@
+{{/* Base64 of the UTF-8 text, then the base64 string itself reversed.
+
+     The reverse is applied to the base64 rather than to the plaintext — which
+     is the one change from the scheme this replaces. Reversing the plaintext
+     reverses its *bytes*, so anything outside Latin-1 comes back scrambled;
+     umlauts survive it only because atob() happens to read bytes as Latin-1
+     code points. Base64 is ASCII, so reversing that is always safe, and the
+     decoder can then do a proper UTF-8 decode.
+
+     This is obfuscation, not protection: anyone who looks at the page can
+     read it back in two lines. It stops address harvesters that scrape markup,
+     which is what it is for. */}}
+{{- delimit (collections.Reverse (split (. | base64Encode) "")) "" -}}

@@ -97,6 +97,48 @@ const check = (n, ok, d) => {
   check("nothing is requested off-origin except the Matomo host",
     hosts.length === allowed.length, hosts.join(",") || "no off-origin requests at all");
 
+  /* The Impressum's details are assembled in the browser. Umlauts are the
+     part worth testing: the scheme this replaced reversed the plaintext's
+     bytes and could only survive them by accident. */
+  await page.goto(`http://127.0.0.1:${PORT}/impressum/`, { waitUntil: "load" });
+  await page.waitForTimeout(500);
+  const revealed = await page.evaluate(() => {
+    const lines = [...document.querySelectorAll(".se-obf")].map((e) => e.textContent);
+    const mail = document.querySelector(".se-obf-mail");
+    return { lines, mail: mail && mail.textContent, href: mail && mail.getAttribute("href") };
+  });
+  check("the address is assembled in the browser",
+    revealed.lines.length >= 3 && revealed.lines.every((l) => l && l.trim().length),
+    revealed.lines.join(" / "));
+  check("non-ASCII survives the round trip",
+    !revealed.lines.join("").includes("\uFFFD"),
+    "no replacement characters");
+  check("the email becomes a working mailto",
+    !!revealed.mail && revealed.href === "mailto:" + revealed.mail, revealed.href);
+  check("none of it is in the served markup", await (async () => {
+    const html = await (await fetch(`http://127.0.0.1:${PORT}/impressum/`)).text();
+    return !revealed.lines.concat([revealed.mail]).some((v) => v && html.includes(v));
+  })());
+
+  /* With scripting off the block can only be empty, so it has to be hidden
+     rather than left as a hole above the notice that explains it. */
+  const noJs = await browser.newContext({ javaScriptEnabled: false });
+  const plain = await noJs.newPage();
+  await plain.goto(`http://127.0.0.1:${PORT}/impressum/`, { waitUntil: "load" });
+  const off = await plain.evaluate(() => {
+    const a = document.querySelector(".se-imprint--js");
+    const note = document.querySelector("noscript");
+    return {
+      hidden: a ? getComputedStyle(a).display === "none" : null,
+      height: a ? Math.round(a.getBoundingClientRect().height) : null,
+      explains: !!note && /JavaScript/.test(document.body.textContent),
+    };
+  });
+  check("without JavaScript the empty block is hidden", off.hidden === true && off.height === 0,
+    `display none=${off.hidden} height=${off.height}`);
+  check("and the page says why", off.explains);
+  await noJs.close();
+
   /* The legal pages must be reachable from every page, not just linked once. */
   await page.goto(`http://127.0.0.1:${PORT}/docs/broker/`, { waitUntil: "load" });
   for (const href of ["/impressum/", "/datenschutz/"]) {

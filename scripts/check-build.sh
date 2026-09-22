@@ -50,8 +50,24 @@ for page in impressum datenschutz; do
   if [ -f "$f" ]; then ok "/$page/ builds"; else bad "/$page/ missing"; continue; fi
   if grep -qF "Die Anschrift fehlt noch" "$f"; then
     bad "/$page/ still shows the address placeholder — create data/imprint.yaml"
+    continue
+  fi
+  # The details are base64-with-the-base64-reversed so they are not in the
+  # markup, which means a plain grep can no longer see whether anything real is
+  # there. Decode them back and look.
+  decoded=$(grep -o 'data-o="[^"]*"' "$f" \
+          | sed 's/data-o="//; s/"$//' \
+          | while read -r v; do printf '%s' "$v" | rev | base64 -d 2>/dev/null; printf '\n'; done)
+  if printf '%s' "$decoded" | grep -qE '[0-9]' && printf '%s' "$decoded" | grep -q '@'; then
+    ok "/$page/ carries a postal address and an email, both obfuscated"
   else
-    ok "/$page/ carries a postal address"
+    bad "/$page/ obfuscated block does not decode to an address and an email"
+  fi
+  # And the plaintext must not have leaked in alongside it.
+  if grep -qF "$(printf '%s' "$decoded" | grep '@' | head -1)" "$f"; then
+    bad "/$page/ leaks the email address in the markup"
+  else
+    ok "/$page/ keeps the plaintext out of the markup"
   fi
 done
 for a in impressum.html datenschutz.html; do

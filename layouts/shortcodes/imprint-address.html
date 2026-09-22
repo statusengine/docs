@@ -1,7 +1,14 @@
 {{/* Renders the operator's details from data/imprint.yaml, which is gitignored
-     so the postal address is never committed. Without that file the page still
-     builds — it would be worse to break the build than to show the gap — but
-     the gap is loud, and scripts/check-build.sh reports it too. */}}
+     so the postal address is never committed.
+
+     Every line is emitted base64-and-reversed and assembled by JavaScript, so
+     the name, address and email do not appear in the page source either. See
+     layouts/partials/obfuscate.html for the encoding and assets/js/se-obfuscate.js
+     for the other half.
+
+     Without data/imprint.yaml the page still builds — breaking the build would
+     be worse than showing the gap — but the gap is loud, and
+     scripts/check-build.sh reports it too. */}}
 {{- $d := site.Data.imprint -}}
 {{- $street := "" -}}
 {{- with $d }}{{ $street = .street | default "" }}{{ end -}}
@@ -14,14 +21,24 @@
     in <code>.gitignore</code> und wird nicht mit veröffentlicht.
   </div>
 {{- else -}}
-  <address class="se-imprint">
-    {{ $d.name }}<br />
-    {{ $street }}<br />
-    {{ with $d.postcode }}{{ . }} {{ end }}{{ $d.city }}<br />
-    {{ with $d.country }}{{ . }}<br />{{ end }}
-    {{- with $d.phone }}<br />Telefon / Phone: {{ . }}<br />{{ end }}
-    {{- with $d.vatId }}<br />USt-IdNr. / VAT ID: {{ . }}<br />{{ end }}
-    <br />
-    E-Mail: <a href="mailto:{{ $d.email }}">{{ $d.email }}</a>
+  {{- $lines := slice $d.name $street (printf "%s %s" ($d.postcode | default "") $d.city | strings.TrimSpace) -}}
+  {{- with $d.country }}{{ $lines = $lines | append . }}{{ end -}}
+  {{- with $d.phone }}{{ $lines = $lines | append (printf "Telefon / Phone: %s" .) }}{{ end -}}
+  {{- with $d.vatId }}{{ $lines = $lines | append (printf "USt-IdNr. / VAT ID: %s" .) }}{{ end -}}
+  <address class="se-imprint se-imprint--js">
+    {{- range $i, $line := $lines }}
+    {{ if $i }}<br />{{ end }}<span class="se-obf" data-o="{{ partial "obfuscate.html" $line }}"></span>
+    {{- end }}
+    <br /><br />
+    E-Mail: <a class="se-obf-mail" data-o="{{ partial "obfuscate.html" $d.email }}" href="#"></a>
   </address>
+  <noscript>
+    <div class="se-imprint se-imprint--missing">
+      <strong>Für die Kontaktdaten wird JavaScript benötigt.</strong>
+      Sie sind absichtlich nicht im Quelltext hinterlegt, damit sie nicht
+      automatisiert ausgelesen werden können.<br />
+      <strong>JavaScript is required for the contact details.</strong> They are
+      deliberately kept out of the page source so they cannot be harvested.
+    </div>
+  </noscript>
 {{- end -}}
