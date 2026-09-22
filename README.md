@@ -92,3 +92,39 @@ Any other page can carry a reference too:
 
 The renderer is then loaded on that page alone — it is bigger than the rest of
 the site put together, so it is deliberately not part of the site-wide bundle.
+
+## Licensing
+
+Two licences, because this repository holds two different kinds of work.
+
+| What                                                            | Licence                                        |
+|-----------------------------------------------------------------|------------------------------------------------|
+| Code — `layouts/`, `assets/js/`, `assets/css/`, `scripts/`, build files | [MIT](LICENSE)                          |
+| Content — the prose in `content/`, the screenshots in `static/images/interface/` | [CC BY 4.0](LICENSE-CONTENT)  |
+
+MIT on its own would have been simpler, but its wording is about "the
+Software"; read strictly it asks anyone quoting a paragraph to carry the
+copyright notice along. CC BY is built for text, and says plainly what
+attribution means and that translations and adaptations are allowed.
+
+### Not covered by either
+
+- **The Statusengine mark** — `static/images/logo-mark.svg`, `static/favicon.svg`
+  and `brand/`. It identifies the project, so it is not yours to reuse as a mark
+  for something else. Illustrating or linking to Statusengine is fine.
+- **The EU label for AI-generated content** in the footer. It comes from the
+  European Commission's icon set and is used under
+  [its own terms](https://digital-strategy.ec.europa.eu/en/policies/eu-icons-labelling-ai-generated-content).
+- **Bundled third-party code**, which keeps its own licence and ships the text
+  alongside it:
+
+  | Path                    | Licence                            |
+  |-------------------------|------------------------------------|
+  | `themes/hextra/`        | MIT — see `themes/hextra/LICENSE`  |
+  | `assets/vendor/scalar/` | MIT — see that directory's LICENSE |
+  | `static/fonts/`         | SIL OFL 1.1 — see the OFL files    |
+
+`static/api/statusengine-worker.yaml` is a mirror of the OpenAPI document in
+the [worker repository](https://github.com/statusengine/statusengine-worker)
+and carries that project's licence, which is also MIT. Note that the broker is
+**GPLv2**, not MIT — the two Statusengine components differ.
