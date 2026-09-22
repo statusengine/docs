@@ -1,11 +1,18 @@
 {{/*
   Project override of themes/hextra/layouts/partials/scripts/mermaid.html.
 
-  Upstream renders the diagram at its natural size and leaves it there. Two
+  Upstream renders the diagram at its natural size and leaves it there. Three
   additions:
     1. maxTextSize/fontFamily so the diagram uses the site's own font.
     2. A click-to-expand overlay, because a flowchart that fits a 700px column
        is not always readable and there is no other way to enlarge it.
+    3. The brand palette. Mermaid's stock themes are lavender on white and
+       near-black on black, neither of which belongs to this site, so it gets
+       the "base" theme plus the tokens below. They are literals rather than
+       var(--se-brand) reads because mermaid bakes them into the generated
+       SVG's own stylesheet and into inline attributes, where a custom
+       property resolved against :root would not follow — keep them in step
+       with assets/css/custom.css by hand.
 
   Everything else — the dark/light re-render on the html class MutationObserver —
   is upstream's and must stay: mermaid bakes its colours into the SVG, so the
@@ -18,9 +25,50 @@
 <script defer src="{{ $mermaidJS.RelPermalink }}" integrity="{{ $mermaidJS.Data.Integrity }}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", () => {
+    /* Light: nodes are a pale brand tint with a brand border, edges the brand
+       red itself. Dark is the same relationship lifted — #b03b2d sits too
+       close to the background there, so it uses the brighter tone the rest of
+       the site switches to. */
+    const LIGHT = {
+      background: "transparent",
+      primaryColor: "#fdf2f0",
+      mainBkg: "#fdf2f0",
+      secondaryColor: "#f7e7e3",
+      tertiaryColor: "#faf7f6",
+      primaryBorderColor: "#b03b2d",
+      nodeBorder: "#b03b2d",
+      primaryTextColor: "#16110f",
+      nodeTextColor: "#16110f",
+      textColor: "#4a403d",
+      titleColor: "#16110f",
+      lineColor: "#b03b2d",
+      edgeLabelBackground: "#ffffff",
+      clusterBkg: "#faf7f6",
+      clusterBorder: "#e3d5d1"
+    };
+
+    const DARK = {
+      background: "transparent",
+      primaryColor: "#241a18",
+      mainBkg: "#241a18",
+      secondaryColor: "#2e211e",
+      tertiaryColor: "#1a1717",
+      primaryBorderColor: "#c9503d",
+      nodeBorder: "#c9503d",
+      primaryTextColor: "#f2eeec",
+      nodeTextColor: "#f2eeec",
+      textColor: "#c4b8b5",
+      titleColor: "#f2eeec",
+      lineColor: "#c9503d",
+      edgeLabelBackground: "#1a1717",
+      clusterBkg: "#1a1717",
+      clusterBorder: "#3a2b28"
+    };
+
     const config = () => ({
       startOnLoad: true,
-      theme: document.documentElement.classList.contains("dark") ? "dark" : "default",
+      theme: "base",
+      themeVariables: document.documentElement.classList.contains("dark") ? DARK : LIGHT,
       fontFamily: getComputedStyle(document.documentElement).getPropertyValue("--se-font-sans").trim()
         || "sans-serif",
       flowchart: { htmlLabels: true, padding: 12 }
