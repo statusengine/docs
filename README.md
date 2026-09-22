@@ -50,9 +50,6 @@ reference — requests that only happen once 3.6 MB of vendored JavaScript runs.
   blocks and fails on a mismatch.
 - **Every page needs `title`, `description`, `date` and `weight`** in its front
   matter. `weight` drives sidebar order.
-- **Do not invent configuration parameters.** Broker options come from
-  `/home/nook24/git/broker/`, worker options from
-  `/home/nook24/git/statusengine-worker/`.
 
 ## Updating the theme
 
@@ -93,6 +90,17 @@ Any other page can carry a reference too:
 The renderer is then loaded on that page alone — it is bigger than the rest of
 the site put together, so it is deliberately not part of the site-wide bundle.
 
+## Relation to the 3.x documentation
+
+This is a new site, not an evolution of the old one — different generator,
+different content, its own history. The documentation for Statusengine 3 lives
+on in the same GitHub repository on the **`3.x-master`** branch, and at tag
+`3.8.0`. It is a PHP/Parsedown site and is licensed **CC BY-SA 4.0**, so text
+taken from it carries that licence's share-alike condition with it.
+
+The 3.x pages that are still useful are summarised under `/v3/` here, written
+from the source rather than copied.
+
 ## Licensing
 
 Two licences, because this repository holds two different kinds of work.
@@ -100,7 +108,7 @@ Two licences, because this repository holds two different kinds of work.
 | What                                                            | Licence                                        |
 |-----------------------------------------------------------------|------------------------------------------------|
 | Code — `layouts/`, `assets/js/`, `assets/css/`, `scripts/`, build files | [MIT](LICENSE)                          |
-| Content — the prose in `content/`, the screenshots in `static/images/interface/` | [CC BY 4.0](LICENSE-CONTENT)  |
+| Content — the prose in `content/`, the screenshots in `assets/images/` | [CC BY 4.0](LICENSE-CONTENT)  |
 
 MIT on its own would have been simpler, but its wording is about "the
 Software"; read strictly it asks anyone quoting a paragraph to carry the
