@@ -47,6 +47,7 @@ flowchart LR
   worker -->|perfdata| graphite[("Graphite")]
   mysql -->|current state| ui["Web Interface<br/>seid"]
   worker -->|live events, WebSocket| ui
+  worker -->|live events, WebSocket| clients["Other WebSocket clients<br/>dashboards, notifiers"]
   ui -.->|POST /commands| worker
   worker -.-> queue
   queue -.-> broker
@@ -56,6 +57,10 @@ flowchart LR
 Reading runs left to right and ends at the database. The
 [web interface](docs/interface/) picks it up from there: current state comes out
 of MySQL, and a WebSocket to the worker keeps it live instead of polling.
+
+It is not a privileged client, only the first one. The worker fans the same
+stream out to as many subscribers as connect, each with its own buffer, so a
+dashboard or a chat notifier of your own reads exactly what the interface reads.
 
 The dotted path is the same route in reverse, and it is what makes the queue
 two-way. Acknowledging a problem or forcing a check posts to the worker's
