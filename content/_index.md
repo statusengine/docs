@@ -45,14 +45,22 @@ flowchart LR
   queue --> worker["Statusengine Worker<br/>(Go)"]
   worker -->|bulk INSERT| mysql[("MySQL")]
   worker -->|perfdata| graphite[("Graphite")]
-  worker -->|live events| ws["WebSocket clients"]
-  worker -.->|external commands| queue
+  mysql -->|current state| ui["Web Interface<br/>seid"]
+  worker -->|live events, WebSocket| ui
+  ui -.->|POST /commands| worker
+  worker -.-> queue
   queue -.-> broker
+  broker -.->|external commands| core
 ```
 
-The dotted path back to the core is what makes the queue two-way: the worker can
-accept external commands over HTTP and publish them onto the command queue, and
-the broker consumes them and hands them to the monitoring core.
+Reading runs left to right and ends at the database. The
+[web interface](docs/interface/) picks it up from there: current state comes out
+of MySQL, and a WebSocket to the worker keeps it live instead of polling.
+
+The dotted path is the same route in reverse, and it is what makes the queue
+two-way. Acknowledging a problem or forcing a check posts to the worker's
+`/commands` API, the worker publishes it onto the command queue, the broker
+consumes it, and the core receives it as an external command.
 
 <div class="se-section-label">Why a queue at all</div>
 

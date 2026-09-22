@@ -906,6 +906,29 @@ a:hover .se-external {
   text-shadow: 0 0 14px var(--se-glow);
 }
 
+/* --- Mermaid ------------------------------------------------------------- */
+
+/* The landing page lays its sections out in a flex column with
+   align-items: flex-start, which makes a block child shrink-to-fit. The flow
+   chart was getting 350px of a 1232px column and scaling its own SVG down to
+   match — 300x54px of diagram on a desktop screen. */
+pre.mermaid {
+  align-self: stretch;
+  width: 100%;
+}
+
+/* A wide left-to-right chart cannot shrink to phone width and stay readable,
+   so let it scroll sideways inside its own block instead — the same bargain
+   Hextra makes for tables that do not fit. */
+@media (max-width: 767px) {
+  pre.mermaid {
+    overflow-x: auto;
+  }
+  pre.mermaid svg {
+    min-width: 700px;
+  }
+}
+
 /* --- Theme toggle --------------------------------------------------------- */
 
 /* Written by hand rather than as Tailwind variants: the theme ships a
