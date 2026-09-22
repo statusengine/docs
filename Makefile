@@ -66,5 +66,14 @@ upgrade-theme: ## Re-vendor Hextra, e.g. make upgrade-theme THEME_TAG=v0.9.8
 	rm -rf themes/hextra/.git themes/hextra/.github themes/hextra/exampleSite \
 	       themes/hextra/images themes/hextra/netlify.toml themes/hextra/build.sh \
 	       themes/hextra/dev.toml themes/hextra/taskfile.yaml
+	# Hextra's own build toolchain. It compiles assets/css/compiled/main.css,
+	# which upstream ships already built and which is the only stylesheet this
+	# site ever loads — the postCSS path in head-css.html runs solely under
+	# --environment=theme. Keeping the manifests would leave a dependency tree
+	# we never install in a repository we publish, which is all Dependabot
+	# needs to open pull requests against vendored third-party code.
+	rm -f themes/hextra/package.json themes/hextra/package-lock.json \
+	      themes/hextra/go.mod themes/hextra/postcss.config.js \
+	      themes/hextra/tailwind.config.js
 	@echo
 	@echo "Hextra re-vendored at $(THEME_TAG). Update themes/hextra/UPSTREAM.md, then run 'make check'."
