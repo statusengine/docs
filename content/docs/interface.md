@@ -33,6 +33,9 @@ can keep it. The two do not share configuration, accounts or session state.
 They do share a repository: `statusengine/interface` holds this interface
 on `main`, and the old one on
 [`3.x-master`](https://github.com/statusengine/interface/tree/3.x-master).
+The version numbers continue rather than restart - this is a 4.x
+interface because it belongs to Statusengine 4, and 3.x belongs to the
+one before it.
 {{< /callout >}}
 
 {{< cards >}}
