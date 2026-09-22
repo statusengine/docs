@@ -1,0 +1,81 @@
+{{/*
+  Copy of themes/hextra/layouts/shortcodes/card.html with one addition: a card
+  that carries an image but no link gets a lightbox instead of being dead.
+
+  Screenshots in cards were the one place a picture could not be enlarged.
+  render-image.html covers Markdown images, but a card renders its image
+  directly and never passes through that hook, so the four interface
+  screenshots just sat there at card size.
+
+  A card is already a single <a> wrapping image, title and subtitle. Where it
+  has no link that anchor has no href at all, so handing it the large rendition
+  costs nothing and, as with the Markdown images, still works with JavaScript
+  off. A card that does have a link is left alone — its own destination wins.
+
+  Keep in sync when bumping the theme.
+*/}}
+{{- $context := . -}}
+{{- $link := .Get "link" -}}
+{{- $title := .Get "title" -}}
+{{- $icon := .Get "icon" -}}
+{{- $subtitle := .Get "subtitle" -}}
+{{- $image := .Get "image" -}}
+{{- $width := 0 -}}
+{{- $height := 0 -}}
+{{- $imageStyle := .Get "imageStyle" -}}
+{{- $tag := .Get "tag" -}}
+{{- $tagType := .Get "tagType" -}}
+
+{{/* Same ceiling render-image.html uses: past this the file grows faster than
+     the detail anybody can use on screen. */}}
+{{- $lightboxWidth := 2400 -}}
+{{- $full := "" -}}
+{{- $fullWidth := "" -}}
+
+{{/* Image processing options */}}
+{{- $method := .Get "method" | default "Resize" | humanize -}}
+{{- $options := .Get "options" | default "800x webp q80" -}}
+{{- $process := .Get "process" | default (printf "%s %s" $method $options) -}}
+
+{{- if and $image (not (urls.Parse $image).Scheme) -}}
+  {{- with or (.Page.Resources.Get $image) (resources.Get $image) -}}
+    {{/* .Process does not work on svgs */}}
+    {{- if (not (eq .MediaType.SubType "svg")) -}}
+      {{/* Retrieve the $image resource from local or global resources */}}
+      {{- $processed := .Process $process -}}
+      {{- $width = $processed.Width -}}
+      {{- $height = $processed.Height -}}
+      {{- $image = $processed.RelPermalink -}}
+
+      {{- if not $link -}}
+        {{- $big := cond (gt .Width $lightboxWidth) $lightboxWidth .Width -}}
+        {{- with .Resize (printf "%dx webp q85" $big) -}}
+          {{- $full = .RelPermalink -}}
+          {{- $fullWidth = .Width -}}
+        {{- end -}}
+      {{- end -}}
+    {{- end -}}
+  {{ else }}
+    {{/* Otherwise, use relative link of the image */}}
+    {{- if hasPrefix $image "/" -}}
+      {{- $image = relURL (strings.TrimPrefix "/" $image) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
+{{- partial "shortcodes/card" (dict
+  "page"        .Page
+  "link"        $link
+  "title"       $title
+  "icon"        $icon
+  "subtitle"    $subtitle
+  "image"       $image
+  "width"       $width
+  "height"      $height
+  "imageStyle"  $imageStyle
+  "tag"         $tag
+  "tagType"     $tagType
+  "full"        $full
+  "fullWidth"   $fullWidth
+  )
+-}}

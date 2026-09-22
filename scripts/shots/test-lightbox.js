@@ -140,6 +140,53 @@ async function overlayState(page) {
   const end = await overlayState(page);
   check("Escape closes the zoomed overlay", end.open === false && end.blocksPage === false);
 
+
+  /* Cards with a screenshot and no link of their own. They render their image
+     directly instead of through render-image.html, so they used to be the one
+     picture on the site that could not be enlarged. */
+  console.log("\n\x1b[1mScreenshot cards open the lightbox too\x1b[0m");
+  {
+    const page2 = await (await browser.newContext({ viewport: { width: 1440, height: 950 } })).newPage();
+    await page2.goto(`http://127.0.0.1:${PORT}/docs/interface/`, { waitUntil: "networkidle" });
+    await page2.waitForTimeout(500);
+
+    const cards = await page2.$$("a.hextra-card[data-lightbox]");
+    check(`the interface screenshots are clickable`, cards.length === 4, `${cards.length} of 4`);
+
+    await cards[0].click();
+    await page2.waitForTimeout(400);
+    const thumbSrc = await cards[0].evaluate((a) => a.querySelector("img").getAttribute("src"));
+    const shown = await page2.evaluate(async () => {
+      const o = document.querySelector(".se-lightbox");
+      const img = o && o.querySelector("img");
+      if (img && !img.complete) await new Promise((r) => (img.onload = r));
+      return { open: !!o && !o.hidden, src: img && img.getAttribute("src"),
+               natural: img ? img.naturalWidth : 0,
+               caption: o && o.textContent.includes("Dashboard") };
+    });
+    check("clicking one opens the overlay", shown.open);
+    /* Hugo's processed filenames carry a content hash, not dimensions, so the
+       proof has to be the pixels: a different file from the card thumbnail,
+       and wider than the 800px the card asks for. */
+    check("with the large rendition, not the card thumbnail",
+      shown.src !== thumbSrc && shown.natural > 800,
+      `card=${thumbSrc} overlay=${shown.src} naturalWidth=${shown.natural}`);
+    check("and the card title as the caption", shown.caption);
+
+    await page2.keyboard.press("Escape");
+    await page2.waitForTimeout(300);
+    const closed = await page2.evaluate(() => {
+      const o = document.querySelector(".se-lightbox");
+      return !o || o.hidden;
+    });
+    check("Escape closes it", closed);
+
+    /* A card that has a link must still navigate rather than pop an overlay. */
+    await page2.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: "networkidle" });
+    const hijacked = await page2.$$("a.hextra-card[href][data-lightbox]");
+    check("linked cards are left alone", hijacked.length === 0, `${hijacked.length} hijacked`);
+  }
+
   await browser.close();
   server.close();
 
