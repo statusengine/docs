@@ -7,3 +7,6 @@
 # Editor / OS
 .DS_Store
 *.swp
+
+# Local only: the Impressum address must not be published to the repository.
+/data/imprint.yaml

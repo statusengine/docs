@@ -17,14 +17,46 @@ note "No externally loaded subresources (CLAUDE.md: keine CDNs)"
 # public/vendor/ is excluded and checked separately below: the Scalar bundle
 # carries Scalar's own font URLs as an inert string, so a plain grep over it
 # reports a subresource that the page never actually requests.
+#
+# The one permitted exception is the self-hosted Matomo host from
+# hugo.yaml, and only when analytics are configured at all. It is read from the
+# config rather than hard-coded, so pointing the site at a different Matomo does
+# not quietly widen what this check allows.
+# Scoped to the matomo: block. A bare `url:` match would pick up the GitHub
+# menu entry instead and quietly allow github.com as a subresource host.
+matomo_host=$(awk '/^  matomo:$/{inblock=1; next}
+                   inblock && /^  [^ ]/{inblock=0}
+                   inblock && /^    url:/{print; exit}' hugo.yaml \
+            | sed -n 's|^ *url: *"https\?://\([a-zA-Z0-9.-]*\).*|\1|p')
 hits=$(grep -rhoE '(src|srcset)="https?://[^"]+|<link[^>]+href="https?://[^"]+|@import[^;]*https?://[^;"]+|url\(https?://[^)]+' \
         public --exclude-dir=vendor --include='*.html' --include='*.css' --include='*.js' 2>/dev/null \
       | grep -oE 'https?://[a-zA-Z0-9.-]+' | sort -u)
+if [ -n "$matomo_host" ]; then
+  hits=$(printf '%s\n' "$hits" | grep -v "^https\?://${matomo_host}$" | grep -v '^$')
+fi
 if [ -z "$hits" ]; then
-  ok "no external src=, <link href=, @import or url()"
+  if [ -n "$matomo_host" ]; then
+    ok "no external subresources apart from the configured Matomo ($matomo_host)"
+  else
+    ok "no external src=, <link href=, @import or url()"
+  fi
 else
   bad "external subresources found:"; printf '       %s\n' $hits
 fi
+
+note "Legal pages are present and the address is filled in"
+for page in impressum datenschutz; do
+  f="public/$page/index.html"
+  if [ -f "$f" ]; then ok "/$page/ builds"; else bad "/$page/ missing"; continue; fi
+  if grep -qF "Die Anschrift fehlt noch" "$f"; then
+    bad "/$page/ still shows the address placeholder — create data/imprint.yaml"
+  else
+    ok "/$page/ carries a postal address"
+  fi
+done
+for a in impressum.html datenschutz.html; do
+  [ -f "public/$a" ] && ok "old /$a still resolves" || bad "/$a alias missing"
+done
 
 note "Vendored Scalar bundle carries nothing new"
 # standalone.js contains @font-face rules for fonts.scalar.com as a string. They

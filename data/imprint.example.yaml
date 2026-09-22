@@ -1,0 +1,21 @@
+# Copy to data/imprint.yaml and fill in. That file is gitignored, so the postal
+# address never enters the repository — Hugo reads it at build time and writes
+# it into the generated pages.
+#
+# Without data/imprint.yaml the Impressum still builds, but shows a visible
+# placeholder instead of the address, and `make check` says so.
+
+name: "Daniel Ziegler"
+
+# § 5 DDG requires an address at which the operator can be served, so a city
+# on its own is not enough.
+street: "STRASSE UND HAUSNUMMER"
+postcode: "PLZ"
+city: "Fulda"
+country: "Germany"
+
+email: "MAIL@DOMAIN.TLD"
+
+# Optional. Leave empty and the line is omitted.
+phone: ""
+vatId: ""

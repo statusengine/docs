@@ -1,0 +1,27 @@
+{{/* Renders the operator's details from data/imprint.yaml, which is gitignored
+     so the postal address is never committed. Without that file the page still
+     builds — it would be worse to break the build than to show the gap — but
+     the gap is loud, and scripts/check-build.sh reports it too. */}}
+{{- $d := site.Data.imprint -}}
+{{- $street := "" -}}
+{{- with $d }}{{ $street = .street | default "" }}{{ end -}}
+
+{{- if or (not $d) (not $street) (in (upper $street) "STRASSE UND HAUSNUMMER") -}}
+  <div class="se-imprint se-imprint--missing">
+    <strong>Die Anschrift fehlt noch.</strong>
+    Lege <code>data/imprint.yaml</code> nach dem Muster von
+    <code>data/imprint.example.yaml</code> an und trage sie ein. Die Datei ist
+    in <code>.gitignore</code> und wird nicht mit veröffentlicht.
+  </div>
+{{- else -}}
+  <address class="se-imprint">
+    {{ $d.name }}<br />
+    {{ $street }}<br />
+    {{ with $d.postcode }}{{ . }} {{ end }}{{ $d.city }}<br />
+    {{ with $d.country }}{{ . }}<br />{{ end }}
+    {{- with $d.phone }}<br />Telefon / Phone: {{ . }}<br />{{ end }}
+    {{- with $d.vatId }}<br />USt-IdNr. / VAT ID: {{ . }}<br />{{ end }}
+    <br />
+    E-Mail: <a href="mailto:{{ $d.email }}">{{ $d.email }}</a>
+  </address>
+{{- end -}}

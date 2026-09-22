@@ -63,3 +63,46 @@
     <script defer src="{{ $scalarInit.RelPermalink }}"></script>
   {{- end -}}
 {{- end -}}
+
+
+{{/* Matomo, cookieless.
+
+     Emitted only when params.matomo.url and .siteId are both set, so a clone
+     without them ships no analytics and scripts/check-build.sh stays green.
+
+     disableCookies() must come before the first trackPageView: it is what
+     keeps the tracker from writing to the visitor's device, which is in turn
+     what lets this site run without a consent banner under § 25 TDDDG.
+     setDoNotTrack() honours the browser's DNT header, so a visitor who has
+     asked not to be measured is not measured.
+
+     The snippet is inline rather than a file because it is six lines and
+     carries site-specific configuration; the tracker itself is fetched from
+     the Matomo host, which is the one external request this site makes and is
+     named in content/datenschutz.md. */}}
+{{- $m := site.Params.matomo -}}
+{{- if and $m $m.url $m.siteId -}}
+<script>
+  var _paq = (window._paq = window._paq || []);
+  _paq.push(["disableCookies"]);
+  _paq.push(["setDoNotTrack", true]);
+  _paq.push(["trackPageView"]);
+  _paq.push(["enableLinkTracking"]);
+  (function () {
+    /* No jsonify here. Inside <script> Hugo already emits a quoted JS string,
+       and jsonify would quote it a second time — the tracker URL then comes
+       out as the literal characters "https://…/" and every request 404s. */
+    var u = {{ $m.url }};
+    _paq.push(["setTrackerUrl", u + "matomo.php"]);
+    _paq.push(["setSiteId", {{ $m.siteId }}]);
+    var d = document,
+      g = d.createElement("script"),
+      s = d.getElementsByTagName("script")[0];
+    g.async = true;
+    g.src = u + "matomo.js";
+    s.parentNode.insertBefore(g, s);
+  })();
+</script>
+<noscript><p><img referrerpolicy="no-referrer-when-downgrade" alt=""
+  src="{{ $m.url }}matomo.php?idsite={{ $m.siteId }}&amp;rec=1" style="border:0" /></p></noscript>
+{{- end -}}

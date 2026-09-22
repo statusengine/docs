@@ -76,6 +76,28 @@ menu:
 params:
   description: "Every Naemon or Nagios event, stored and streamed — a C++ event broker module and a Go worker."
 
+  # Self-hosted Matomo. Leave url empty and no analytics code is emitted at all
+  # — that is the default, so a fresh clone tracks nothing.
+  #
+  # It is configured cookieless (see layouts/partials/custom/head-end.html):
+  # nothing is written to or read from the visitor's device, so § 25 TDDDG does
+  # not apply and the site needs no consent banner. Do not add cookies back
+  # without also adding consent — content/datenschutz.md promises otherwise.
+  #
+  # Set Matomo's own IP anonymisation to two bytes as well; that is a server
+  # setting the tracker cannot make for you.
+  #
+  # url takes a trailing slash, and an explicit https:// — the tracker snippet
+  # Matomo hands out is protocol-relative ("//host/"), which is obsolete and
+  # which scripts/check-build.sh could not match against.
+  #
+  # Keep example URLs out of a trailing comment on the url line: check-build.sh
+  # reads that value to decide which host may serve a subresource, and would
+  # read a hostname out of the comment too.
+  matomo:
+    url: "https://piwik.nook24.eu/"
+    siteId: "1"
+
   # Versions the tutorials pin, in one place. Referenced from the pages as
   # {{< param naemonVersion >}} — Hugo expands shortcodes before Goldmark, so
   # this also works inside fenced code blocks. Bumping a release is a one-line

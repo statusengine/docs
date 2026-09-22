@@ -44,6 +44,7 @@ test-ui: build ## Build, then drive the browser over behaviour the build cannot 
 	$(COMPOSE) run --rm shots node test-lightbox.js
 	$(COMPOSE) run --rm shots node test-scrollspy.js
 	$(COMPOSE) run --rm shots node test-menu.js
+	$(COMPOSE) run --rm shots node test-privacy.js
 
 # The API reference's privacy properties are configuration inside a 3.6 MB
 # vendored bundle, so only a running browser can prove them. Everything the

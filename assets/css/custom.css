@@ -929,6 +929,30 @@ pre.mermaid {
   }
 }
 
+/* --- Legal pages --------------------------------------------------------- */
+
+/* The legal pages carry both languages; this is the pointer to the other one. */
+.se-lang-switch {
+  color: var(--se-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.75rem;
+}
+
+.se-imprint {
+  font-style: normal;
+  margin: 1rem 0 1.5rem;
+  line-height: 1.7;
+}
+
+/* The address is loaded from a gitignored file. When it is not there the page
+   has to say so unmissably rather than quietly print a name and a city. */
+.se-imprint--missing {
+  border-left: 3px solid var(--se-brand);
+  background: var(--se-glow-faint);
+  padding: 0.85rem 1rem;
+  border-radius: 0 6px 6px 0;
+}
+
 /* --- Theme toggle --------------------------------------------------------- */
 
 /* Written by hand rather than as Tailwind variants: the theme ships a

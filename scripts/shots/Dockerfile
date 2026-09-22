@@ -16,4 +16,4 @@ RUN npm install -g playwright@1.63.0 \
  && npm cache clean --force
 
 WORKDIR /shots
-COPY shoot.js test-lightbox.js test-api.js test-scrollspy.js test-menu.js ./
+COPY shoot.js test-lightbox.js test-api.js test-scrollspy.js test-menu.js test-privacy.js ./
